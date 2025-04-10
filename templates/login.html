@@ -4,24 +4,100 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Authentification</title>
-    <!-- Lien vers le CDN de TailwindCSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-</head>
-<body class="bg-gradient-to-r from-blue-400 via-indigo-500 to-purple-600 h-screen flex items-center justify-center">
+    <script src="https://cdn.jsdelivr.net/npm/heroicons@2.1.1/script.js"></script>
+    <style>
+        body {
+            background-image: url('/static/image/ARR1.jpeg'); /* Assurez-vous que le chemin est correct */
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
 
-<div class="bg-white p-8 rounded-lg shadow-lg w-96 max-w-sm">
-    <h2 class="text-2xl font-semibold text-center text-gray-700 mb-6">Se connecter</h2>
+        .form-container {
+            background-color: rgba(255, 255, 255, 0.2); /* Blanc transparent */
+            backdrop-filter: blur(10px); /* Effet de flou */
+            -webkit-backdrop-filter: blur(10px); /* Pour Safari */
+            padding: 2rem; /* Augmenter le padding pour un meilleur aspect */
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            width: 96; /* Correspond à w-96 */
+            max-width: sm; /* Correspond à max-w-sm */
+        }
+
+        .form-container h2,
+        .form-container label,
+        .form-container input,
+        .form-container .text-gray-600,
+        .form-container .text-indigo-600 {
+            color: white; /* Texte blanc pour contraster avec le fond flou */
+        }
+        .form-container button{
+            background-color: #205781;
+            color: white;
+        }
+        .form-container button:hover{
+            background-color: white;
+            color: #205781;
+            border: #205781 solid  3px;
+            ;
+        }
+
+        .form-container input {
+            background-color: rgba(255, 248, 248, 0.8); /* Fond légèrement transparent pour les inputs et le bouton */
+            border-color: rgba(255, 255, 255, 0.8);
+        }
+
+        .form-container input:focus {
+            outline: 2px solid rgba(255, 255, 255, 0.8); /* Anneau de focus plus visible */
+            border-color: #205781;
+        }
+
+      
+
+        .form-container svg {
+            fill: #205781!important; 
+            color: #205781 !important;
+        }
+
+        
+    </style>
+</head>
+<body class="h-screen flex items-center justify-center">
+
+<div class="form-container relative rounded-xl shadow-lg w-96 max-w-sm">
+    
+    <h2 class="text-2xl font-semibold text-center mb-6">Se connecter</h2>
     <form action="/login" method="POST">
         <div class="mb-4">
-            <label for="username" class="block text-sm font-medium text-gray-600">Nom d'utilisateur</label>
-            <input type="text" id="username" name="username" required class="mt-2 p-2 w-full border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+            <label for="username" class="block text-sm font-medium">Nom d'utilisateur</label>
+            <div class="relative mt-2 rounded-md shadow-sm">
+                <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                    <svg class="w-[20px] h-[20px] text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+                        <path fill-rule="evenodd" d="M12 20a7.966 7.966 0 0 1-5.002-1.756l.002.001v-.683c0-1.794 1.492-3.25 3.333-3.25h3.334c1.84 0 3.333 1.456 3.333 3.25v.683A7.966 7.966 0 0 1 12 20ZM2 12C2 6.477 6.477 2 12 2s10 4.477 10 10c0 5.5-4.44 9.963-9.932 10h-.138C6.438 21.962 2 17.5 2 12Zm10-5c-1.84 0-3.333 1.455-3.333 3.25S10.159 13.5 12 13.5c1.84 0 3.333-1.455 3.333-3.25S13.841 7 12 7Z" clip-rule="evenodd"/>
+                    </svg>
+                </div>
+                <input type="text" id="username" name="username" required class="pl-8 pr-3 py-2 w-full border rounded-lg focus:outline-none focus:ring-2 focus:border-indigo-500">
+            </div>
         </div>
         <div class="mb-6">
-            <label for="password" class="block text-sm font-medium text-gray-600">Mot de passe</label>
-            <input type="password" id="password" name="password" required class="mt-2 p-2 w-full border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+            <label for="password" class="block text-sm font-medium">Mot de passe</label>
+            <div class="relative mt-2 rounded-md shadow-sm">
+                <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                    <svg class="w-[20px] h-[20px] text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+                        <path fill-rule="evenodd" d="M8 10V7a4 4 0 1 1 8 0v3h1a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h1Zm2-3a2 2 0 1 1 4 0v3h-4V7Zm2 6a1 1 0 0 1 1 1v3a1 1 0 1 1-2 0v-3a1 1 0 0 1 1-1Z" clip-rule="evenodd"/>
+                    </svg>
+                </div>
+                <input type="password" id="password" name="password" required class="pl-8 pr-3 py-2 w-full border rounded-lg focus:outline-none focus:ring-2 focus:border-indigo-500">
+            </div>
         </div>
-        <button type="submit" class="w-full py-2 px-4 bg-indigo-600 text-white font-semibold rounded-lg shadow-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500">Se connecter</button>
+        <button type="submit" class="w-full py-2 px-4 bg-indigo-600 text-white font-semibold rounded-lg shadow-md hover:bg-indigo-700 focus:outline-none focus:ring-2">Se connecter</button>
     </form>
+  
 </div>
 
 </body>
