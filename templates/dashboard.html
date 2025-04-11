@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tableau de Bord de Surveillance</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="home-container">
+        <h2>État de la Surveillance des Sites Web</h2>
+
+        <h3>Ajouter un nouveau site</h3>
+        <form action="/add_site" method="POST">
+            <label for="name">Nom:</label>
+            <input type="text" id="name" name="name" required>
+            <label for="url_or_ip">URL ou IP:</label>
+            <input type="text" id="url_or_ip" name="url_or_ip" required>
+            <button type="submit">Ajouter</button>
+        </form>
+
+        <h3>Sites Surveillés</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Nom</th>
+                    <th>URL/IP</th>
+                    <th>Statut</th>
+                    <th>Dernière Vérification</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for site in sites %}
+                <tr>
+                    <td>{{ site['name'] }}</td>
+                    <td>{{ site['url_or_ip'] }}</td>
+                    <td class="{{ 'status-online' if site['last_status'] == 'En ligne' else 'status-offline' }}">{{ site['last_status'] }}</td>
+                    <td>{{ site['last_checked'] }}</td>
+                    <td><a href="/toggle_site/{{ site['id'] }}">Basculer</a></td>
+                </tr>
+                {% else %}
+                <tr><td colspan="5">Aucun site surveillé.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <h3>Derniers Événements</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Site</th>
+                    <th>Timestamp</th>
+                    <th>Statut</th>
+                    <th>Raison</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for event in events %}
+                <tr>
+                    <td>{{ event['site_name'] }}</td>
+                    <td>{{ event['timestamp'] }}</td>
+                    <td class="{{ 'status-online' if event['status'] == 'En ligne' else 'status-offline' }}">{{ event['status'] }}</td>
+                    <td>{{ event['reason'] }}</td>
+                </tr>
+                {% else %}
+                <tr><td colspan="4">Aucun événement récent.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>
