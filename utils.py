@@ -1,7 +1,19 @@
 import smtplib
 from email.mime.text import MIMEText
+# from utils import send_email # Supprimé car on intègre la fonction ici
+from config import EMAIL_CONFIG
 
 def send_email(subject, body, recipients, config):
+    """
+    Envoie un email en utilisant SMTP.
+
+    Args:
+        subject (str): Le sujet de l'email.
+        body (str): Le corps (contenu) de l'email.
+        recipients (list): Une liste des adresses email des destinataires.
+        config (dict): Un dictionnaire contenant les paramètres de configuration de l'email
+                        (serveur, port, nom d'utilisateur, mot de passe, expéditeur, enabled).
+    """
     print("DEBUG (utils.send_email): Fonction appelée")
     if not config.get('enabled', False):
         print("DEBUG (utils.send_email): L'envoi d'emails est désactivé")
@@ -31,3 +43,7 @@ def send_email(subject, body, recipients, config):
         print(f"DEBUG (utils.send_email): Une exception SMTPException s'est produite : {e}")
     except Exception as e:
         print(f"DEBUG (utils.send_email): Une exception générale s'est produite : {e}")
+
+
+
+print(f"DEBUG (test_email.py): EMAIL_CONFIG['recipients'] = {EMAIL_CONFIG['recipients']}")
