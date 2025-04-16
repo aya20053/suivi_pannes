@@ -21,7 +21,7 @@
             border-radius: 12px;
             box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
             padding: 40px;
-            width: 90%;
+            width: 80%;
             max-width: 600px;
             display: flex;
             flex-direction: column; /* Stack header and actions vertically */
@@ -68,51 +68,23 @@
 
         .profil-info i {
             margin-right: 8px;
-            color: #777;
+            color: #EB5B00;
             font-size: 1.2em;
         }
 
         .profil-info strong {
             font-weight: bold;
-            color: #333;
+            color: #143D60;
             margin-right: 8px;
         }
 
-        .profil-actions {
-            display: flex;
-            justify-content: flex-end; /* Push button to the right */
-        }
-
-        .modifier-btn {
-            background-color: #143D60;
-            color: #fff;
-            border: none;
-            border-radius: 8px;
-            padding: 12px 24px;
-            font-size: 1.1em;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            align-self: flex-end; /* Push button to the bottom */
-        }
-
-        .modifier-btn i {
-            margin-right: 8px;
-            font-size: 1.2em;
-        }
-
-        .modifier-btn:hover {
-            background-color: #EB5B00;
-        }
+        
     </style>
 </head>
 <body>
     <div class="profil-container">
         <div class="profil-header">
-            <img src="{{ user['photo_profile'] }}" alt="Photo de Profil" class="photo-profile">
+            <img src="{{ user['photo_profile'] if user['photo_profile'] else url_for('static', filename='default-profile.png') }}" alt="Photo de Profil" class="photo-profile">
             <div>
                 <div class="profil-info">
                     <p><i class='bx bx-id-card'></i><strong>ID:</strong> {{ user['id'] }}</p>
@@ -124,9 +96,23 @@
                 </div>
             </div>
         </div>
-        <div class="profil-actions">
-            <button class="modifier-btn" onclick="window.location.href='/modifier/1'">Modifier le Profil</button>
-        </div>
+        
     </div>
+
+    <div id="menu"></div>
+  
+    <script>
+      fetch("/static/menu.html")
+        .then(response => response.text())
+        .then(data => {
+          const menuDiv = document.getElementById("menu");
+          if (menuDiv) {
+            menuDiv.innerHTML = data;
+          }
+        })
+        .catch(error => {
+          console.error('Erreur lors du chargement du menu :', error);
+        });
+    </script>
 </body>
 </html>

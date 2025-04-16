@@ -119,13 +119,7 @@ def get_user():
             }
     return None
 
-def update_user(user_id, data):
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute('''UPDATE users SET username=%s, prenom=%s, email=%s, poste=%s, telephone=%s WHERE id=%s''',
-                   (data['username'], data['prenom'], data['email'], data['poste'], data['telephone'], user_id))
-    conn.commit()
-    conn.close()
+
 
 @app.route('/profile')
 def profile():
@@ -134,17 +128,8 @@ def profile():
         return render_template('profile.html', user=user)
     return redirect(url_for('index'))
 
-@app.route('/edit', methods=['POST'])
-def edit_profile():
-    form_data = {
-        'username': request.form['username'],
-        'prenom': request.form['prenom'],
-        'email': request.form['email'],
-        'poste': request.form['poste'],
-        'telephone': request.form['telephone']
-    }
-    update_user(1, form_data)  # Assure-toi que l'ID de l'utilisateur est bien passé ici
-    return redirect(url_for('profile'))
+
+
 
 @app.route('/logout', methods=['GET', 'POST'])
 def logout():

@@ -59,22 +59,3 @@ h2 {
 .profil-actions {
   text-align: center;
 }
-
-.modifier-btn {
-  background-color: #007bff;
-  color: white;
-  border: none;
-  padding: 10px 20px;
-  font-size: 1.2rem;
-  cursor: pointer;
-  border-radius: 5px;
-  transition: background-color 0.3s ease;
-}
-
-.modifier-btn:hover {
-  background-color: #0056b3;
-}
-
-.modifier-btn:focus {
-  outline: none;
-}
