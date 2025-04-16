@@ -1,73 +1,138 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tableau de Bord de Surveillance</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Statistiques Réseau</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    
+    .home-container {
+    
+      margin: 30px auto;
+      padding: 2rem;
+      border-radius: 12px;
+      text-align: center;
+    }
+
+    h2 {
+      margin-bottom: 1rem;
+      color: #EB5B00;
+    }
+
+    #pieChart {
+
+  margin: 20px auto;
+}
+
+
+    .statistic-box {
+      display: flex;
+      justify-content: space-between;
+      padding: 1rem;
+      background: #CBDCEB;
+      margin-top: 1rem;
+      border-radius: 8px;
+      box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .statistic-box p {
+      margin: 0;
+    }
+
+    .statistic-box .stat-title {
+      font-weight: bold;
+      font-size: 18px;
+    
+      color: #205781;
+    }
+  </style>
 </head>
 <body>
-    <div class="home-container">
-        <h2>État de la Surveillance des Sites Web</h2>
+  <div class="home-container">
+    <h2>📈 Tableau de bord - Surveillance des Sites Web</h2>
 
-        <h3>Ajouter un nouveau site</h3>
-        <form action="/add_site" method="POST">
-            <label for="name">Nom:</label>
-            <input type="text" id="name" name="name" required>
-            <label for="url_or_ip">URL ou IP:</label>
-            <input type="text" id="url_or_ip" name="url_or_ip" required>
-            <button type="submit">Ajouter</button>
-        </form>
+    <!-- ⏱️ Dernière vérification -->
+    <p style="font-size: 18px;">
+      ⏱️ Dernière vérification : 
+      <strong>{{ last_check or "Non disponible" }}</strong>
+    </p>
 
-        <h3>Sites Surveillés</h3>
-        <table>
-            <thead>
-                <tr>
-                    <th>Nom</th>
-                    <th>URL/IP</th>
-                    <th>Statut</th>
-                    <th>Dernière Vérification</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for site in sites %}
-                <tr>
-                    <td>{{ site['name'] }}</td>
-                    <td>{{ site['url_or_ip'] }}</td>
-                    <td class="{{ 'status-online' if site['last_status'] == 'En ligne' else 'status-offline' }}">{{ site['last_status'] }}</td>
-                    <td>{{ site['last_checked'] }}</td>
-                    <td><a href="/toggle_site/{{ site['id'] }}">Basculer</a></td>
-                </tr>
-                {% else %}
-                <tr><td colspan="5">Aucun site surveillé.</td></tr>
-                {% endfor %}
-            </tbody>
-        </table>
-
-        <h3>Derniers Événements</h3>
-        <table>
-            <thead>
-                <tr>
-                    <th>Site</th>
-                    <th>Timestamp</th>
-                    <th>Statut</th>
-                    <th>Raison</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for event in events %}
-                <tr>
-                    <td>{{ event['site_name'] }}</td>
-                    <td>{{ event['timestamp'] }}</td>
-                    <td class="{{ 'status-online' if event['status'] == 'En ligne' else 'status-offline' }}">{{ event['status'] }}</td>
-                    <td>{{ event['reason'] }}</td>
-                </tr>
-                {% else %}
-                <tr><td colspan="4">Aucun événement récent.</td></tr>
-                {% endfor %}
-            </tbody>
-        </table>
+    <div class="statistic-box">
+       
+      <div>
+        <p class="stat-title">
+            <i class='bx bx-user'></i> Nombre d'utilisateurs
+        </p>
+        <p class="stat-value">{{ user_count }}</p>
     </div>
+    
+    <div>
+        <p class="stat-title">
+            <i class='bx bx-globe'></i> Nombre total de sites
+        </p>
+        <p class="stat-value">{{ total_sites }}</p>
+    </div>
+    
+
+         
+        
+     
+   
+  </div>
+    <!-- 🥧 Diagramme circulaire -->
+    <canvas id="pieChart" width="400" height="200" aria-label="Diagramme circulaire" role="img"></canvas>
+
+    
+  </div>
+  <script>
+   
+       
+  
+    
+    const pieCtx = document.getElementById('pieChart').getContext('2d');
+    new Chart(pieCtx, {
+      type: 'pie',
+      data: {
+        labels: ['En ligne', 'Hors ligne'],
+        datasets: [{
+          data: [
+            {{ total_online | default(0) }},
+            {{ total_offline | default(0) }}
+          ],
+          backgroundColor: [
+            'rgba(137, 168, 178, 0.6)',
+            'rgba(54, 116, 181 , 0.6)'
+          ],
+          borderColor: [
+            'rgba(137, 168, 178, 1)',
+            'rgba(54, 116, 181 , 1)'
+          ],
+          borderWidth: 1
+        }]
+      },
+      options: {
+        responsive: true
+      }
+    });
+  </script>
+  
+  <div id="menu"></div>
+  
+  <script>
+    fetch("/static/menu.html")
+      .then(response => response.text())
+      .then(data => {
+        const menuDiv = document.getElementById("menu");
+        if (menuDiv) {
+          menuDiv.innerHTML = data;
+        }
+      })
+      .catch(error => {
+        console.error('Erreur lors du chargement du menu :', error);
+      });
+  </script>
+  
 </body>
 </html>

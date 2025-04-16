@@ -3,83 +3,154 @@ import pymysql
 
 def get_db_connection():
     conn = pymysql.connect(
-        host='localhost',  # Hôte de la base de données
-        user='root',  # Nom d'utilisateur
-        password='',  # Mot de passe
-        database='suivi_pannes_'  # Nom de la base de données
+        host='localhost',
+        user='root',
+        password='',
+        database='suivi_pannes_'  # ⚠️ Vérifie bien le nom exact de ta BDD
     )
     return conn
 
 app = Flask(__name__)
-app.secret_key = 'ton_secret_key'  # N'oublie pas de définir une clé secrète pour la gestion des sessions
+app.secret_key = 'ton_secret_key'
 
 @app.route('/')
 def index():
-    return render_template('login.html')  # Page de login
+    return render_template('login.html')
 
 @app.route('/login', methods=['POST'])
 def login():
     username = request.form['username']
     password = request.form['password']
 
-    # Connexion à la base de données
     conn = get_db_connection()
     cursor = conn.cursor()
 
-    # Requête SQL pour vérifier si l'utilisateur existe
     cursor.execute('SELECT * FROM Users WHERE username = %s', (username,))
-    users = cursor.fetchone()  # Retourne le premier utilisateur correspondant
-
-    # Vérification si l'utilisateur existe et si le mot de passe est correct
-    if users and users[2] == password:  # users[2] représente le mot de passe dans la table Users
-        session['username'] = username  # Enregistrer l'utilisateur dans la session
-        return redirect(url_for('dashboard'))  # Redirige vers la page du tableau de bord après une connexion réussie
-    else:
-        return render_template('login.html', error="Nom d'utilisateur ou mot de passe incorrect")
+    user = cursor.fetchone()
 
     cursor.close()
     conn.close()
 
+    # Assure-toi que l'indice utilisé ici correspond au champ mot de passe
+    if user and user[7] == password:  # Ajuste l'indice en fonction de la structure de ta table
+        session['username'] = username
+        return redirect(url_for('home'))
+    else:
+        return render_template('login.html', error="Nom d'utilisateur ou mot de passe incorrect")
 
 @app.route('/home')
 def home():
-    return render_template('home.html')  # Page d'accueil après connexion réussie
+    if 'username' not in session:
+        return redirect(url_for('index'))
+    return render_template('home.html')
 
-if __name__ == '_main_':    app.run(debug=True)
 @app.route('/dashboard')
 def dashboard():
-    if 'username' not in session:
-        return redirect(url_for('index'))  # Redirige vers la page de login si non connecté
-    return render_template('dashboard.html')  # Page du tableau de bord
+    try:
+        # Connexion à la base de données
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        # Requête pour récupérer le nombre d'utilisateurs
+        cursor.execute("SELECT COUNT(*) FROM users")
+        user_count = cursor.fetchone()[0]
+
+        # Requête pour récupérer les autres statistiques
+        cursor.execute("SELECT COUNT(*) FROM monitored_sites WHERE last_status = 'En ligne'")
+        total_online = cursor.fetchone()[0]
+
+        cursor.execute("SELECT COUNT(*) FROM monitored_sites WHERE last_status = 'Hors ligne'")
+        total_offline = cursor.fetchone()[0]
+
+        cursor.execute("SELECT COUNT(*) FROM monitored_sites")
+        total_sites = cursor.fetchone()[0]
+
+        # Dernière vérification (à adapter selon ta logique)
+        cursor.execute("SELECT MAX(last_checked) FROM monitored_sites")
+        last_check = cursor.fetchone()[0]
+
+        return render_template('dashboard.html', 
+                               total_online=total_online, 
+                               total_offline=total_offline,
+                               total_sites=total_sites,
+                               user_count=user_count,  # Ajouter le nombre d'utilisateurs
+                               last_check=last_check)
+    except Exception as e:
+        app.logger.error(f"Erreur dans le rendu de la page : {e}")
+        return "Une erreur est survenue. Veuillez réessayer plus tard.", 500
 
 @app.route('/network-stats')
 def network_stats():
     if 'username' not in session:
-        return redirect(url_for('index'))  # Redirige vers la page de login si non connecté
-    return render_template('network_stats.html')  # Page des statistiques réseau
+        return redirect(url_for('index'))
+    return render_template('network_stats.html')
 
 @app.route('/alerts')
 def alerts():
     if 'username' not in session:
-        return redirect(url_for('index'))  # Redirige vers la page de login si non connecté
-    return render_template('alerts.html')  # Page des alertes
+        return redirect(url_for('index'))
+    return render_template('alerts.html')
 
 @app.route('/manage-networks')
 def manage_networks():
     if 'username' not in session:
-        return redirect(url_for('index'))  # Redirige vers la page de login si non connecté
-    return render_template('manage_networks.html')  # Page de gestion des réseaux
+        return redirect(url_for('index'))
+    return render_template('manage_networks.html')
+
+def get_user():
+    # Utilisation de la connexion à la base de données avec l'utilisateur en session
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    username = session.get('username')
+    if username:
+        cursor.execute("SELECT * FROM users WHERE username = %s", (username,))
+        row = cursor.fetchone()
+        conn.close()
+        if row:
+            return {
+                "id": row[0],
+                "username": row[1],
+                "prenom": row[2],
+                "email": row[3],
+                "poste": row[4],
+                "telephone": row[5],
+                "photo_profile": row[6]
+            }
+    return None
+
+def update_user(user_id, data):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute('''UPDATE users SET username=%s, prenom=%s, email=%s, poste=%s, telephone=%s WHERE id=%s''',
+                   (data['username'], data['prenom'], data['email'], data['poste'], data['telephone'], user_id))
+    conn.commit()
+    conn.close()
 
 @app.route('/profile')
 def profile():
-    if 'username' not in session:
-        return redirect(url_for('index'))  # Redirige vers la page de login si non connecté
-    return render_template('profile.html', username=session['username'])  # Page du profil avec le nom de l'utilisateur
+    user = get_user()
+    if user:
+        return render_template('profile.html', user=user)
+    return redirect(url_for('index'))
 
-@app.route('/logout')
+@app.route('/edit', methods=['POST'])
+def edit_profile():
+    form_data = {
+        'username': request.form['username'],
+        'prenom': request.form['prenom'],
+        'email': request.form['email'],
+        'poste': request.form['poste'],
+        'telephone': request.form['telephone']
+    }
+    update_user(1, form_data)  # Assure-toi que l'ID de l'utilisateur est bien passé ici
+    return redirect(url_for('profile'))
+
+@app.route('/logout', methods=['GET', 'POST'])
 def logout():
-    session.pop('username', None)  # Supprime l'utilisateur de la session
-    return redirect(url_for('index'))  # Redirige vers la page de login
+    session.clear()
+    return redirect(url_for('index'))
 
+# ✅ C’est bien "__main__" ici
 if __name__ == '__main__':
     app.run(debug=True)

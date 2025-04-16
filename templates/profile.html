@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profil Utilisateur</title>
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background-color: #f7f7f7;
+        }
+
+        .profil-container {
+            background-color: #fff;
+            border-radius: 12px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            width: 90%;
+            max-width: 600px;
+            display: flex;
+            flex-direction: column; /* Stack header and actions vertically */
+            align-items: stretch; /* Make items take full width */
+        }
+
+        .profil-header {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            margin-bottom: 30px; /* Add margin below header */
+        }
+
+        .photo-profile {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-right: 30px;
+            border: 5px solid #143D60;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .profil-header h2 {
+            color: #333;
+            font-size: 2.2em;
+            margin-bottom: 10px;
+            text-align: left;
+        }
+
+        .profil-info {
+            text-align: left;
+            margin-bottom: 30px; /* Add margin below info */
+        }
+
+        .profil-info p {
+            color: #555;
+            line-height: 1.6;
+            margin-bottom: 8px;
+            font-size: 1em;
+            display: flex;
+            align-items: center;
+        }
+
+        .profil-info i {
+            margin-right: 8px;
+            color: #777;
+            font-size: 1.2em;
+        }
+
+        .profil-info strong {
+            font-weight: bold;
+            color: #333;
+            margin-right: 8px;
+        }
+
+        .profil-actions {
+            display: flex;
+            justify-content: flex-end; /* Push button to the right */
+        }
+
+        .modifier-btn {
+            background-color: #143D60;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            padding: 12px 24px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            align-self: flex-end; /* Push button to the bottom */
+        }
+
+        .modifier-btn i {
+            margin-right: 8px;
+            font-size: 1.2em;
+        }
+
+        .modifier-btn:hover {
+            background-color: #EB5B00;
+        }
+    </style>
+</head>
+<body>
+    <div class="profil-container">
+        <div class="profil-header">
+            <img src="{{ user['photo_profile'] }}" alt="Photo de Profil" class="photo-profile">
+            <div>
+                <div class="profil-info">
+                    <p><i class='bx bx-id-card'></i><strong>ID:</strong> {{ user['id'] }}</p>
+                    <p><i class='bx bx-user'></i><strong>Username:</strong> {{ user['username'] }}</p>
+                    <p><i class='bx bx-user-circle'></i><strong>Prénom:</strong> {{ user['prenom'] }}</p>
+                    <p><i class='bx bx-envelope'></i><strong>Email:</strong> {{ user['email'] }}</p>
+                    <p><i class='bx bx-briefcase'></i><strong>Poste:</strong> {{ user['poste'] }}</p>
+                    <p><i class='bx bx-phone'></i><strong>Téléphone:</strong> {{ user['telephone'] }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="profil-actions">
+            <button class="modifier-btn" onclick="window.location.href='/modifier/1'">Modifier le Profil</button>
+        </div>
+    </div>
+</body>
+</html>

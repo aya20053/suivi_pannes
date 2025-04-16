@@ -2,7 +2,8 @@ import subprocess
 import platform
 from datetime import datetime
 import time
-
+import requests
+import re
 import pymysql
 from db import get_db_connection, close_db_connection, execute_query
 from utils import send_email
@@ -14,11 +15,30 @@ def ping(host):
     command = ['ping', param, '1', host]
     return subprocess.call(command, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL) == 0
 
+def is_ip_address(host):
+    """Vérifie si le host est une adresse IP (IPv4 simple)."""
+    return re.match(r"^\d{1,3}(\.\d{1,3}){3}$", host) is not None
+
 def check_site_status(host):
-    """Vérifie le statut d'un site web ou d'une IP en utilisant ping."""
-    is_up = ping(host)
-    reason = "Ping réussi" if is_up else "Ping échoué"
-    return is_up, reason
+    """Vérifie le statut d'un site web ou IP (HTTP ou ping selon le cas)."""
+    if is_ip_address(host):
+        # Utilise le ping
+        is_up = ping(host)
+        reason = "Ping réussi" if is_up else "Ping échoué"
+        return is_up, reason
+
+    elif host.startswith("http://") or host.startswith("https://"):
+        # Vérifie par HTTP(S)
+        try:
+            response = requests.get(host, timeout=5)
+            is_up = response.status_code == 200
+            reason = f"HTTP {response.status_code}" if is_up else f"Réponse HTTP anormale : {response.status_code}"
+            return is_up, reason
+        except requests.exceptions.RequestException as e:
+            return False, f"Erreur HTTP : {e}"
+
+    else:
+        return False, "Format de l'adresse non reconnu"
 
 def send_alert(site_name, url_or_ip, reason):
     """Envoie une alerte par email et/ou notification."""

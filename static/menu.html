@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Surveillance réseau</title>
+    <link rel="icon" type="image/png" href="/static/image/logo.jpeg">
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <style>
+    :root {
+        --primary-color: #FC4100; 
+        --text-color: #666666;
+        --active-text-color: #00215E;
+        --bg-color: #ffffff;
+    }
+
+    * {
+        margin: 0;
+        padding: 0;
+    }
+
+    body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+        
+    }
+
+    .desktop-nav {
+      position: fixed; /* Keep fixed */
+    top: 50%; /* Vertically center */
+    right: 20px; /* Adjust distance from the right edge */
+    transform: translateY(-50%); /* Fine-tune vertical centering */
+    background: var(--bg-color);
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end; /* Align items to the right */
+    padding-top: 20px;
+    border-left: 1px solid #e0e0e0; /* Add left border for visual separation */
+    z-index: 101;
+    width: 100px; /* Adjust the width as needed */
+    /* height: fit-content; /* Let height be determined by content */
+    }
+
+    .nav-item {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 12px 0;
+        margin-bottom: 4px;
+        cursor: pointer;
+        text-decoration: none;
+        color: var(--text-color);
+        position: relative;
+        transition: color 0.3s ease;
+    }
+
+    .nav-item .nav-icon {
+        font-size: 26px;
+        margin-bottom: 4px;
+        transition: color 0.3s ease;
+    }
+
+    .nav-item .nav-label {
+        font-size: 12px;
+        font-weight: 500;
+    }
+
+    .nav-item.active {
+        color: var(--active-text-color);
+    }
+
+    .nav-item.active .nav-icon {
+        color: var(--primary-color);
+    }
+
+    .nav-item.active::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 3px;
+        background-color: var(--primary-color);
+        border-radius: 0 3px 3px 0;
+    }
+
+    .mobile-nav {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: var(--bg-color);
+        display: none;
+        justify-content: space-around;
+        padding: 8px 0;
+        border-top: 1px solid #e0e0e0;
+        z-index: 100;
+    }
+
+    .mobile-nav-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 6px 12px;
+        text-decoration: none;
+        color: var(--text-color);
+        flex: 1;
+        max-width: 80px;
+        transition: color 0.3s ease;
+    }
+
+    .mobile-nav-icon {
+        font-size: 24px;
+        transition: color 0.3s ease;
+    }
+
+    .mobile-nav-label {
+        font-size: 10px;
+        margin-top: 2px;
+        font-weight: 500;
+    }
+
+    .mobile-nav-item.active {
+        color: var(--primary-color);
+    }
+
+    .mobile-nav-item.active .mobile-nav-icon {
+        color: var(--primary-color);
+    }
+
+    .mobile-nav-item.active .mobile-nav-label {
+        color: var(--active-text-color);
+    }
+
+    .main-content {
+        margin-left: 80px; /* Adjust margin for desktop nav width */
+        padding: 20px;
+    }
+
+    @media (max-width: 768px) {
+        .desktop-nav {
+            display: none;
+        }
+
+        .mobile-nav {
+            display: flex;
+        }
+
+        .main-content {
+            margin-left: 0;
+            padding-bottom: 80px;
+        }
+    }
+
+    @media (min-width: 769px) {
+        .mobile-nav {
+            display: none;
+        }
+    }
+/* Cacher le span par défaut */
+.nav__tooltip {
+display: none;
+position: absolute;
+background-color: rgba(179, 19, 18, 0.4);
+color: black;
+padding: 5px;
+border-radius: 5px;
+font-size: 12px;
+top: 50%;
+right: 110%;  /* Positionner le span à gauche de l'icône */
+transform: translateY(-50%);
+}
+
+/* Afficher le span au survol */
+.nav__link:hover .nav__tooltip {
+display: block;
+}
+
+
+.nav {
+  background: var(--nav-bg);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  border-radius: 1rem;
+  list-style: none;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--gap);
+  position: fixed;
+  top: 50%;
+  transform: translateY(-50%);
+  right: 1rem; /* Position on the right */
+  z-index: 100;
+  width: var(--nav-width-desktop);
+}
+
+.nav__links {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--gap);
+  position: relative;
+  width: 100%;
+}
+
+.nav__links li {
+  width: 100%;
+  text-align: center;
+}
+
+.nav__links li a {
+  display: block;
+  color: var(--nav-item-color);
+  text-decoration: none;
+  font-size: 1.5rem;
+  padding: 0.8rem;
+  transition: color 0.3s ease-in-out;
+  position: relative; /* For indicator positioning */
+}
+
+.nav__links li.active a {
+  color: var(--primary);
+}
+
+.nav__indicator {
+  position: absolute;
+  left: 0;
+  top: 0; /* Adjust for vertical indicator */
+  background-color: var(--indicator-color);
+  width: 0.3rem; /* Vertical indicator width */
+  height: 100%; /* Vertical indicator height */
+  border-radius: 0.5rem;
+  transition: all 0.3s ease-in-out;
+}
+
+  </style>
+</head>
+<body>
+
+    <nav class="desktop-nav">
+        <a href="#" class="nav-item active" data-navlink="accueil">
+            <i class='bx bx-home-alt-2 nav-icon'></i>
+            <span class="nav-label">Accueil</span>
+        </a>
+        <a href="#" class="nav-item" data-navlink="reseau">
+            <i class='bx bx-network-chart nav-icon'></i>
+            <span class="nav-label">Réseau</span>
+        </a>
+        <a href="#" class="nav-item" data-navlink="statistiques">
+            <i class='bx bx-bar-chart-alt nav-icon'></i>
+            <span class="nav-label">Statistiques</span>
+        </a>
+        <a href="#" class="nav-item" data-navlink="parametres">
+            <i class='bx bx-cog nav-icon'></i>
+            <span class="nav-label">Paramètres</span>
+        </a>
+        <a href="/profile" class="nav-item" data-navlink="profil">
+            <i class='bx bx-user nav-icon'></i>
+            <span class="nav-label">Profil</span>
+        </a>
+    </nav>
+
+    <nav class="mobile-nav">
+        <a href="/dashboard" class="mobile-nav-item active" data-navlink="accueil">
+            <i class='bx bx-home-alt-2 mobile-nav-icon'></i>
+            <span class="mobile-nav-label">Accueil</span>
+        </a>
+        <a href="/network-stats" class="mobile-nav-item" data-navlink="reseau">
+            <i class='bx bx-network-chart mobile-nav-icon'></i>
+            <span class="mobile-nav-label">Réseau</span>
+        </a>
+        <a href="" class="mobile-nav-item" data-navlink="statistiques">
+            <i class='bx bx-bar-chart-alt mobile-nav-icon'></i>
+            <span class="mobile-nav-label">Stats</span>
+        </a>
+        <a href="#" class="mobile-nav-item" data-navlink="parametres">
+            <i class='bx bx-cog mobile-nav-icon'></i>
+            <span class="mobile-nav-label">Param.</span>
+        </a>
+        <a href="/profile" class="mobile-nav-item" data-navlink="profil">
+            <i class='bx bx-user mobile-nav-icon'></i>
+            <span class="mobile-nav-label">Profil</span>
+        </a>
+    </nav>
+
+   
+
+    <script>
+      document.addEventListener('DOMContentLoaded', function() {
+        const desktopLinks = document.querySelectorAll('.desktop-nav .nav-item');
+        const mobileLinks = document.querySelectorAll('.mobile-nav .mobile-nav-item');
+        const contentSections = document.querySelectorAll('#mainContent > section');
+
+        function setActiveLink(links, target) {
+          links.forEach(link => {
+            link.classList.remove('active');
+            const icon = link.querySelector('.nav-icon, .mobile-nav-icon');
+            if (icon) {
+              icon.style.color = ''; // Reset icon color
+            }
+          });
+          target.classList.add('active');
+          const activeIcon = target.querySelector('.nav-icon, .mobile-nav-icon');
+          if (activeIcon) {
+            activeIcon.style.color = 'var(--primary-color)'; // Set active icon color
+          }
+        }
+
+        function showContent(page) {
+          contentSections.forEach(section => section.classList.remove('active'));
+          const activeSection = document.querySelector(`#mainContent > section[data-page="${page}"]`);
+          if (activeSection) {
+            activeSection.classList.add('active');
+          }
+        }
+
+        desktopLinks.forEach(link => {
+          link.addEventListener('click', function(event) {
+            event.preventDefault(); // Prevent default link behavior
+            setActiveLink(desktopLinks, this);
+            const page = this.dataset.navlink;
+            showContent(page);
+          });
+        });
+
+        mobileLinks.forEach(link => {
+          link.addEventListener('click', function(event) {
+            event.preventDefault(); // Prevent default link behavior
+            setActiveLink(mobileLinks, this);
+            const page = this.dataset.navlink;
+            showContent(page);
+          });
+        });
+
+        // Set initial active state and content based on the initially active link
+        const initialActiveDesktop = document.querySelector('.desktop-nav .nav-item.active');
+        if (initialActiveDesktop) {
+          setActiveLink(desktopLinks, initialActiveDesktop);
+          showContent(initialActiveDesktop.dataset.navlink);
+        } else {
+          const initialActiveMobile = document.querySelector('.mobile-nav .mobile-nav-item.active');
+          if (initialActiveMobile) {
+            setActiveLink(mobileLinks, initialActiveMobile);
+            showContent(initialActiveMobile.dataset.navlink);
+          }
+        }
+      });
+    </script>
+
+</body>
+</html>
