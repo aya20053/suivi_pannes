@@ -54,7 +54,7 @@
 
         .profil-info {
             text-align: left;
-            margin-bottom: 30px; /* Add margin below info */
+            margin-bottom: 30px; 
         }
 
         .profil-info p {
@@ -84,7 +84,7 @@
 <body>
     <div class="profil-container">
         <div class="profil-header">
-            <img src="{{ user['photo_profile'] if user['photo_profile'] else url_for('static', filename='default-profile.png') }}" alt="Photo de Profil" class="photo-profile">
+            <img src="{{ user['photo_profile'] if user['photo_profile'] else url_for('static', filename='image/default-profile.png') }}" alt="Photo de Profil" class="photo-profile">
             <div>
                 <div class="profil-info">
                     <p><i class='bx bx-id-card'></i><strong>ID:</strong> {{ user['id'] }}</p>

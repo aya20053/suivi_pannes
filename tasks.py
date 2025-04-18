@@ -43,7 +43,7 @@ def check_site_status(host):
 def send_alert(site_name, url_or_ip, reason):
     """Envoie une alerte par email et/ou notification."""
     subject = f"ALERTE: Site/IP '{site_name}' ({url_or_ip}) est hors ligne"
-    body = f"Le site/l'IP '{site_name}' ({url_or_ip}) est actuellement hors ligne.\n\nRaison : {reason}\nDernière vérification : {datetime.utcnow()} (UTC)."
+    body = f"Le reseau: '{site_name}' ({url_or_ip}) est actuellement hors ligne.\n\n\nDernière vérification : {datetime.utcnow()} (UTC)."
 
     if EMAIL_CONFIG['enabled']:
         send_email(subject, body, EMAIL_CONFIG['recipients'], EMAIL_CONFIG)

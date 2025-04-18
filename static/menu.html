@@ -233,33 +233,50 @@ display: block;
   border-radius: 0.5rem;
   transition: all 0.3s ease-in-out;
 }
+#mainContent > section {
+  display: none;
+}
+
+#mainContent > section.active {
+  display: block;
+}
+
 
   </style>
 </head>
 <body>
 
-    <nav class="desktop-nav">
-        <a href="#" class="nav-item active" data-navlink="accueil">
-            <i class='bx bx-home-alt-2 nav-icon'></i>
-            <span class="nav-label">Accueil</span>
-        </a>
-        <a href="#" class="nav-item" data-navlink="reseau">
-            <i class='bx bx-network-chart nav-icon'></i>
-            <span class="nav-label">Réseau</span>
-        </a>
-        <a href="#" class="nav-item" data-navlink="statistiques">
-            <i class='bx bx-bar-chart-alt nav-icon'></i>
-            <span class="nav-label">Statistiques</span>
-        </a>
-        <a href="#" class="nav-item" data-navlink="parametres">
-            <i class='bx bx-cog nav-icon'></i>
-            <span class="nav-label">Paramètres</span>
-        </a>
-        <a href="/profile" class="nav-item" data-navlink="profil">
-            <i class='bx bx-user nav-icon'></i>
-            <span class="nav-label">Profil</span>
-        </a>
-    </nav>
+  <nav class="desktop-nav">
+    <a href="/dashboard" class="nav-item active" data-navlink="accueil">
+        <i class='bx bx-home-alt-2 nav-icon'></i>
+        <span class="nav-label">Accueil</span>
+    </a>
+    <a href="#" class="nav-item" data-navlink="reseau">
+        <i class='bx bx-network-chart nav-icon'></i>
+        <span class="nav-label">Réseau</span>
+    </a>
+    <a href="#" class="nav-item" data-navlink="statistiques">
+        <i class='bx bx-bar-chart-alt nav-icon'></i>
+        <span class="nav-label">Statistiques</span>
+    </a>
+    <a href="#" class="nav-item" data-navlink="parametres">
+        <i class='bx bx-cog nav-icon'></i>
+        <span class="nav-label">Paramètres</span>
+    </a>
+    <a href="/profile" class="nav-item" data-navlink="profil">
+        <i class='bx bx-user nav-icon'></i>
+        <span class="nav-label">Profil</span>
+    </a>
+</nav>
+
+<div id="mainContent">
+    <section data-page="accueil" class="active"></section>
+    <section data-page="reseau"></section>
+    <section data-page="statistiques"></section>
+    <section data-page="parametres"></section>
+    <section data-page="profil"></section>
+</div>
+
 
     <nav class="mobile-nav">
         <a href="/dashboard" class="mobile-nav-item active" data-navlink="accueil">
@@ -287,11 +304,11 @@ display: block;
    
 
     <script>
-      document.addEventListener('DOMContentLoaded', function() {
+      document.addEventListener('DOMContentLoaded', function () {
         const desktopLinks = document.querySelectorAll('.desktop-nav .nav-item');
         const mobileLinks = document.querySelectorAll('.mobile-nav .mobile-nav-item');
         const contentSections = document.querySelectorAll('#mainContent > section');
-
+    
         function setActiveLink(links, target) {
           links.forEach(link => {
             link.classList.remove('active');
@@ -306,7 +323,7 @@ display: block;
             activeIcon.style.color = 'var(--primary-color)'; // Set active icon color
           }
         }
-
+    
         function showContent(page) {
           contentSections.forEach(section => section.classList.remove('active'));
           const activeSection = document.querySelector(`#mainContent > section[data-page="${page}"]`);
@@ -314,39 +331,50 @@ display: block;
             activeSection.classList.add('active');
           }
         }
-
+    
         desktopLinks.forEach(link => {
-          link.addEventListener('click', function(event) {
-            event.preventDefault(); // Prevent default link behavior
+          link.addEventListener('click', function (event) {
+            event.preventDefault();
             setActiveLink(desktopLinks, this);
-            const page = this.dataset.navlink;
-            showContent(page);
+            setActiveLink(mobileLinks, document.querySelector(`.mobile-nav-item[data-navlink="${this.dataset.navlink}"]`));
+            showContent(this.dataset.navlink);
           });
         });
-
+    
         mobileLinks.forEach(link => {
-          link.addEventListener('click', function(event) {
-            event.preventDefault(); // Prevent default link behavior
+          link.addEventListener('click', function (event) {
+            event.preventDefault();
             setActiveLink(mobileLinks, this);
-            const page = this.dataset.navlink;
-            showContent(page);
+            setActiveLink(desktopLinks, document.querySelector(`.nav-item[data-navlink="${this.dataset.navlink}"]`));
+            showContent(this.dataset.navlink);
           });
         });
-
-        // Set initial active state and content based on the initially active link
-        const initialActiveDesktop = document.querySelector('.desktop-nav .nav-item.active');
-        if (initialActiveDesktop) {
-          setActiveLink(desktopLinks, initialActiveDesktop);
-          showContent(initialActiveDesktop.dataset.navlink);
-        } else {
-          const initialActiveMobile = document.querySelector('.mobile-nav .mobile-nav-item.active');
-          if (initialActiveMobile) {
-            setActiveLink(mobileLinks, initialActiveMobile);
-            showContent(initialActiveMobile.dataset.navlink);
-          }
+    
+        // 👇 Partie manquante ici pour afficher la section active au début
+        const initial = document.querySelector('.nav-item.active') || document.querySelector('.mobile-nav-item.active');
+        if (initial) {
+          const page = initial.dataset.navlink;
+          showContent(page);
         }
       });
     </script>
+    
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+          const navItems = document.querySelectorAll(".nav-item");
+  
+          navItems.forEach(item => {
+              item.addEventListener("click", function () {
+                  // Supprimer la classe 'active' de tous les éléments
+                  navItems.forEach(nav => nav.classList.remove("active"));
+  
+                  // Ajouter la classe 'active' à l'élément cliqué
+                  this.classList.add("active");
+              });
+          });
+      });
+  </script>
+  
 
 </body>
 </html>
