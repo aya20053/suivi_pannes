@@ -5,7 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Statistiques Réseau</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@1.0.2"></script>
   <style>
     
     .home-container {
@@ -22,16 +24,15 @@
     }
 
     #pieChart {
-
   margin: 20px auto;
-}
+    }
 
 
     .statistic-box {
       display: flex;
       justify-content: space-between;
       padding: 1rem;
-      background: #CBDCEB;
+      background: rgb(203, 220, 235);
       margin-top: 1rem;
       border-radius: 8px;
       box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
@@ -47,78 +48,166 @@
     
       color: #205781;
     }
+    canvas[id^="hourlyChart"] {
+  height: 120px !important;
+  max-width: 100% !important;
+}
+
+@keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .fade-in {
+    animation: fadeIn 1s ease-out;
+  }
+
   </style>
 </head>
-<body>
-  <div class="home-container">
-    <h2>📈 Tableau de bord - Surveillance des Sites Web</h2>
+
+<body class="bg-gray-50 text-gray-800">
+  <div class="max-w-6xl mx-auto px-4 py-8">
+    <h2 class="text-2xl font-bold text-orange-600 mb-4 text-center">
+      📈 Tableau de bord - Surveillance des Sites Web
+    </h2>
 
     <!-- ⏱️ Dernière vérification -->
-    <p style="font-size: 18px;">
+    <p class="text-center text-lg mb-4">
       ⏱️ Dernière vérification : 
       <strong>{{ last_check or "Non disponible" }}</strong>
     </p>
 
-    <div class="statistic-box">
-       
+    <!-- Statistiques globales -->
+    <div class="flex flex-col md:flex-row justify-between bg-blue-100 p-4 rounded-lg shadow mb-6 gap-4">
       <div>
-        <p class="stat-title">
-            <i class='bx bx-user'></i> Nombre d'utilisateurs
-        </p>
-        <p class="stat-value">{{ user_count }}</p>
+        <p class="text-blue-900 font-bold text-lg">👤 Nombre d'utilisateurs</p>
+        <p class="text-lg">{{ user_count }}</p>
+      </div>
+      <div>
+        <p class="text-blue-900 font-bold text-lg">🌐 Nombre total de sites</p>
+        <p class="text-lg">{{ total_sites }}</p>
+      </div>
     </div>
-    
-    <div>
-        <p class="stat-title">
-            <i class='bx bx-globe'></i> Nombre total de sites
-        </p>
-        <p class="stat-value">{{ total_sites }}</p>
-    </div>
-    
 
-         
-        
-     
-   
-  </div>
     <!-- 🥧 Diagramme circulaire -->
-    <canvas id="pieChart" width="400" height="200" aria-label="Diagramme circulaire" role="img"></canvas>
+    <div class="flex justify-center mb-8">
+      <canvas id="pieChart" width="400" height="200"></canvas>
+    </div>
 
-    
+    <!-- Liste des sites -->
+    {% for site in sites_data %}
+    <div class="bg-white rounded-lg shadow p-4 mb-6">
+      <div class="flex flex-col md:flex-row justify-between items-center mb-4">
+        <h3 class="text-lg font-semibold">{{ site.name }}</h3>
+        <div class="flex gap-2 mt-2 md:mt-0">
+          <span class="px-3 py-1 rounded-full text-white text-sm 
+            {% if site.current_status == 'En ligne' %} bg-green-500 {% else %} bg-red-500 {% endif %}">
+            {{ site.current_status }}
+          </span>
+          <span class="px-3 py-1 rounded-full bg-blue-200 text-blue-800 text-sm">
+            Disponibilité: {{ site.availability }}%
+          </span>
+        </div>
+      </div>
+
+      <!-- Contenu en ligne -->
+      <div class="flex flex-col md:flex-row gap-4">
+        <!-- Graphique -->
+        <div class="w-full md:w-2/3">
+          <canvas id="hourlyChart{{ site.id }}" class="w-full h-32 mt-4"></canvas>
+        </div>
+
+        <!-- Infos -->
+        <div class="w-full md:w-1/3 flex flex-col justify-center gap-2 text-sm">
+          <div class="flex justify-between">
+            <span>En ligne :</span>
+            <span class="font-semibold">{{ site.online_count }} fois</span>
+          </div>
+          <div class="flex justify-between">
+            <span>Hors ligne :</span>
+            <span class="font-semibold">{{ site.offline_count }} fois</span>
+          </div>
+          <div class="flex justify-between">
+            <span>Dernier check :</span>
+            <span>{{ site.last_checked }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      new Chart(document.getElementById('hourlyChart{{ site.id }}'), {
+        type: 'line',
+        data: {
+          labels: {{ site.hourly_labels|tojson|safe }},
+          datasets: [{
+            label: 'Disponibilité (%)',
+            data: {{ site.hourly_ratios|tojson|safe }},
+            borderColor: 'rgba(75, 192, 192, 1)',
+            backgroundColor: 'rgba(255,255,255, 0.2)',
+            borderWidth: 2,
+            fill: true,
+            tension: 0.3
+          }]
+        },
+        options: {
+          responsive: true,
+          
+          scales: {
+            y: {
+              min: 0,
+              max: 100,
+              ticks: {
+                callback: function(value) {
+                  return value + '%';
+                }
+              }
+            }
+          },
+          plugins: {
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  return context.dataset.label + ': ' + context.parsed.y.toFixed(2) + '%';
+                }
+              }
+            },
+            legend: {
+              display: false
+            }
+          }
+        }
+      });
+    </script>
+    {% endfor %}
+
+    <!-- Script Pie Chart -->
+    <script>
+      const pieCtx = document.getElementById('pieChart').getContext('2d');
+      new Chart(pieCtx, {
+        type: 'pie',
+        data: {
+          labels: ['En ligne', 'Hors ligne'],
+          datasets: [{
+            data: [{{ total_online | default(0) }}, {{ total_offline | default(0) }}],
+            backgroundColor: ['rgba(137, 168, 178, 0.6)', 'rgba(54, 116, 181, 0.6)'],
+            borderColor: ['rgba(137, 168, 178, 1)', 'rgba(54, 116, 181, 1)'],
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: true
+        }
+      });
+    </script>
   </div>
-  <script>
-   
-       
-  
-    
-    const pieCtx = document.getElementById('pieChart').getContext('2d');
-    new Chart(pieCtx, {
-      type: 'pie',
-      data: {
-        labels: ['En ligne', 'Hors ligne'],
-        datasets: [{
-          data: [
-            {{ total_online | default(0) }},
-            {{ total_offline | default(0) }}
-          ],
-          backgroundColor: [
-            'rgba(137, 168, 178, 0.6)',
-            'rgba(54, 116, 181 , 0.6)'
-          ],
-          borderColor: [
-            'rgba(137, 168, 178, 1)',
-            'rgba(54, 116, 181 , 1)'
-          ],
-          borderWidth: 1
-        }]
-      },
-      options: {
-        responsive: true
-      }
-    });
-  </script>
-  
-  <div id="menu"></div>
+$  <div id="menu"></div>
   
   <script>
     fetch("/static/menu.html")
@@ -134,5 +223,7 @@
       });
   </script>
   
+
+ 
 </body>
 </html>

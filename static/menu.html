@@ -13,7 +13,10 @@
         --active-text-color: #00215E;
         --bg-color: #ffffff;
     }
-
+::selection{
+  color:#FC4100 ;
+  background-color: #00215E;
+}
     * {
         margin: 0;
         padding: 0;
@@ -21,7 +24,7 @@
 
     body {
         font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-        
+     margin-right: 0px;   
     }
 
     .desktop-nav {
@@ -251,11 +254,11 @@ display: block;
         <i class='bx bx-home-alt-2 nav-icon'></i>
         <span class="nav-label">Accueil</span>
     </a>
-    <a href="#" class="nav-item" data-navlink="reseau">
+    <a href="/manage-networks" class="nav-item" data-navlink="reseau">
         <i class='bx bx-network-chart nav-icon'></i>
         <span class="nav-label">Réseau</span>
     </a>
-    <a href="#" class="nav-item" data-navlink="statistiques">
+    <a href="/network-stats" class="nav-item" data-navlink="statistiques">
         <i class='bx bx-bar-chart-alt nav-icon'></i>
         <span class="nav-label">Statistiques</span>
     </a>
@@ -264,9 +267,13 @@ display: block;
         <span class="nav-label">Paramètres</span>
     </a>
     <a href="/profile" class="nav-item" data-navlink="profil">
-        <i class='bx bx-user nav-icon'></i>
-        <span class="nav-label">Profil</span>
-    </a>
+      <i class='bx bx-user nav-icon'></i>
+      <span class="nav-label">Profil</span>
+  </a>
+  <a href="/" class="nav-item" data-navlink="profil">
+    <i class='bx bx-log-out nav-icon'></i>
+    <span class="nav-label">Deconnexion</span>
+  </a>
 </nav>
 
 <div id="mainContent">
@@ -299,6 +306,10 @@ display: block;
             <i class='bx bx-user mobile-nav-icon'></i>
             <span class="mobile-nav-label">Profil</span>
         </a>
+        <a href="/" class="mobile-nav-item" data-navlink="profil">
+          <i class='bx bx-log-out nav-icon'></i>
+          <span class="mobile-nav-label">Deconnexion</span>
+      </a>
     </nav>
 
    

@@ -1,12 +1,14 @@
 from flask import Flask, render_template, request, redirect, url_for, session
 import pymysql
-
+from datetime import datetime, timedelta  # Ajoutez cette ligne en haut de votre fichier
+from datetime import datetime, timedelta
+import json
 def get_db_connection():
     conn = pymysql.connect(
         host='localhost',
         user='root',
         password='',
-        database='suivi_pannes_'  # ⚠️ Vérifie bien le nom exact de ta BDD
+        database='suivi_pannes_'  
     )
     return conn
 
@@ -47,15 +49,13 @@ def home():
 @app.route('/dashboard')
 def dashboard():
     try:
-        # Connexion à la base de données
         conn = get_db_connection()
         cursor = conn.cursor()
 
-        # Requête pour récupérer le nombre d'utilisateurs
+        # Statistiques de base
         cursor.execute("SELECT COUNT(*) FROM users")
         user_count = cursor.fetchone()[0]
 
-        # Requête pour récupérer les autres statistiques
         cursor.execute("SELECT COUNT(*) FROM monitored_sites WHERE last_status = 'En ligne'")
         total_online = cursor.fetchone()[0]
 
@@ -65,20 +65,85 @@ def dashboard():
         cursor.execute("SELECT COUNT(*) FROM monitored_sites")
         total_sites = cursor.fetchone()[0]
 
-        # Dernière vérification (à adapter selon ta logique)
         cursor.execute("SELECT MAX(last_checked) FROM monitored_sites")
         last_check = cursor.fetchone()[0]
 
+        # Récupérer les données pour les graphiques des 24 dernières heures
+        twenty_four_hours_ago = datetime.now() - timedelta(hours=24)
+        
+        # Récupérer tous les sites surveillés avec leur état actuel
+        cursor.execute("""
+            SELECT ms.id, ms.name, ms.last_status, ms.last_checked
+            FROM monitored_sites ms
+        """)
+        sites = cursor.fetchall()
+        
+        sites_data = []
+        for site in sites:
+            site_id, site_name, last_status, last_checked = site
+            
+            # Récupérer les événements des dernières 24 heures pour ce site
+            cursor.execute("""
+                SELECT timestamp, status 
+                FROM monitoring_events 
+                WHERE site_id = %s AND timestamp >= %s
+                ORDER BY timestamp
+            """, (site_id, twenty_four_hours_ago))
+            
+            events = cursor.fetchall()
+            
+            # Calculer les statistiques
+            online_count = sum(1 for event in events if event[1] == 'En ligne')
+            offline_count = len(events) - online_count
+            availability = (online_count / len(events) * 100) if events else 0
+            
+            # Préparer les données pour le graphique
+            timestamps = [event[0].strftime('%H:%M') for event in events]
+            statuses = [1 if event[1] == 'En ligne' else 0 for event in events]
+            
+            # Données agrégées par heure pour un graphique plus lisible
+            hourly_data = {}
+            for event in events:
+                hour = event[0].strftime('%H:00')
+                status = 1 if event[1] == 'En ligne' else 0
+                if hour not in hourly_data:
+                    hourly_data[hour] = {'count': 0, 'sum': 0}
+                hourly_data[hour]['count'] += 1
+                hourly_data[hour]['sum'] += status
+            
+            hours = sorted(hourly_data.keys())
+            hourly_ratios = [(hourly_data[hour]['sum'] / hourly_data[hour]['count'] * 100) 
+                            for hour in hours]
+            
+            sites_data.append({
+                'id': site_id,
+                'name': site_name,
+                'current_status': last_status,
+                'last_checked': last_checked.strftime('%Y-%m-%d %H:%M:%S') if last_checked else 'N/A',
+                'availability': round(availability, 2),
+                'online_count': online_count,
+                'offline_count': offline_count,
+                'timestamps': timestamps,
+                'statuses': statuses,
+                'hourly_labels': hours,
+                'hourly_ratios': hourly_ratios,
+                'events_json': json.dumps([{
+                    'timestamp': event[0].strftime('%Y-%m-%d %H:%M:%S'),
+                    'status': event[1]
+                } for event in events])
+            })
+
         return render_template('dashboard.html', 
-                               total_online=total_online, 
-                               total_offline=total_offline,
-                               total_sites=total_sites,
-                               user_count=user_count,  # Ajouter le nombre d'utilisateurs
-                               last_check=last_check)
+                           total_online=total_online, 
+                           total_offline=total_offline,
+                           total_sites=total_sites,
+                           user_count=user_count,
+                           last_check=last_check.strftime('%Y-%m-%d %H:%M:%S') if last_check else 'N/A',
+                           sites_data=sites_data,
+                           now=datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
     except Exception as e:
         app.logger.error(f"Erreur dans le rendu de la page : {e}")
         return "Une erreur est survenue. Veuillez réessayer plus tard.", 500
-
 @app.route('/network-stats')
 def network_stats():
     if 'username' not in session:
