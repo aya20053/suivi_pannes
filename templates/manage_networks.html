@@ -5,51 +5,82 @@
   <title>Monitoring Réseaux</title>
   <script src="https://unpkg.com/lucide@latest"></script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://cdn.jsdelivr.net/npm/lucide-icons@0.1.0/dist/lucide.min.css" rel="stylesheet">
 
   <script src="script.js" defer></script>
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <style>button i {
+    font-size: 24px; /* Taille des icônes */
+    color: #1c3d5a; /* Couleur des icônes (exemple bleu) */
+  }
+  </style>
 </head>
-<body class="bg-gray-100 p-4 sm:p-10">
+<body class=" p-4 sm:p-10">
   <div class="max-w-5xl mx-auto">
     <div class="flex justify-between items-center mb-6 flex-wrap">
-      <h1 class="text-2xl sm:text-3xl font-bold text-center sm:text-left w-full sm:w-auto">🌐 Réseaux Monitorés</h1>
-      <button id="toggle-form-btn" class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 mt-4 sm:mt-0">
+      <h1 class="text-2xl sm:text-3xl font-bold w-full text-center" style="color: #EB5B00;">
+        🌐 Réseaux Monitorés</h1>
+      <button id="toggle-form-btn" class="px-4 py-2" style="background-color: #205781; color: white; border-radius: 0.375rem;">
         ➕ Ajouter Réseau
       </button>
     </div>
 
-    <form id="add-form" class="bg-white p-4 rounded-lg shadow mb-6 hidden">
+    <form id="add-form" class="bg-blue-50 p-6 rounded-xl shadow-lg border border-blue-200 mb-6 hidden">
+      <h2 class="text-xl font-semibold text-blue-800 mb-4 flex items-center gap-2">
+        <i data-lucide="plus-circle"></i> Ajouter un nouveau réseau
+      </h2>
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <input type="text" id="name" placeholder="Nom du réseau" required class="p-2 border rounded">
-        <input type="text" id="url_or_ip" placeholder="URL ou IP" required class="p-2 border rounded">
+        <input type="text" id="name" placeholder="Nom du réseau" required
+               class="p-3 border border-blue-200 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
+        <input type="text" id="url_or_ip" placeholder="URL ou IP" required
+               class="p-3 border border-blue-200 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
       </div>
-      <button type="submit" class="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
-        Ajouter
+      <button type="submit"
+              class="mt-5 px-4 py-2 bg-blue-100 text-blue-800 rounded-md hover:bg-blue-200 transition-all duration-200 flex items-center gap-1">
+        <i data-lucide="save"></i> Ajouter
       </button>
     </form>
 
+
     <!-- Barre de recherche -->
-    <div class="mb-4">
-      <input type="text" id="search" placeholder="Rechercher un réseau..." class="w-full p-2 border rounded">
+    <div class="mb-4 relative">
+      <i data-lucide="search" class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500"></i>
+      <input 
+        type="text" 
+        id="search" 
+        placeholder="Rechercher un réseau..." 
+        class="w-full pl-10 p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-300"
+      >
     </div>
+    
 
     <div id="site-list" class="space-y-4">
       <!-- Sites dynamiques -->
     </div>
   </div>
 
-  <form id="edit-form" class="bg-yellow-100 p-4 rounded-lg shadow mb-6 hidden">
-    <h2 class="text-xl font-bold mb-2">Modifier le site</h2>
+  <form id="edit-form" class="bg-blue-50 p-6 rounded-xl shadow-lg border border-blue-200 mb-6 hidden w-150">
+    <h2 class="text-xl font-semibold text-blue-800 mb-4 flex items-center gap-2">
+      <i data-lucide="pencil"></i> Modifier le site
+    </h2> 
     <input type="hidden" id="edit-id">
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-      <input type="text" id="edit-name" placeholder="Nom du réseau" required class="p-2 border rounded">
-      <input type="text" id="edit-url" placeholder="URL ou IP" required class="p-2 border rounded">
+      <input type="text" id="edit-name" placeholder="Nom du réseau" required
+             class="p-3 border border-blue-200 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
+      <input type="text" id="edit-url" placeholder="URL ou IP" required
+             class="p-3 border border-blue-200 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
     </div>
     <div class="mt-4 flex gap-2">
-      <button type="submit" class="px-4 py-2 bg-yellow-600 text-white rounded hover:bg-yellow-700">Enregistrer</button>
-      <button type="button" onclick="cancelEdit()" class="px-4 py-2 bg-gray-400 text-white rounded hover:bg-gray-500">Annuler</button>
+      <button type="submit" class="mt-5 px-4 py-2 bg-blue-100 text-blue-800 rounded-md hover:bg-blue-200 transition-all duration-200 flex items-center gap-1">
+        <i data-lucide="save"></i> Enregistrer
+      </button>
+      <button type="button" onclick="cancelEdit()" class="mt-5 px-4 py-2 bg-blue-100 text-blue-800 rounded-md hover:bg-blue-200 transition-all duration-200 flex items-center gap-1">
+        <i data-lucide="x"></i> Annuler
+      </button>
     </div>
   </form>
+  
+  
 
   
   <script>
@@ -77,17 +108,21 @@
           container.className = "bg-white rounded shadow p-4";
 
           container.innerHTML = `
-            <div class="flex justify-between items-center flex-wrap">
+  <div class="flex justify-between items-center flex-wrap">
+               <h2 class="text-lg font-bold flex-1">${site.name}</h2>
+
               <div class="flex items-center gap-2 w-full sm:w-auto">
-                <button onclick="editSite(${site.id})" class="flex items-center gap-1 text-green-600 hover:underline">
+
+                <button onclick="editSite(${site.id})" class="flex items-center gap-1 text-green-600 ">
                 <i data-lucide="pencil"></i>
               </button>
-                <button onclick="deleteSite(${site.id})" class="text-red-500 hover:text-red-700"><i data-lucide="trash-2"></i></button>
-                <h2 class="text-lg font-bold flex-1">${site.name}</h2>
-              </div>
-              <button onclick="toggleDetails(this)" class="flex items-center gap-1 text-blue-600 hover:underline">
-                <i data-lucide="eye"></i> Afficher détails
-              </button>
+                <button onclick="deleteSite(${site.id})" class="text-red-500  gap-1 hover:text-red-700"><i data-lucide="trash-2"></i></button>
+              
+            <button type="button" onclick="toggleDetails(this)" class="flex items-center gap-2">
+              👁‍🗨
+            </button>
+
+              <br>
             </div>
             <div class="hidden mt-2 details text-sm text-gray-700">
               <p><strong>Adresse :</strong> ${site.url_or_ip}</p>
@@ -95,7 +130,7 @@
               <p><strong>Dernier check :</strong> ${site.last_checked}</p>
               <p><strong>Échecs :</strong> ${site.failed_pings_count}</p>
               <p><strong>Alerte :</strong> ${site.alert_sent ? "✅" : "❌"}</p>
-            </div>
+            </div></div>
           `;
           list.appendChild(container);
         });
@@ -105,12 +140,23 @@
       console.error("Erreur lors du chargement des sites :", error);
     }
   }
-
   function toggleDetails(btn) {
-    const details = btn.parentElement.nextElementSibling;
-    details.classList.toggle("hidden");
-    btn.textContent = details.classList.contains("hidden") ? "Afficher détails" : "Masquer";
+  const details = btn.parentElement.nextElementSibling; // On cible le div avec les détails
+  details.classList.toggle("hidden"); // On ajoute ou enlève la classe "hidden"
+
+  // Ici on change le texte du bouton en fonction de l'état d'affichage
+  if (details.classList.contains("hidden")) {
+    btn.textContent = "👁‍🗨";  // Afficher l'icône pour "Afficher"
+  } else {
+    btn.textContent = "Masquer";  // Texte pour masquer
   }
+}
+
+
+
+
+
+
 
   document.getElementById("add-form").addEventListener("submit", async (e) => {
     e.preventDefault();
@@ -191,12 +237,14 @@
   document.getElementById("search").addEventListener("input", (e) => {
     fetchSites(e.target.value);
   });
+  lucide.createIcons(); // Ajoute ça après toute modification du DOM
 
   // Charger les sites au démarrage
   fetchSites();
 </script>
 <div id="menu"></div>
-  
+<script src="https://cdn.jsdelivr.net/npm/lucide@0.0.0/dist/lucide.min.js"></script>
+
 <script>
   fetch("/static/menu.html")
     .then(response => response.text())
