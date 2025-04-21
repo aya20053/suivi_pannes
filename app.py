@@ -231,26 +231,31 @@ def get_site(id):
 def update_site(id):
     try:
         data = request.get_json()
-        if not data or "name" not in data or "url_or_ip" not in data:
-            return jsonify({"error": "Données invalides"}), 400
+        name = data.get("name")
+        url_or_ip = data.get("url_or_ip")
+
+        if not name or not url_or_ip:
+            return jsonify({"error": "Champs manquants"}), 400
 
         with get_db_connection() as conn:
             with conn.cursor() as cursor:
-                cursor.execute("SELECT * FROM monitored_sites WHERE id = %s", (id,))
+                # Vérifier si le site existe
+                cursor.execute("SELECT id FROM monitored_sites WHERE id = %s", (id,))
                 if not cursor.fetchone():
                     return jsonify({"error": "Site non trouvé"}), 404
 
+                # Mettre à jour
                 cursor.execute("""
                     UPDATE monitored_sites
                     SET name = %s, url_or_ip = %s
                     WHERE id = %s
-                """, (data["name"], data["url_or_ip"], id))
+                """, (name, url_or_ip, id))
                 conn.commit()
-        return jsonify({"message": "Site mis à jour"}), 200
+
+        return jsonify({"message": "Site mis à jour avec succès"}), 200
 
     except Exception as e:
         return jsonify({"error": f"Erreur serveur : {str(e)}"}), 500
-
 
 # ---------- Lancer l'application ----------
 if __name__ == '__main__':

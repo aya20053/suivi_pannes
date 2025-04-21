@@ -159,10 +159,30 @@
       document.getElementById("edit-form").classList.remove("hidden");
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } catch (error) {
-      alert("Erreur lors du chargement du site.");
       console.error(error);
     }
   }
+  document.getElementById("edit-form").addEventListener("submit", async (e) => {
+  e.preventDefault();
+
+  const id = document.getElementById("edit-id").value;
+  const name = document.getElementById("edit-name").value;
+  const url_or_ip = document.getElementById("edit-url").value;
+
+  try {
+    await fetch(`${API_URL}/${id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name, url_or_ip })
+    });
+
+    document.getElementById("edit-form").classList.add("hidden");
+    fetchSites();
+  } catch (err) {
+    alert("Erreur lors de la mise à jour.");
+    console.error(err);
+  }
+});
 
   function cancelEdit() {
     document.getElementById("edit-form").classList.add("hidden");
