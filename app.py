@@ -1,20 +1,24 @@
-from flask import Flask, render_template, request, redirect, url_for, session
-import pymysql
-from datetime import datetime, timedelta  # Ajoutez cette ligne en haut de votre fichier
+from flask import Flask, jsonify, render_template, request, redirect, url_for, session
+from flask_cors import CORS
 from datetime import datetime, timedelta
+import pymysql
 import json
-def get_db_connection():
-    conn = pymysql.connect(
-        host='localhost',
-        user='root',
-        password='',
-        database='suivi_pannes_'  
-    )
-    return conn
 
 app = Flask(__name__)
 app.secret_key = 'ton_secret_key'
+CORS(app)
 
+# ---------- Connexion à la base de données ----------
+def get_db_connection():
+    return pymysql.connect(
+        host='localhost',
+        user='root',
+        password='',
+        database='suivi_pannes_',
+        cursorclass=pymysql.cursors.DictCursor
+    )
+
+# ---------- Authentification ----------
 @app.route('/')
 def index():
     return render_template('login.html')
@@ -23,127 +27,114 @@ def index():
 def login():
     username = request.form['username']
     password = request.form['password']
-
-    conn = get_db_connection()
-    cursor = conn.cursor()
-
-    cursor.execute('SELECT * FROM Users WHERE username = %s', (username,))
-    user = cursor.fetchone()
-
-    cursor.close()
-    conn.close()
-
-    # Assure-toi que l'indice utilisé ici correspond au champ mot de passe
-    if user and user[7] == password:  # Ajuste l'indice en fonction de la structure de ta table
+    with get_db_connection() as conn:
+        with conn.cursor() as cursor:
+            cursor.execute('SELECT * FROM users WHERE username = %s', (username,))
+            user = cursor.fetchone()
+    if user and user['password'] == password:
         session['username'] = username
         return redirect(url_for('home'))
     else:
         return render_template('login.html', error="Nom d'utilisateur ou mot de passe incorrect")
 
+@app.route('/logout')
+def logout():
+    session.clear()
+    return redirect(url_for('index'))
+
+# ---------- Page d'accueil ----------
 @app.route('/home')
 def home():
     if 'username' not in session:
         return redirect(url_for('index'))
     return render_template('home.html')
 
+# ---------- Dashboard ----------
 @app.route('/dashboard')
 def dashboard():
+    if 'username' not in session:
+        return redirect(url_for('index'))
+
     try:
-        conn = get_db_connection()
-        cursor = conn.cursor()
+        with get_db_connection() as conn:
+            with conn.cursor() as cursor:
+                cursor.execute("SELECT COUNT(*) FROM users")
+                user_count = cursor.fetchone()['COUNT(*)']
 
-        # Statistiques de base
-        cursor.execute("SELECT COUNT(*) FROM users")
-        user_count = cursor.fetchone()[0]
+                cursor.execute("SELECT COUNT(*) FROM monitored_sites WHERE last_status = 'En ligne'")
+                total_online = cursor.fetchone()['COUNT(*)']
 
-        cursor.execute("SELECT COUNT(*) FROM monitored_sites WHERE last_status = 'En ligne'")
-        total_online = cursor.fetchone()[0]
+                cursor.execute("SELECT COUNT(*) FROM monitored_sites WHERE last_status = 'Hors ligne'")
+                total_offline = cursor.fetchone()['COUNT(*)']
 
-        cursor.execute("SELECT COUNT(*) FROM monitored_sites WHERE last_status = 'Hors ligne'")
-        total_offline = cursor.fetchone()[0]
+                cursor.execute("SELECT COUNT(*) FROM monitored_sites")
+                total_sites = cursor.fetchone()['COUNT(*)']
 
-        cursor.execute("SELECT COUNT(*) FROM monitored_sites")
-        total_sites = cursor.fetchone()[0]
+                cursor.execute("SELECT MAX(last_checked) FROM monitored_sites")
+                last_check = cursor.fetchone()['MAX(last_checked)']
 
-        cursor.execute("SELECT MAX(last_checked) FROM monitored_sites")
-        last_check = cursor.fetchone()[0]
+                twenty_four_hours_ago = datetime.now() - timedelta(hours=24)
 
-        # Récupérer les données pour les graphiques des 24 dernières heures
-        twenty_four_hours_ago = datetime.now() - timedelta(hours=24)
-        
-        # Récupérer tous les sites surveillés avec leur état actuel
-        cursor.execute("""
-            SELECT ms.id, ms.name, ms.last_status, ms.last_checked
-            FROM monitored_sites ms
-        """)
-        sites = cursor.fetchall()
-        
-        sites_data = []
-        for site in sites:
-            site_id, site_name, last_status, last_checked = site
-            
-            # Récupérer les événements des dernières 24 heures pour ce site
-            cursor.execute("""
-                SELECT timestamp, status 
-                FROM monitoring_events 
-                WHERE site_id = %s AND timestamp >= %s
-                ORDER BY timestamp
-            """, (site_id, twenty_four_hours_ago))
-            
-            events = cursor.fetchall()
-            
-            # Calculer les statistiques
-            online_count = sum(1 for event in events if event[1] == 'En ligne')
-            offline_count = len(events) - online_count
-            availability = (online_count / len(events) * 100) if events else 0
-            
-            # Préparer les données pour le graphique
-            timestamps = [event[0].strftime('%H:%M') for event in events]
-            statuses = [1 if event[1] == 'En ligne' else 0 for event in events]
-            
-            # Données agrégées par heure pour un graphique plus lisible
-            hourly_data = {}
-            for event in events:
-                hour = event[0].strftime('%H:00')
-                status = 1 if event[1] == 'En ligne' else 0
-                if hour not in hourly_data:
-                    hourly_data[hour] = {'count': 0, 'sum': 0}
-                hourly_data[hour]['count'] += 1
-                hourly_data[hour]['sum'] += status
-            
-            hours = sorted(hourly_data.keys())
-            hourly_ratios = [(hourly_data[hour]['sum'] / hourly_data[hour]['count'] * 100) 
-                            for hour in hours]
-            
-            sites_data.append({
-                'id': site_id,
-                'name': site_name,
-                'current_status': last_status,
-                'last_checked': last_checked.strftime('%Y-%m-%d %H:%M:%S') if last_checked else 'N/A',
-                'availability': round(availability, 2),
-                'online_count': online_count,
-                'offline_count': offline_count,
-                'timestamps': timestamps,
-                'statuses': statuses,
-                'hourly_labels': hours,
-                'hourly_ratios': hourly_ratios,
-                'events_json': json.dumps([{
-                    'timestamp': event[0].strftime('%Y-%m-%d %H:%M:%S'),
-                    'status': event[1]
-                } for event in events])
-            })
+                cursor.execute("SELECT id, name, last_status, last_checked FROM monitored_sites")
+                sites = cursor.fetchall()
 
-        return render_template('dashboard.html', 
-                           total_online=total_online, 
-                           total_offline=total_offline,
-                           total_sites=total_sites,
-                           user_count=user_count,
-                           last_check=last_check.strftime('%Y-%m-%d %H:%M:%S') if last_check else 'N/A',
-                           sites_data=sites_data,
-                           now=datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+                sites_data = []
+
+                for site in sites:
+                    cursor.execute("""
+                        SELECT timestamp, status FROM monitoring_events 
+                        WHERE site_id = %s AND timestamp >= %s ORDER BY timestamp
+                    """, (site['id'], twenty_four_hours_ago))
+                    events = cursor.fetchall()
+
+                    online_count = sum(1 for e in events if e['status'] == 'En ligne')
+                    offline_count = len(events) - online_count
+                    availability = (online_count / len(events) * 100) if events else 0
+
+                    hourly_data = {}
+                    for e in events:
+                        hour = e['timestamp'].strftime('%H:00')
+                        if hour not in hourly_data:
+                            hourly_data[hour] = {'count': 0, 'sum': 0}
+                        hourly_data[hour]['count'] += 1
+                        hourly_data[hour]['sum'] += (1 if e['status'] == 'En ligne' else 0)
+
+                    hours = sorted(hourly_data.keys())
+                    hourly_ratios = [(hourly_data[h]['sum'] / hourly_data[h]['count']) * 100 for h in hours]
+
+                    sites_data.append({
+                        'id': site['id'],
+                        'name': site['name'],
+                        'current_status': site['last_status'],
+                        'last_checked': site['last_checked'].strftime('%Y-%m-%d %H:%M:%S') if site['last_checked'] else 'N/A',
+                        'availability': round(availability, 2),
+                        'online_count': online_count,
+                        'offline_count': offline_count,
+                        'hourly_labels': hours,
+                        'hourly_ratios': hourly_ratios,
+                        'events_json': json.dumps([
+                            {'timestamp': e['timestamp'].strftime('%Y-%m-%d %H:%M:%S'), 'status': e['status']}
+                            for e in events
+                        ])
+                    })
+
+        user = get_user()
+        return render_template('dashboard.html',
+            total_online=total_online,
+            total_offline=total_offline,
+            total_sites=total_sites,
+            user_count=user_count,
+            last_check=last_check.strftime('%Y-%m-%d %H:%M:%S') if last_check else 'N/A',
+            sites_data=sites_data,
+            now=datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+            user_role=user['role'] if user else 'unknown'
+        )
+
     except Exception as e:
         app.logger.error(f"Erreur dans le rendu de la page : {e}")
-        return "Une erreur est survenue. Veuillez réessayer plus tard.", 500
+        return "Une erreur est survenue.", 500
+
+# ---------- Autres vues HTML ----------
 @app.route('/network-stats')
 def network_stats():
     if 'username' not in session:
@@ -162,30 +153,6 @@ def manage_networks():
         return redirect(url_for('index'))
     return render_template('manage_networks.html')
 
-def get_user():
-    # Utilisation de la connexion à la base de données avec l'utilisateur en session
-    conn = get_db_connection()
-    cursor = conn.cursor()
-
-    username = session.get('username')
-    if username:
-        cursor.execute("SELECT * FROM users WHERE username = %s", (username,))
-        row = cursor.fetchone()
-        conn.close()
-        if row:
-            return {
-                "id": row[0],
-                "username": row[1],
-                "prenom": row[2],
-                "email": row[3],
-                "poste": row[4],
-                "telephone": row[5],
-                "photo_profile": row[6]
-            }
-    return None
-
-
-
 @app.route('/profile')
 def profile():
     user = get_user()
@@ -193,14 +160,98 @@ def profile():
         return render_template('profile.html', user=user)
     return redirect(url_for('index'))
 
+# ---------- Données utilisateur ----------
+def get_user():
+    username = session.get('username')
+    if not username:
+        return None
+
+    with get_db_connection() as conn:
+        with conn.cursor() as cursor:
+            cursor.execute("SELECT * FROM users WHERE username = %s", (username,))
+            user = cursor.fetchone()
+            if user:
+                return {
+                    "id": user['id'],
+                    "username": user['username'],
+                    "prenom": user['prenom'],
+                    "email": user['email'],
+                    "poste": user['poste'],
+                    "telephone": user['telephone'],
+                    "photo_profile": user['photo_profile'],
+                    "role": user['role']
+                }
+    return None
+
+# ---------- API REST ----------
+@app.route("/api/sites", methods=["GET"])
+def api_get_sites():
+    with get_db_connection() as conn:
+        with conn.cursor() as cursor:
+            cursor.execute("SELECT * FROM monitored_sites")
+            return jsonify(cursor.fetchall())
+
+@app.route("/api/sites", methods=["POST"])
+def api_add_site():
+    data = request.json
+    with get_db_connection() as conn:
+        with conn.cursor() as cursor:
+            cursor.execute(
+                "INSERT INTO monitored_sites (name, url_or_ip) VALUES (%s, %s)",
+                (data["name"], data["url_or_ip"])
+            )
+            conn.commit()
+    return jsonify({"message": "Site ajouté"}), 201
+
+@app.route("/api/sites/<int:id>", methods=["DELETE"])
+def api_delete_site(id):
+    with get_db_connection() as conn:
+        with conn.cursor() as cursor:
+            cursor.execute("DELETE FROM monitored_sites WHERE id = %s", (id,))
+            conn.commit()
+    return jsonify({"message": "Site supprimé"})
+
+# ---------- Obtenir les détails d’un site ----------
+@app.route("/api/sites/<int:id>", methods=["GET"])
+def get_site(id):
+    try:
+        with get_db_connection() as conn:
+            with conn.cursor() as cursor:
+                cursor.execute("SELECT * FROM monitored_sites WHERE id = %s", (id,))
+                site = cursor.fetchone()
+                if site:
+                    return jsonify(site), 200
+                else:
+                    return jsonify({"error": "Site non trouvé"}), 404
+    except Exception as e:
+        return jsonify({"error": f"Erreur serveur : {str(e)}"}), 500
+
+# ---------- Mettre à jour un site ----------
+@app.route("/api/sites/<int:id>", methods=["PUT"])
+def update_site(id):
+    try:
+        data = request.get_json()
+        if not data or "name" not in data or "url_or_ip" not in data:
+            return jsonify({"error": "Données invalides"}), 400
+
+        with get_db_connection() as conn:
+            with conn.cursor() as cursor:
+                cursor.execute("SELECT * FROM monitored_sites WHERE id = %s", (id,))
+                if not cursor.fetchone():
+                    return jsonify({"error": "Site non trouvé"}), 404
+
+                cursor.execute("""
+                    UPDATE monitored_sites
+                    SET name = %s, url_or_ip = %s
+                    WHERE id = %s
+                """, (data["name"], data["url_or_ip"], id))
+                conn.commit()
+        return jsonify({"message": "Site mis à jour"}), 200
+
+    except Exception as e:
+        return jsonify({"error": f"Erreur serveur : {str(e)}"}), 500
 
 
-
-@app.route('/logout', methods=['GET', 'POST'])
-def logout():
-    session.clear()
-    return redirect(url_for('index'))
-
-# ✅ C’est bien "__main__" ici
+# ---------- Lancer l'application ----------
 if __name__ == '__main__':
     app.run(debug=True)

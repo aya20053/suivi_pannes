@@ -6,6 +6,9 @@
     <title>Surveillance réseau</title>
     <link rel="icon" type="image/png" href="/static/image/logo.jpeg">
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.7.14"></script>
+
+
     <style>
     :root {
         --primary-color: #FC4100; 
@@ -13,34 +16,40 @@
         --active-text-color: #00215E;
         --bg-color: #ffffff;
     }
-::selection{
-  color:#FC4100 ;
-  background-color: #00215E;
-}
+    
+    ::selection {
+        color: #FC4100;
+        background-color: #00215E;
+    }
+    
     * {
         margin: 0;
         padding: 0;
+        box-sizing: border-box;
     }
 
     body {
         font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-     margin-right: 0px;   
+        margin: 0;
+        padding: 0;
+        min-height: 100vh;
     }
 
     .desktop-nav {
-      position: fixed; /* Keep fixed */
-    top: 50%; /* Vertically center */
-    right: 20px; /* Adjust distance from the right edge */
-    transform: translateY(-50%); /* Fine-tune vertical centering */
-    background: var(--bg-color);
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end; /* Align items to the right */
-    padding-top: 20px;
-    border-left: 1px solid #e0e0e0; /* Add left border for visual separation */
-    z-index: 101;
-    width: 100px; /* Adjust the width as needed */
-    /* height: fit-content; /* Let height be determined by content */
+        position: fixed;
+        top: 50%;
+        right: 20px;
+        transform: translateY(-50%);
+        background: var(--bg-color);
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        padding: 20px 0;
+        border-left: 1px solid #e0e0e0;
+        z-index: 101;
+        width: 100px;
+        box-shadow: -2px 0 10px rgba(0, 0, 0, 0.1);
+        border-radius: 10px 0 0 10px;
     }
 
     .nav-item {
@@ -54,7 +63,11 @@
         text-decoration: none;
         color: var(--text-color);
         position: relative;
-        transition: color 0.3s ease;
+        transition: all 0.3s ease;
+    }
+
+    .nav-item:hover {
+        background-color: rgba(255, 197, 90, 0.4);
     }
 
     .nav-item .nav-icon {
@@ -98,6 +111,7 @@
         padding: 8px 0;
         border-top: 1px solid #e0e0e0;
         z-index: 100;
+        box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
     }
 
     .mobile-nav-item {
@@ -109,7 +123,11 @@
         color: var(--text-color);
         flex: 1;
         max-width: 80px;
-        transition: color 0.3s ease;
+        transition: all 0.3s ease;
+    }
+
+    .mobile-nav-item:hover {
+        background-color: rgba(255, 197, 90, 0.4);
     }
 
     .mobile-nav-icon {
@@ -136,8 +154,29 @@
     }
 
     .main-content {
-        margin-left: 80px; /* Adjust margin for desktop nav width */
+        margin-right: 120px; /* Adjust margin for desktop nav width */
         padding: 20px;
+        min-height: calc(100vh - 80px);
+    }
+
+    /* Tooltip styles */
+    .nav__tooltip {
+        display: none;
+        position: absolute;
+        background-color: rgba(255, 197, 90, 0.4);
+        color: black;
+        padding: 5px 10px;
+        border-radius: 5px;
+        font-size: 12px;
+        top: 50%;
+        right: 110%;
+        transform: translateY(-50%);
+        white-space: nowrap;
+        pointer-events: none;
+    }
+
+    .nav-item:hover .nav__tooltip {
+        display: block;
     }
 
     @media (max-width: 768px) {
@@ -150,7 +189,7 @@
         }
 
         .main-content {
-            margin-left: 0;
+            margin-right: 0;
             padding-bottom: 80px;
         }
     }
@@ -160,232 +199,120 @@
             display: none;
         }
     }
-/* Cacher le span par défaut */
-.nav__tooltip {
-display: none;
-position: absolute;
-background-color: rgba(179, 19, 18, 0.4);
-color: black;
-padding: 5px;
-border-radius: 5px;
-font-size: 12px;
-top: 50%;
-right: 110%;  /* Positionner le span à gauche de l'icône */
-transform: translateY(-50%);
-}
 
-/* Afficher le span au survol */
-.nav__link:hover .nav__tooltip {
-display: block;
-}
+    /* Content sections */
+    #mainContent > section {
+        display: none;
+    }
 
+    #mainContent > section.active {
+        display: block;
+        animation: fadeIn 0.5s ease;
+    }
 
-.nav {
-  background: var(--nav-bg);
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-  border-radius: 1rem;
-  list-style: none;
-  padding: 1rem;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--gap);
-  position: fixed;
-  top: 50%;
-  transform: translateY(-50%);
-  right: 1rem; /* Position on the right */
-  z-index: 100;
-  width: var(--nav-width-desktop);
-}
-
-.nav__links {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--gap);
-  position: relative;
-  width: 100%;
-}
-
-.nav__links li {
-  width: 100%;
-  text-align: center;
-}
-
-.nav__links li a {
-  display: block;
-  color: var(--nav-item-color);
-  text-decoration: none;
-  font-size: 1.5rem;
-  padding: 0.8rem;
-  transition: color 0.3s ease-in-out;
-  position: relative; /* For indicator positioning */
-}
-
-.nav__links li.active a {
-  color: var(--primary);
-}
-
-.nav__indicator {
-  position: absolute;
-  left: 0;
-  top: 0; /* Adjust for vertical indicator */
-  background-color: var(--indicator-color);
-  width: 0.3rem; /* Vertical indicator width */
-  height: 100%; /* Vertical indicator height */
-  border-radius: 0.5rem;
-  transition: all 0.3s ease-in-out;
-}
-#mainContent > section {
-  display: none;
-}
-
-#mainContent > section.active {
-  display: block;
-}
-
-
-  </style>
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+    </style>
 </head>
-<body>
 
-  <nav class="desktop-nav">
-    <a href="/dashboard" class="nav-item active" data-navlink="accueil">
+<body data-user-role="{{ user_role }}">
+    <div id="app">
+    <nav class="desktop-nav">
+      <a href="/dashboard" class="nav-item active" data-navlink="accueil">
         <i class='bx bx-home-alt-2 nav-icon'></i>
-        <span class="nav-label">Accueil</span>
-    </a>
-    <a href="/manage-networks" class="nav-item" data-navlink="reseau">
+        <span class="nav__tooltip">Tableau de bord</span>
+      </a>
+      <a href="/manage-networks" class="nav-item" data-navlink="reseau">
         <i class='bx bx-network-chart nav-icon'></i>
-        <span class="nav-label">Réseau</span>
-    </a>
-    <a href="/network-stats" class="nav-item" data-navlink="statistiques">
+        <span class="nav__tooltip">Gestion du réseau</span>
+      </a>
+      <a href="/network-stats" class="nav-item" data-navlink="statistiques">
         <i class='bx bx-bar-chart-alt nav-icon'></i>
-        <span class="nav-label">Statistiques</span>
-    </a>
-    <a href="#" class="nav-item" data-navlink="parametres">
+        <span class="nav__tooltip">Statistiques utilisateurs</span>
+      </a>
+      <a href="/manage_users" class="nav-item"  data-navlink="gestion-utilisateurs" >
+        <i class='bx bx-user-check nav-icon'></i>
+        <span class="nav__tooltip">Gestion des utilisateurs</span>
+      </a>
+      <a href="#" class="nav-item" data-navlink="parametres">
         <i class='bx bx-cog nav-icon'></i>
-        <span class="nav-label">Paramètres</span>
-    </a>
-    <a href="/profile" class="nav-item" data-navlink="profil">
-      <i class='bx bx-user nav-icon'></i>
-      <span class="nav-label">Profil</span>
-  </a>
-  <a href="/" class="nav-item" data-navlink="profil">
-    <i class='bx bx-log-out nav-icon'></i>
-    <span class="nav-label">Deconnexion</span>
-  </a>
-</nav>
+        <span class="nav__tooltip">Paramètres système</span>
+      </a>
+      <a href="/profile" class="nav-item" data-navlink="profil">
+        <i class='bx bx-user nav-icon'></i>
+        <span class="nav__tooltip">Mon profil</span>
+      </a>
+      <a href="/logout" class="nav-item" data-navlink="deconnexion">
+        <i class='bx bx-log-out nav-icon'></i>
+        <span class="nav__tooltip">Se déconnecter</span>
+      </a>
+    </nav>
+  
 
-<div id="mainContent">
-    <section data-page="accueil" class="active"></section>
-    <section data-page="reseau"></section>
-    <section data-page="statistiques"></section>
-    <section data-page="parametres"></section>
-    <section data-page="profil"></section>
-</div>
-
-
+  
     <nav class="mobile-nav">
-        <a href="/dashboard" class="mobile-nav-item active" data-navlink="accueil">
-            <i class='bx bx-home-alt-2 mobile-nav-icon'></i>
-            <span class="mobile-nav-label">Accueil</span>
-        </a>
-        <a href="/network-stats" class="mobile-nav-item" data-navlink="reseau">
-            <i class='bx bx-network-chart mobile-nav-icon'></i>
-            <span class="mobile-nav-label">Réseau</span>
-        </a>
-        <a href="" class="mobile-nav-item" data-navlink="statistiques">
-            <i class='bx bx-bar-chart-alt mobile-nav-icon'></i>
-            <span class="mobile-nav-label">Stats</span>
-        </a>
-        <a href="#" class="mobile-nav-item" data-navlink="parametres">
-            <i class='bx bx-cog mobile-nav-icon'></i>
-            <span class="mobile-nav-label">Param.</span>
-        </a>
-        <a href="/profile" class="mobile-nav-item" data-navlink="profil">
-            <i class='bx bx-user mobile-nav-icon'></i>
-            <span class="mobile-nav-label">Profil</span>
-        </a>
-        <a href="/" class="mobile-nav-item" data-navlink="profil">
-          <i class='bx bx-log-out nav-icon'></i>
-          <span class="mobile-nav-label">Deconnexion</span>
+      <a href="/dashboard" class="mobile-nav-item active" data-navlink="accueil">
+        <i class='bx bx-home-alt-2 nav-icon'></i>
+        <span class="nav__tooltip">Tableau de bord</span>
+      </a>
+      <a href="/manage-networks" class="mobile-nav-item" data-navlink="reseau">
+        <i class='bx bx-network-chart nav-icon'></i>
+        <span class="nav__tooltip">Gestion du réseau</span>
+      </a>
+      <a href="/network-stats" class="mobile-nav-item" data-navlink="statistiques">
+        <i class='bx bx-bar-chart-alt nav-icon'></i>
+        <span class="nav__tooltip">Statistiques utilisateurs</span>
+      </a>
+      <a href="/manage_users" class="mobile-nav-item"  data-navlink="gestion-utilisateurs" >
+        <i class='bx bx-user-check nav-icon'></i>
+        <span class="nav__tooltip">Gestion des utilisateurs</span>
+      </a>
+      <a href="#" class="mobile-nav-item" data-navlink="parametres">
+        <i class='bx bx-cog nav-icon'></i>
+        <span class="nav__tooltip">Paramètres système</span>
+      </a>
+      <a href="/profile" class="mobile-nav-item" data-navlink="profil">
+        <i class='bx bx-user nav-icon'></i>
+        <span class="nav__tooltip">Mon profil</span>
+      </a>
+      <a href="/logout" class="mobile-nav-item" data-navlink="deconnexion">
+        <i class='bx bx-log-out nav-icon'></i>
+        <span class="nav__tooltip">Se déconnecter</span>
       </a>
     </nav>
 
-   
 
-    <script>
-      document.addEventListener('DOMContentLoaded', function () {
-        const desktopLinks = document.querySelectorAll('.desktop-nav .nav-item');
-        const mobileLinks = document.querySelectorAll('.mobile-nav .mobile-nav-item');
-        const contentSections = document.querySelectorAll('#mainContent > section');
-    
-        function setActiveLink(links, target) {
-          links.forEach(link => {
-            link.classList.remove('active');
-            const icon = link.querySelector('.nav-icon, .mobile-nav-icon');
-            if (icon) {
-              icon.style.color = ''; // Reset icon color
-            }
-          });
-          target.classList.add('active');
-          const activeIcon = target.querySelector('.nav-icon, .mobile-nav-icon');
-          if (activeIcon) {
-            activeIcon.style.color = 'var(--primary-color)'; // Set active icon color
-          }
-        }
-    
-        function showContent(page) {
-          contentSections.forEach(section => section.classList.remove('active'));
-          const activeSection = document.querySelector(`#mainContent > section[data-page="${page}"]`);
-          if (activeSection) {
-            activeSection.classList.add('active');
-          }
-        }
-    
-        desktopLinks.forEach(link => {
-          link.addEventListener('click', function (event) {
-            event.preventDefault();
-            setActiveLink(desktopLinks, this);
-            setActiveLink(mobileLinks, document.querySelector(`.mobile-nav-item[data-navlink="${this.dataset.navlink}"]`));
-            showContent(this.dataset.navlink);
-          });
-        });
-    
-        mobileLinks.forEach(link => {
-          link.addEventListener('click', function (event) {
-            event.preventDefault();
-            setActiveLink(mobileLinks, this);
-            setActiveLink(desktopLinks, document.querySelector(`.nav-item[data-navlink="${this.dataset.navlink}"]`));
-            showContent(this.dataset.navlink);
-          });
-        });
-    
-        // 👇 Partie manquante ici pour afficher la section active au début
-        const initial = document.querySelector('.nav-item.active') || document.querySelector('.mobile-nav-item.active');
-        if (initial) {
-          const page = initial.dataset.navlink;
-          showContent(page);
-        }
-      });
-    </script>
-    
-    <script>
-      document.addEventListener("DOMContentLoaded", function () {
-          const navItems = document.querySelectorAll(".nav-item");
-  
-          navItems.forEach(item => {
-              item.addEventListener("click", function () {
-                  // Supprimer la classe 'active' de tous les éléments
-                  navItems.forEach(nav => nav.classList.remove("active"));
-  
-                  // Ajouter la classe 'active' à l'élément cliqué
-                  this.classList.add("active");
-              });
-          });
-      });
-  </script>
-  
+</div>
+<script>
+   document.addEventListener('DOMContentLoaded', function () {
+    // Sélectionner les liens de gestion des utilisateurs pour desktop et mobile
+    const manageUsersDesktopLink = document.getElementById('manage-users-link');
+    const manageUsersMobileLink = document.getElementById('mobile-manage-users-link');
 
-</body>
+    // Récupérer le rôle de l'utilisateur depuis l'attribut data-user-role du body
+    const userRole = document.body.getAttribute('data-user-role');
+    console.log("Rôle utilisateur:", userRole);
+
+    // Vérification et affichage des liens uniquement pour le rôle 'chef_admin'
+    if (userRole === 'chef_admin') {
+        if (manageUsersDesktopLink) {
+            manageUsersDesktopLink.style.display = 'block';
+        }
+        if (manageUsersMobileLink) {
+            manageUsersMobileLink.style.display = 'block';
+        }
+    } else {
+        if (manageUsersDesktopLink) {
+            manageUsersDesktopLink.style.display = 'none';
+        }
+        if (manageUsersMobileLink) {
+            manageUsersMobileLink.style.display = 'none';
+        }
+    }
+});
+
+</script>
+  </body>
 </html>
