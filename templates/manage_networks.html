@@ -4,14 +4,16 @@
   <meta charset="UTF-8">
   <title>Monitoring Réseaux</title>
   <script src="https://unpkg.com/lucide@latest"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   <script src="script.js" defer></script>
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
 </head>
-<body class="bg-gray-100 p-10">
+<body class="bg-gray-100 p-4 sm:p-10">
   <div class="max-w-5xl mx-auto">
-    <div class="flex justify-between items-center mb-6">
-      <h1 class="text-3xl font-bold">🌐 Réseaux Monitorés</h1>
-      <button id="toggle-form-btn" class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">
+    <div class="flex justify-between items-center mb-6 flex-wrap">
+      <h1 class="text-2xl sm:text-3xl font-bold text-center sm:text-left w-full sm:w-auto">🌐 Réseaux Monitorés</h1>
+      <button id="toggle-form-btn" class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 mt-4 sm:mt-0">
         ➕ Ajouter Réseau
       </button>
     </div>
@@ -51,125 +53,142 @@
 
   
   <script>
-    const API_URL = "http://localhost:5000/api/sites";
-  
-    // Toggle formulaire ajout
-    document.getElementById("toggle-form-btn").addEventListener("click", () => {
-      const form = document.getElementById("add-form");
-      form.classList.toggle("hidden");
-    });
-  
-    async function fetchSites(filter = "") {
-      try {
-        const res = await fetch(API_URL);
-        if (!res.ok) throw new Error("Erreur lors de la récupération des sites");
-        const sites = await res.json();
-  
-        const list = document.getElementById("site-list");
-        list.innerHTML = "";
-  
-        sites
-          .filter(site => site.name.toLowerCase().includes(filter.toLowerCase()))
-          .forEach(site => {
-            const container = document.createElement("div");
-            container.className = "bg-white rounded shadow p-4";
-  
-            container.innerHTML = `
-              <div class="flex justify-between items-center">
-                <div class="flex items-center gap-2">
-                  <button onclick="editSite(${site.id})" class="text-green-600 hover:underline">Modifier</button>
-                  <button onclick="deleteSite(${site.id})" class="text-red-500 hover:text-red-700"><i data-lucide="trash-2"></i></button>
-                  <h2 class="text-lg font-bold">${site.name}</h2>
-                </div>
-                <button onclick="toggleDetails(this)" class="text-blue-600 hover:underline">Afficher détails</button>
+  const API_URL = "http://localhost:5000/api/sites";
+
+  // Toggle formulaire ajout
+  document.getElementById("toggle-form-btn").addEventListener("click", () => {
+    const form = document.getElementById("add-form");
+    form.classList.toggle("hidden");
+  });
+
+  async function fetchSites(filter = "") {
+    try {
+      const res = await fetch(API_URL);
+      if (!res.ok) throw new Error("Erreur lors de la récupération des sites");
+      const sites = await res.json();
+
+      const list = document.getElementById("site-list");
+      list.innerHTML = "";
+
+      sites
+        .filter(site => site.name.toLowerCase().includes(filter.toLowerCase()))
+        .forEach(site => {
+          const container = document.createElement("div");
+          container.className = "bg-white rounded shadow p-4";
+
+          container.innerHTML = `
+            <div class="flex justify-between items-center flex-wrap">
+              <div class="flex items-center gap-2 w-full sm:w-auto">
+                <button onclick="editSite(${site.id})" class="flex items-center gap-1 text-green-600 hover:underline">
+                <i data-lucide="pencil"></i>
+              </button>
+                <button onclick="deleteSite(${site.id})" class="text-red-500 hover:text-red-700"><i data-lucide="trash-2"></i></button>
+                <h2 class="text-lg font-bold flex-1">${site.name}</h2>
               </div>
-              <div class="hidden mt-2 details text-sm text-gray-700">
-                <p><strong>Adresse :</strong> ${site.url_or_ip}</p>
-                <p><strong>Status :</strong> ${site.last_status}</p>
-                <p><strong>Dernier check :</strong> ${site.last_checked}</p>
-                <p><strong>Échecs :</strong> ${site.failed_pings_count}</p>
-                <p><strong>Alerte :</strong> ${site.alert_sent ? "✅" : "❌"}</p>
-              </div>
-            `;
-            list.appendChild(container);
-          });
-  
-        lucide.createIcons(); // Recréer les icônes
-      } catch (error) {
-        console.error("Erreur lors du chargement des sites :", error);
-        alert("Erreur lors de la récupération des réseaux. Vérifie le serveur.");
-      }
-    }
-  
-    function toggleDetails(btn) {
-      const details = btn.parentElement.nextElementSibling;
-      details.classList.toggle("hidden");
-      btn.textContent = details.classList.contains("hidden") ? "Afficher détails" : "Masquer";
-    }
-  
-    document.getElementById("add-form").addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const name = document.getElementById("name").value;
-      const url = document.getElementById("url_or_ip").value;
-  
-      try {
-        await fetch(API_URL, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ name, url_or_ip: url })
+              <button onclick="toggleDetails(this)" class="flex items-center gap-1 text-blue-600 hover:underline">
+                <i data-lucide="eye"></i> Afficher détails
+              </button>
+            </div>
+            <div class="hidden mt-2 details text-sm text-gray-700">
+              <p><strong>Adresse :</strong> ${site.url_or_ip}</p>
+              <p><strong>Status :</strong> ${site.last_status}</p>
+              <p><strong>Dernier check :</strong> ${site.last_checked}</p>
+              <p><strong>Échecs :</strong> ${site.failed_pings_count}</p>
+              <p><strong>Alerte :</strong> ${site.alert_sent ? "✅" : "❌"}</p>
+            </div>
+          `;
+          list.appendChild(container);
         });
+
+      lucide.createIcons(); // Recréer les icônes
+    } catch (error) {
+      console.error("Erreur lors du chargement des sites :", error);
+    }
+  }
+
+  function toggleDetails(btn) {
+    const details = btn.parentElement.nextElementSibling;
+    details.classList.toggle("hidden");
+    btn.textContent = details.classList.contains("hidden") ? "Afficher détails" : "Masquer";
+  }
+
+  document.getElementById("add-form").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const name = document.getElementById("name").value;
+    const url = document.getElementById("url_or_ip").value;
+
+    try {
+      await fetch(API_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, url_or_ip: url })
+      });
+
+      e.target.reset();
+      document.getElementById("add-form").classList.add("hidden");
+      fetchSites();
+    } catch (err) {
+      alert("Erreur lors de l'ajout du site.");
+      console.error(err);
+    }
+  });
+
+  async function deleteSite(id) {
+    const confirmDelete = confirm("Êtes-vous sûr de vouloir supprimer ce site ?");
+    if (!confirmDelete) return;
+
+    try {
+      await fetch(`${API_URL}/${id}`, { method: "DELETE" });
+      fetchSites();
+    } catch (err) {
+      alert("Erreur lors de la suppression.");
+      console.error(err);
+    }
+  }
+
+  async function editSite(id) {
+    try {
+      const res = await fetch(`${API_URL}/${id}`);
+      if (!res.ok) throw new Error("Erreur HTTP " + res.status);
+      const site = await res.json();
+
+      document.getElementById("edit-id").value = site.id;
+      document.getElementById("edit-name").value = site.name;
+      document.getElementById("edit-url").value = site.url_or_ip;
+
+      document.getElementById("edit-form").classList.remove("hidden");
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } catch (error) {
+      alert("Erreur lors du chargement du site.");
+      console.error(error);
+    }
+  }
+
+  function cancelEdit() {
+    document.getElementById("edit-form").classList.add("hidden");
+  }
+
+  document.getElementById("search").addEventListener("input", (e) => {
+    fetchSites(e.target.value);
+  });
+
+  // Charger les sites au démarrage
+  fetchSites();
+</script>
+<div id="menu"></div>
   
-        e.target.reset();
-        document.getElementById("add-form").classList.add("hidden");
-        fetchSites();
-      } catch (err) {
-        alert("Erreur lors de l'ajout du site.");
-        console.error(err);
+<script>
+  fetch("/static/menu.html")
+    .then(response => response.text())
+    .then(data => {
+      const menuDiv = document.getElementById("menu");
+      if (menuDiv) {
+        menuDiv.innerHTML = data;
       }
+    })
+    .catch(error => {
+      console.error('Erreur lors du chargement du menu :', error);
     });
-  
-    async function deleteSite(id) {
-      const confirmDelete = confirm("Êtes-vous sûr de vouloir supprimer ce site ?");
-      if (!confirmDelete) return;
-  
-      try {
-        await fetch(`${API_URL}/${id}`, { method: "DELETE" });
-        fetchSites();
-      } catch (err) {
-        alert("Erreur lors de la suppression.");
-        console.error(err);
-      }
-    }
-  
-    async function editSite(id) {
-      try {
-        const res = await fetch(`${API_URL}/${id}`);
-        if (!res.ok) throw new Error("Erreur HTTP " + res.status);
-        const site = await res.json();
-  
-        document.getElementById("edit-id").value = site.id;
-        document.getElementById("edit-name").value = site.name;
-        document.getElementById("edit-url").value = site.url_or_ip;
-  
-        document.getElementById("edit-form").classList.remove("hidden");
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      } catch (error) {
-        alert("Erreur lors du chargement du site.");
-        console.error(error);
-      }
-    }
-  
-    function cancelEdit() {
-      document.getElementById("edit-form").classList.add("hidden");
-    }
-  
-    document.getElementById("search").addEventListener("input", (e) => {
-      fetchSites(e.target.value);
-    });
-  
-    // Charger les sites au démarrage
-    fetchSites();
-  </script>
-  
+</script>
 </body>
 </html>
