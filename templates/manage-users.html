@@ -1,0 +1,329 @@
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Gestion des utilisateurs</title>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/lucide-icons@0.1.0/dist/lucide.min.css" rel="stylesheet">
+
+    <script src="script.js" defer></script>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>button i {
+        font-size: 24px; /* Taille des icônes */
+        color: #1c3d5a; /* Couleur des icônes (exemple bleu) */
+    }
+    </style>
+</head>
+<body class=" p-4 sm:p-10">
+    <div class="max-w-5xl mx-auto">
+        <div class="flex justify-between items-center mb-6 flex-wrap">
+            <h1 class="text-2xl sm:text-3xl font-bold w-full text-center" style="color: #EB5B00;">
+                🌐 Gestion des utilisateurs
+            </h1>
+            <br>
+            <button id="toggle-form-btn" class="px-4 py-2" style="background-color: #205781; color: white; border-radius: 0.375rem;">
+                ➕ Ajouter utilisateur
+            </button>
+        </div>
+
+        <form id="add-form" class="bg-blue-50 p-6 rounded-xl shadow-lg border border-blue-200 mb-6 hidden">
+            <h2 class="text-xl font-semibold text-blue-800 mb-4 flex items-center gap-2">
+                <i data-lucide="plus-circle"></i> Ajouter un nouveau utilisateur
+            </h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <input type="text" id="username" placeholder="Nom" required
+                       class="p-3 border border-blue-200 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
+
+                <input type="text" id="prenom" placeholder="Prénom" required
+                       class="p-3 border border-blue-200 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
+
+                <input type="email" id="email" placeholder="Email" required
+                       class="p-3 border border-blue-200 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
+
+                <input type="text" id="poste" placeholder="Poste" required
+                       class="p-3 border border-blue-200 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
+
+                <input type="number" id="telephone" placeholder="Téléphone" required
+                       class="p-3 border border-blue-200 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
+
+                <input type="password" id="password" placeholder="Mot de passe" required
+                       class="p-3 border border-blue-200 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
+                <select name="role" id="role" class="p-3 border border-blue-200 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
+                    <option value="chef admin">chef admin</option>
+                    <option value="admin">admin</option>
+                </select>
+            </div>
+            <button type="submit"
+                    class="mt-5 px-4 py-2 bg-blue-100 text-blue-800 rounded-md hover:bg-blue-200 transition-all duration-200 flex items-center gap-1">
+                <i data-lucide="save"></i> Ajouter
+            </button>
+        </form>
+
+
+        <div class="mb-4 relative">
+            <i data-lucide="search" class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500"></i>
+            <input
+                type="text"
+                id="search"
+                placeholder="Rechercher un utilisateur..."
+                class="w-full pl-10 p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-300"
+            >
+        </div>
+
+
+        <div id="site-list" class="space-y-4">
+            </div>
+    </div>
+
+    <form id="edit-form" class="bg-blue-50 p-6 rounded-xl shadow-lg border border-blue-200 mb-6 hidden w-150">
+        <h2 class="text-xl font-semibold text-blue-800 mb-4 flex items-center gap-2">
+            <i data-lucide="pencil"></i> Modifier l'utilisateur
+        </h2>
+        <input type="hidden" id="edit-id">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <input type="text" id="edit-username" placeholder="Nom" required
+                   class="p-3 border border-blue-200 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
+
+            <input type="text" id="edit-prenom" placeholder="Prénom" required
+                   class="p-3 border border-blue-200 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
+
+            <input type="email" id="edit-email" placeholder="Email" required
+                   class="p-3 border border-blue-200 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
+
+            <input type="text" id="edit-poste" placeholder="Poste" required
+                   class="p-3 border border-blue-200 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
+
+            <input type="number" id="edit-telephone" placeholder="Téléphone" required
+                   class="p-3 border border-blue-200 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
+
+            <input type="password" id="edit-password" placeholder="Mot de passe" required
+                   class="p-3 border border-blue-200 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
+
+            <select name="edit-role" id="edit-role" class="p-3 border border-blue-200 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
+                <option value="chef admin">chef admin</option>
+                <option value="admin">admin</option>
+            </select>
+
+        </div>
+        <div class="mt-4 flex gap-2">
+            <button type="submit" class="mt-5 px-4 py-2 bg-blue-100 text-blue-800 rounded-md hover:bg-blue-200 transition-all duration-200 flex items-center gap-1">
+                <i data-lucide="save"></i> Enregistrer
+            </button>
+            <button type="button" onclick="cancelEdit()" class="mt-5 px-4 py-2 bg-blue-100 text-blue-800 rounded-md hover:bg-blue-200 transition-all duration-200 flex items-center gap-1">
+                <i data-lucide="x"></i> Annuler
+            </button>
+        </div>
+    </form>
+
+
+    <script>
+        const API_URL = "http://localhost:5000/api/users";
+
+        // Toggle formulaire ajout
+        document.getElementById("toggle-form-btn").addEventListener("click", () => {
+            const form = document.getElementById("add-form");
+            form.classList.toggle("hidden");
+        });
+
+        async function fetchUsers(filter = "") {
+            try {
+                const res = await fetch(API_URL);
+                if (!res.ok) throw new Error("Erreur lors de la récupération des utilisateurs");
+                const users = await res.json();
+
+                const list = document.getElementById("site-list");
+                list.innerHTML = "";
+
+                users
+                    .filter(user => user.username.toLowerCase().includes(filter.toLowerCase()))
+                    .forEach(user => {
+                        const container = document.createElement("div");
+                        container.className = "bg-white rounded shadow p-4";
+
+                        container.innerHTML = `
+                            <div class="flex justify-between items-center flex-wrap">
+                                <h2 class="text-lg font-bold flex-1">${user.username}</h2>
+
+                                <div class="flex items-center gap-2 w-full sm:w-auto">
+
+                                    <button onclick="editUser(${user.id})" class="flex items-center gap-1 text-green-600 ">
+                                        <i data-lucide="pencil"></i>
+                                    </button>
+                                    <button onclick="deleteUser(${user.id})" class="text-red-500  gap-1 hover:text-red-700"><i data-lucide="trash-2"></i></button>
+
+                                <button type="button" onclick="toggleDetails(this)" class="flex items-center gap-2">
+                                    👁‍🗨
+                                </button>
+
+                                <br>
+                                </div>
+                                <div class="hidden mt-2 details text-sm text-gray-700">
+                                    <p><strong>Nom :</strong> ${user.username}</p>
+                                    <p><strong>Prénom :</strong> ${user.prenom}</p>
+                                    <p><strong>Email :</strong> ${user.email}</p>
+                                    <p><strong>Poste :</strong> ${user.poste}</p>
+                                    <p><strong>Téléphone :</strong> ${user.telephone}</p>
+                                    <p><strong>Role :</strong> ${user.role}</p>
+
+                                </div></div>
+                            `;
+                        list.appendChild(container);
+                    });
+
+                lucide.createIcons(); // Recréer les icônes
+            } catch (error) {
+                console.error("Erreur lors du chargement des utilisateurs :", error);
+            }
+        }
+        function toggleDetails(btn) {
+            const details = btn.parentElement.nextElementSibling; // On cible le div avec les détails
+            details.classList.toggle("hidden"); // On ajoute ou enlève la classe "hidden"
+
+            // Ici on change le texte du bouton en fonction de l'état d'affichage
+            if (details.classList.contains("hidden")) {
+                btn.textContent = "👁‍🗨";  // Afficher l'icône pour "Afficher"
+            } else {
+                btn.textContent = "Masquer";  // Texte pour masquer
+            }
+        }
+
+        document.getElementById("add-form").addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const username = document.getElementById("username").value;
+            const prenom = document.getElementById("prenom").value;
+            const email = document.getElementById("email").value;
+            const poste = document.getElementById("poste").value;
+            const telephone = document.getElementById("telephone").value;
+            const password = document.getElementById("password").value; // Récupérer le mot de passe
+            const role = document.getElementById("role").value;
+
+            try {
+                const response = await fetch(API_URL, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ username, prenom, email, poste, telephone, password, role }) // Inclure le mot de passe
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    alert(`Erreur lors de l'ajout de l'utilisateur: ${errorData.error || response.statusText}`);
+                    console.error("Erreur lors de l'ajout de l'utilisateur:", errorData);
+                    return;
+                }
+
+                e.target.reset();
+                document.getElementById("add-form").classList.add("hidden");
+                fetchUsers();
+            } catch (err) {
+                alert("Erreur réseau lors de l'ajout de l'utilisateur.");
+                console.error(err);
+            }
+        });
+
+        async function deleteUser(id) {
+            const confirmDelete = confirm("Êtes-vous sûr de vouloir supprimer cet utilisateur ?");
+            if (!confirmDelete) return;
+
+            try {
+                const response = await fetch(`${API_URL}/${id}`, { method: "DELETE" });
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    alert(`Erreur lors de la suppression de l'utilisateur: ${errorData.error || response.statusText}`);
+                    console.error("Erreur lors de la suppression de l'utilisateur:", errorData);
+                    return;
+                }
+                fetchUsers();
+            } catch (err) {
+                alert("Erreur réseau lors de la suppression.");
+                console.error(err);
+            }
+        }
+
+        async function editUser(id) {
+            try {
+                const res = await fetch(`${API_URL}/${id}`);
+                if (!res.ok) throw new Error("Erreur HTTP " + res.status);
+                const user = await res.json();
+
+                document.getElementById("edit-id").value = user.id;
+                document.getElementById("edit-username").value = user.username;
+                document.getElementById("edit-prenom").value = user.prenom;
+                document.getElementById("edit-email").value = user.email;
+                document.getElementById("edit-poste").value = user.poste;
+                document.getElementById("edit-telephone").value = user.telephone;
+                document.getElementById("edit-role").value = user.role;
+                document.getElementById("edit-password").value = user.password; // Pré-remplir le mot de passe (attention à la sécurité en production)
+
+
+                document.getElementById("edit-form").classList.remove("hidden");
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            } catch (error) {
+                console.error(error);
+            }
+        }
+        document.getElementById("edit-form").addEventListener("submit", async (e) => {
+            e.preventDefault();
+
+            const id = document.getElementById("edit-id").value;
+            const username = document.getElementById("edit-username").value;
+            const prenom = document.getElementById("edit-prenom").value;
+            const email = document.getElementById("edit-email").value;
+            const poste = document.getElementById("edit-poste").value;
+            const telephone = document.getElementById("edit-telephone").value;
+            const role = document.getElementById("edit-role").value;
+            const password = document.getElementById("edit-password").value; // Récupérer le mot de passe de l'édition
+
+
+            try {
+                const response = await fetch(`${API_URL}/${id}`, {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ username, prenom, email, poste, telephone, role, password }) // Inclure le rôle et le mot de passe pour la modification
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    alert(`Erreur lors de la mise à jour de l'utilisateur: ${errorData.error || response.statusText}`);
+                    console.error("Erreur lors de la mise à jour de l'utilisateur:", errorData);
+                    return;
+                }
+
+                document.getElementById("edit-form").classList.add("hidden");
+                fetchUsers();
+            } catch (err) {
+                alert("Erreur réseau lors de la mise à jour.");
+                console.error(err);
+            }
+        });
+
+        function cancelEdit() {
+            document.getElementById("edit-form").classList.add("hidden");
+        }
+
+        document.getElementById("search").addEventListener("input", (e) => {
+            fetchUsers(e.target.value);
+        });
+        lucide.createIcons(); // Ajoute ça après toute modification du DOM
+
+        // Charger les sites au démarrage
+        fetchUsers();
+    </script>
+    <div id="menu"></div>
+    <script src="https://cdn.jsdelivr.net/npm/lucide@0.0.0/dist/lucide.min.js"></script>
+
+    <script>
+        fetch("/static/menu.html")
+            .then(response => response.text())
+            .then(data => {
+                const menuDiv = document.getElementById("menu");
+                if (menuDiv) {
+                    menuDiv.innerHTML = data;
+                }
+            })
+            .catch(error => {console.error('Erreur lors du chargement du menu :', error);
+            });
+    </script>
+</body>
+</html>

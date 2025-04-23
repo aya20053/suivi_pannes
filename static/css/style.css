@@ -10,15 +10,13 @@ body {
   font-size: 16px;
   min-height: 100vh;
 
-  padding: 1rem; /* Add some general padding to the body */
+  padding: 1rem; 
 }
 
-
-
 .profil-container {
-  background-color: #fff;
-  width: 80%;
-  max-width: 600px;
+ 
+  width: 100%;
+  max-width: 800px;
   border-radius: 10px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
   padding: 20px;
@@ -56,6 +54,3 @@ h2 {
   color: #222;
 }
 
-.profil-actions {
-  text-align: center;
-}

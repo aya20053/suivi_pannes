@@ -15,7 +15,7 @@
             align-items: center;
             min-height: 100vh;
             margin: 0;
-            background-color: #f7f7f7;
+        
         }
 
         .profil-container {
@@ -33,7 +33,7 @@
             display: flex;
             flex-direction: row;
             align-items: center;
-            margin-bottom: 30px; /* Add margin below header */
+            margin-bottom: 30px;  /* Add margin below header */
         }
 
         .photo-profile {
@@ -94,6 +94,7 @@
                     <p><i class='bx bx-envelope'></i><strong>Email:</strong> {{ user['email'] }}</p>
                     <p><i class='bx bx-briefcase'></i><strong>Poste:</strong> {{ user['poste'] }}</p>
                     <p><i class='bx bx-phone'></i><strong>Téléphone:</strong> {{ user['telephone'] }}</p>
+                    <p><i class='bx bx-phone'></i><strong>Role:</strong> {{ user['role'] }}</p>
                 </div>
             </div>
         </div>
