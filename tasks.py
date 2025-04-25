@@ -41,19 +41,42 @@ def check_site_status(host):
         return False, "Format de l'adresse non reconnu"
 
 def send_alert(site_name, url_or_ip, reason):
-    """Envoie une alerte par email et/ou notification."""
-    subject = f"ALERTE: Site/IP '{site_name}' ({url_or_ip}) est hors ligne"
-    body = f"Le reseau: '{site_name}' ({url_or_ip}) est actuellement hors ligne.\n\n\nDernière vérification : {datetime.utcnow()} (UTC)."
+    """Enregistre une alerte dans la base de données ET envoie un email."""
+    conn = get_db_connection()
+    if not conn:
+        print("Erreur : Connexion à la base de données échouée pour enregistrer l'alerte.")
+        return
+    try:
+        with conn.cursor() as cursor:
+            query_insert = """
+                INSERT INTO alerts (timestamp, site_name, url_or_ip, reason, is_acknowledged)
+                VALUES (%s, %s, %s, %s, %s)
+            """
+            timestamp = datetime.utcnow()
+            cursor.execute(query_insert, (timestamp, site_name, url_or_ip, reason, False))
+            conn.commit()
+            print(f"Alerte enregistrée dans la base de données pour {site_name}: {reason}")
 
-    if EMAIL_CONFIG['enabled']:
-        send_email(subject, body, EMAIL_CONFIG['recipients'], EMAIL_CONFIG)
-        print(f"Email envoyé pour {site_name}")
+            # Envoi de l'email (comme vous le faisiez déjà)
+            subject = f"ALERTE: Site/IP '{site_name}' ({url_or_ip}) est hors ligne"
+            body = f"Le reseau: '{site_name}' ({url_or_ip}) est actuellement hors ligne.\n\n\nDernière vérification : {timestamp} (UTC).\n\nRaison : {reason}"
 
-    if NOTIFICATION_CONFIG['enabled']:
-        print(f"Notification envoyée pour : {site_name} - {reason}")  # À remplacer par ta logique de notif réelle
+            if EMAIL_CONFIG['enabled']:
+                try: # Ajout d'un try...except autour de l'envoi d'email
+                    send_email(subject, body, EMAIL_CONFIG['recipients'], EMAIL_CONFIG)
+                    print(f"Email envoyé pour {site_name}")
+                except Exception as e:
+                    print(f"Erreur lors de l'envoi de l'email pour {site_name}: {e}")
+
+            if NOTIFICATION_CONFIG['enabled']:
+                print(f"Notification (console) envoyée pour : {site_name} - {reason}") # Gardez votre logique de notification si vous l'utilisez
+    except pymysql.Error as e:
+        print(f"Erreur lors de l'enregistrement de l'alerte : {e}")
+    finally:
+        close_db_connection(conn)
 
 def monitor_all_sites():
-    """Surveille tous les sites web actifs dans la base de données."""
+    """Surveille tous les sites web actifs et envoie des alertes par email et enregistre en DB."""
     print("\n--- Cycle de surveillance lancé ---")
     conn = get_db_connection()
     if not conn:
@@ -85,9 +108,9 @@ def monitor_all_sites():
 
                 if not is_up:
                     failed_pings_count += 1
-                    send_alert(name, url_or_ip, reason)  # Envoie toujours une alerte
+                    send_alert(name, url_or_ip, reason) # Envoie l'email ET enregistre l'alerte en DB
                 else:
-                    failed_pings_count = 0  # Reset en cas de succès
+                    failed_pings_count = 0 # Reset en cas de succès
 
                 # Mise à jour de l'état dans la base
                 query_update = """
@@ -99,8 +122,8 @@ def monitor_all_sites():
                 """
                 execute_query(query_update, (status, timestamp, failed_pings_count, site_id))
 
-            conn.commit()
-            print("--- Fin du cycle de surveillance ---")
+        conn.commit()
+        print("--- Fin du cycle de surveillance ---")
 
     except pymysql.Error as e:
         print(f"Erreur pendant la surveillance : {e}")
@@ -113,4 +136,3 @@ def run_monitoring_loop():
         monitor_all_sites()
         print("Pause de 60 secondes...\n")
         time.sleep(60)
-

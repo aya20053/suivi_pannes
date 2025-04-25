@@ -174,17 +174,13 @@ def network_stats():
         return redirect(url_for('index'))
     return render_template('network_stats.html')
 
-@app.route('/alerts')
-def alerts():
-    if 'username' not in session:
-        return redirect(url_for('index'))
-    return render_template('alerts.html')
+
 
 @app.route('/manage-networks')
 def manage_networks():
     if 'username' not in session:
         return redirect(url_for('index'))
-    return render_template('manage_networks.html')
+    return render_template('manage_networks.html', active_page='reseau')
 
 @app.route('/profile')
 def profile():
@@ -194,7 +190,7 @@ def profile():
     try:
         user = get_user(conn)
         if user:
-            return render_template('profile.html', user=user)
+            return render_template('profile.html', user=user, active_page='profil')
         return redirect(url_for('index'))
     finally:
         conn.close()
@@ -337,7 +333,7 @@ def update_site(id):
 def manage_users():
     if 'username' not in session:
         return redirect(url_for('index'))
-    return render_template('manage-users.html')
+    return render_template('manage-users.html', active_page='gestion-utilisateurs')
 
 # Configuration for file uploads
 UPLOAD_FOLDER = 'uploads'
@@ -540,6 +536,43 @@ def start_monitoring():
     thread.start()
 
 
+@app.route('/alerts')
+def alerts():
+    """Route pour afficher la page des alertes."""
+    if 'username' not in session:
+        return redirect(url_for('index'))  # Redirige vers la page d'accueil si non connecté
+    return render_template('alerts.html', active_page='Alertes')
+
+@app.route("/api/alerts", methods=["GET"])
+def api_get_alerts():
+    """API endpoint pour récupérer les alertes au format JSON."""
+    conn = get_db_connection()
+    if not conn:
+        return jsonify({"error": "Database connection failed"}), 500
+    try:
+        with conn.cursor() as cursor:
+            cursor.execute("SELECT id, timestamp, site_name, url_or_ip, reason, is_acknowledged FROM alerts ORDER BY timestamp DESC")
+            alerts = cursor.fetchall()
+            # Formatter la date pour l'affichage (optionnel)
+            formatted_alerts = [{**alert, 'timestamp': alert['timestamp'].isoformat() + 'Z'} for alert in alerts]
+            return jsonify(formatted_alerts)
+    except pymysql.MySQLError as e:
+        logging.error(f"Error getting alerts: {e}")
+        return jsonify({"error": f"Database error: {e}"}), 500
+    finally:
+        if conn:  # Vérifiez si la connexion existe avant de la fermer
+            conn.close()
+
+
 if __name__ == '__main__':
+    from tasks import run_monitoring_loop
+    import threading
+
+    def start_monitoring():
+        """Démarre la boucle de monitoring dans un thread séparé."""
+        thread = threading.Thread(target=run_monitoring_loop)
+        thread.daemon = True
+        thread.start()
+
     start_monitoring()
     app.run(debug=True)

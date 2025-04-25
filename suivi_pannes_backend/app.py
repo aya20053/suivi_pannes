@@ -23,7 +23,7 @@ def dashboard():
     finally:
         close_db_connection(conn)
 
-    return render_template('dashboard.html', sites=sites, events=events)
+    return render_template('dashboard.html', sites=sites, events=events, active_page='accueil')
 
 @app.route('/add_site', methods=['POST'])
 def add_site():
