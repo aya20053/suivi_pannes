@@ -4,9 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/png" href="/static/image/logo.jpeg">
-
-    <title>Profil </title>
+    <title>Profil</title>
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <link href="https://cdn.jsdelivr.net/npm/lucide-icons@0.1.0/dist/lucide.min.css" rel="stylesheet">
+
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -15,7 +17,6 @@
             align-items: center;
             min-height: 100vh;
             margin: 0;
-        
         }
 
         .profil-container {
@@ -25,25 +26,16 @@
             width: 80%;
             max-width: 600px;
             display: flex;
-            flex-direction: column; /* Stack header and actions vertically */
-            align-items: stretch; /* Make items take full width */
+            flex-direction: column;
+            align-items: stretch;
+            background: #fff;
         }
 
         .profil-header {
             display: flex;
             flex-direction: row;
             align-items: center;
-            margin-bottom: 30px;  /* Add margin below header */
-        }
-
-        .photo-profile {
-            width: 120px;
-            height: 120px;
-            border-radius: 50%;
-            object-fit: cover;
-            margin-right: 30px;
-            border: 5px solid rgb(20, 61, 96);
-            box-shadow: 0 4px 8px rgba(20, 61, 96, 0.5);
+            margin-bottom: 30px;
         }
 
         .profil-header h2 {
@@ -55,7 +47,7 @@
 
         .profil-info {
             text-align: left;
-            margin-bottom: 30px; 
+            margin-bottom: 30px;
         }
 
         .profil-info p {
@@ -80,69 +72,438 @@
         }
 
         @media (max-width: 768px) {
-    .profil-container {
-        padding: 20px;
-        width: 95%;
-    }
+            .profil-container {
+                padding: 20px;
+                width: 95%;
+            }
 
-    .profil-header {
-        flex-direction: column;
-        align-items: left;
-        text-align: left;
-    }
+            .profil-header {
+                flex-direction: column;
+                align-items: flex-start;
+                text-align: left;
+            }
 
-    .photo-profile {
-        margin: 0 0 20px 0;
-    }
+            .profil-info p {
+                flex-wrap: wrap;
+                justify-content: flex-start;
+            }
 
-    .profil-info {
-        text-align: left;
-    }
+            .profil-info i {
+                margin-right: 4px;
+            }
+        }
 
-    .profil-info p {
-        justify-content:left;
-        flex-wrap: wrap;
-    }
+        .edit-button {
+            display: inline-block;
+            background-color: #EB5B00;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: background-color 0.3s;
+            font-size: 1em;
+            border: none;
+            cursor: pointer;
+        }
 
-    .profil-info i {
-        margin-right: 4px;
-    }
-}
+        .edit-button:hover {
+            background-color: #c94a00;
+        }
 
+        .hidden {
+            display: none;
+        }
+
+        .mt-6 {
+            margin-top: 1.5rem; /* Equivalent de Tailwind CSS */
+        }
+
+        .p-6 {
+            padding: 1.5rem; /* Equivalent de Tailwind CSS */
+        }
+
+        .bg-blue-50 {
+            background-color: #eff6ff; /* Equivalent de Tailwind CSS */
+        }
+
+        .rounded-xl {
+            border-radius: 0.75rem; /* Equivalent de Tailwind CSS */
+        }
+
+        .shadow-lg {
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); /* Equivalent de Tailwind CSS */
+        }
+
+        .border {
+            border-width: 1px; /* Equivalent de Tailwind CSS */
+        }
+
+        .border-blue-200 {
+            border-color: #93c5fd; /* Equivalent de Tailwind CSS */
+        }
+
+        .text-xl {
+            font-size: 1.25rem; /* Equivalent de Tailwind CSS */
+        }
+
+        .font-semibold {
+            font-weight: 600; /* Equivalent de Tailwind CSS */
+        }
+
+        .text-blue-800 {
+            color: #2563eb; /* Equivalent de Tailwind CSS */
+        }
+
+        .mb-4 {
+            margin-bottom: 1rem; /* Equivalent de Tailwind CSS */
+        }
+
+        .flex {
+            display: flex; /* Equivalent de Tailwind CSS */
+        }
+
+        .items-center {
+            align-items: center; /* Equivalent de Tailwind CSS */
+        }
+
+        .gap-2 {
+            gap: 0.5rem; /* Equivalent de Tailwind CSS */
+        }
+
+        .grid {
+            display: grid; /* Equivalent de Tailwind CSS */
+        }
+
+        .grid-cols-1 {
+            grid-template-columns: repeat(1, minmax(0, 1fr)); /* Equivalent de Tailwind CSS */
+        }
+
+        .sm\:grid-cols-2 {
+            @media (min-width: 640px) {
+                grid-template-columns: repeat(2, minmax(0, 1fr)); /* Equivalent de Tailwind CSS */
+            }
+        }
+
+        .block {
+            display: block; /* Equivalent de Tailwind CSS */
+        }
+
+        .text-gray-700 {
+            color: #4b5563; /* Equivalent de Tailwind CSS */
+        }
+
+        .text-sm {
+            font-size: 0.875rem; /* Equivalent de Tailwind CSS */
+        }
+
+        .font-bold {
+            font-weight: 700; /* Equivalent de Tailwind CSS */
+        }
+
+        .mb-2 {
+            margin-bottom: 0.5rem; /* Equivalent de Tailwind CSS */
+        }
+
+        .shadow-inner {
+            box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.06); /* Equivalent de Tailwind CSS */
+        }
+
+        .leading-tight {
+            line-height: 1.25; /* Equivalent de Tailwind CSS */
+        }
+
+        .focus\:outline-none:focus {
+            outline: 2px solid transparent;
+            outline-offset: 2px; /* Equivalent de Tailwind CSS */
+        }
+
+        .focus\:shadow-outline:focus {
+            box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.5); /* Equivalent de Tailwind CSS */
+        }
+
+        .bg-green-500 {
+            background-color: #48bb78; /* Equivalent de Tailwind CSS */
+        }
+
+        .text-white {
+            color: #fff; /* Equivalent de Tailwind CSS */
+        }
+
+        .hover\:bg-green-700:hover {
+            background-color: #2f855a; /* Equivalent de Tailwind CSS */
+        }
+
+        .transition-all {
+            transition-property: all; /* Equivalent de Tailwind CSS */
+        }
+
+        .duration-200 {
+            transition-duration: 0.2s; /* Equivalent de Tailwind CSS */
+        }
+
+        .bg-gray-300 {
+            background-color: #e2e8f0; /* Equivalent de Tailwind CSS */
+        }
+
+        .text-gray-700 {
+            color: #4a5568; /* Equivalent de Tailwind CSS */
+        }
+
+        .hover\:bg-gray-400:hover {
+            background-color: #cbd5e0; /* Equivalent de Tailwind CSS */
+        }
     </style>
 </head>
+
 <body>
     <div class="profil-container">
         <div class="profil-header">
-            <img src="{{ user['photo_profile'] if user['photo_profile'] else url_for('static', filename='image/default-profile.png') }}" alt="Photo de Profil" class="photo-profile">
-            <div>
-                <div class="profil-info">
-                    <p><i class='bx bx-id-card'></i><strong>ID:</strong> {{ user['id'] }}</p>
-                    <p><i class='bx bx-user'></i><strong>Username:</strong> {{ user['username'] }}</p>
-                    <p><i class='bx bx-user-circle'></i><strong>Prénom:</strong> {{ user['prenom'] }}</p>
-                    <p><i class='bx bx-envelope'></i><strong>Email:</strong> {{ user['email'] }}</p>
-                    <p><i class='bx bx-briefcase'></i><strong>Poste:</strong> {{ user['poste'] }}</p>
-                    <p><i class='bx bx-phone'></i><strong>Téléphone:</strong> {{ user['telephone'] }}</p>
-                    <p><i class='bx bx-phone'></i><strong>Role:</strong> {{ user['role'] }}</p>
-                </div>
+            <div class="profil-info">
+                <p><i class='bx bx-id-card'></i><strong>ID:</strong> {{ user['id'] }}</p>
+                <p><i class='bx bx-user'></i><strong>Username:</strong> {{ user['username'] }}</p>
+                <p><i class='bx bx-user-circle'></i><strong>Prénom:</strong> {{ user['prenom'] }}</p>
+                <p><i class='bx bx-envelope'></i><strong>Email:</strong> {{ user['email'] }}</p>
+                <p><i class='bx bx-briefcase'></i><strong>Poste:</strong> {{ user['poste'] }}</p>
+                <p><i class='bx bx-phone'></i><strong>Téléphone:</strong> {{ user['telephone'] }}</p>
+                <p><i class='bx bx-lock'></i><strong>Role:</strong> {{ user['role'] }}</p>
             </div>
         </div>
-        
+
+        <form id="edit-profile-form" class="hidden mt-6 p-6 bg-blue-50 rounded-xl shadow-lg border border-blue-200">
+            <h2 class="text-xl font-semibold text-blue-800 mb-4 flex items-center gap-2">
+                <i data-lucide="pencil"></i> Modifier Votre Profil
+            </h2>
+            <input type="hidden" id="edit-id" name="id" value="{{ user['id'] }}">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                    <label for="edit-username" class="block text-gray-700 text-sm font-bold mb-2">Nom d'utilisateur:</label>
+                    <input type="text" id="edit-username" name="username" value="{{ user['username'] }}" required
+                           class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                </div>
+                <div>
+                    <label for="edit-prenom" class="block text-gray-700 text-sm font-bold mb-2">Prénom:</label>
+                    <input type="text" id="edit-prenom" name="prenom" value="{{ user['prenom'] }}" required
+                           class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                </div>
+                <div>
+                    <label for="edit-email" class="block text-gray-700 text-sm font-bold mb-2">Email:</label>
+                    <input type="email" id="edit-email" name="email" value="{{ user['email'] }}" required
+                           class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                </div>
+                <div>
+                    <label for="edit-poste" class="block text-gray-700 text-sm font-bold mb-2">Poste:</label>
+                    <input type="text" id="edit-poste" name="poste" value="{{ user['poste'] }}"
+                           class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                </div>
+                <div>
+                    <label for="edit-telephone" class="block text-gray-700 text-sm font-bold mb-2">Téléphone:</label>
+                    <input type="number" id="edit-telephone" name="telephone" value="{{ user['telephone'] }}"
+                           class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                </div>
+                <div>
+                    <label for="edit-password" class="block text-gray-700 text-sm font-bold mb-2">Nouveau Mot de passe (laisser vide pour ne pas changer):</label>
+                    <input type="password" id="edit-password" name="password"
+                           class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                </div>
+                <div>
+                    <label for="edit-role" class="block text-gray-700 text-sm font-bold mb-2">Role:</label>
+                    <select name="role" id="edit-role" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                        <option value="chef admin" {% if user['role'] == 'chef admin' %}selected{% endif %}>chef admin</option>
+                        <option value="admin" {% if user['role'] == 'admin' %}selected{% endif %}>admin</option>
+                    </select>
+                </div>
+            </div>
+            <div class="mt-4 flex gap-2">
+                <button type="submit" class="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-700 transition-all duration-200 flex items-center gap-1">
+                    <i data-lucide="save"></i> Enregistrer les modifications
+                </button>
+                <button type="button" onclick="toggleEditForm()" class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 transition-all duration-200 flex items-center gap-1">
+                    <i data-lucide="x"></i> Annuler
+                </button>
+            </div>
+        </form>
+
+        <div style="text-align: center; margin-top: 20px;">
+            <button onclick="toggleEditForm()" class="edit-button">
+                <i class='bx bx-edit'></i> Modifier Profil
+            </button>
+        </div>
     </div>
 
-    <div id="menu"></div>
-  
     <script>
-      fetch("/static/menu.html")
-        .then(response => response.text())
-        .then(data => {
-          const menuDiv = document.getElementById("menu");
-          if (menuDiv) {
-            menuDiv.innerHTML = data;
-          }
-        })
-        .catch(error => {
-          console.error('Erreur lors du chargement du menu :', error);
+        function toggleEditForm() {
+            const profileInfo = document.querySelector('.profil-info');
+            const editForm = document.getElementById('edit-profile-form');
+            profileInfo.classList.toggle('hidden');
+            editForm.classList.toggle('hidden');
+        }
+
+        document.getElementById('edit-profile-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const id = document.getElementById('edit-id').value;
+            const username = document.getElementById('edit-username').value;
+            const prenom = document.getElementById('edit-prenom').value;
+            const email = document.getElementById('edit-email').value;
+            const poste = document.getElementById('edit-poste').value;
+            const telephone = document.getElementById('edit-telephone').value;
+            const password = document.getElementById('edit-password').value; // Peut être vide
+            const role = document.getElementById('edit-role').value;
+
+            const formData = {
+                username: username,
+                prenom: prenom,
+                email: email,
+                poste: poste,
+                telephone: telephone,
+                role: role
+            };
+
+            // N'envoyer le mot de passe que s'il a été modifié
+            if (password) {
+                formData.password = password;
+            }
+
+            try {
+                const response = await fetch(`/api/users/${id}`, { // Assurez-vous que votre route de mise à jour est correcte
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                if (response.ok) {
+                    alert('Profil mis à jour avec succès!');
+                    window.location.reload(); // Recharger la page pour afficher les nouvelles informations
+                } else {
+                    const errorData = await response.json();
+                    alert(`Erreur lors de la mise à jour du profil: ${errorData.error || response.statusText}`);
+                    console.error('Erreur lors de la mise à jour du profil:', errorData);
+                }
+            } catch (error) {
+                alert('Erreur réseau lors de la mise à jour du profil.');
+                
+                    console.error('Erreur réseau:', error);
+                }
+            });
+
+        lucide.createIcons(); // Assurez-vous que lucide est initialisé
+    </script>
+    <div id="menu"></div>
+
+    <script>
+        // Suppression de la redéfinition de toggleEditForm()
+        const API_URL = '/api/users'; // <-- Ajouté ici ton API d'utilisateur (à ajuster selon ton backend)
+
+        async function editUser(id) {
+            try {
+                const res = await fetch(`${API_URL}/${id}`);
+                if (!res.ok) throw new Error("Erreur HTTP " + res.status);
+                const user = await res.json();
+
+                // Assurez-vous que le formulaire existe avant d'essayer de remplir ses champs
+                const form = document.getElementById("edit-profile-form"); // Correction de l'ID du formulaire
+                if (form) {
+                    form.classList.remove("hidden");
+                    document.querySelector('.profil-info').classList.add('hidden'); // Cacher les infos initiales
+
+                    document.getElementById("edit-id").value = user.id;
+                    document.getElementById("edit-username").value = user.username;
+                    document.getElementById("edit-prenom").value = user.prenom;
+                    document.getElementById("edit-email").value = user.email;
+                    document.getElementById("edit-poste").value = user.poste;
+                    document.getElementById("edit-telephone").value = user.telephone;
+                    document.getElementById("edit-role").value = user.role;
+                    document.getElementById("edit-password").value = ''; // Ne pas pré-remplir le mot de passe par sécurité
+
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                } else {
+                    console.warn("Formulaire d'édition introuvable !");
+                }
+            } catch (error) {
+                console.error(error);
+            }
+        }
+
+        function cancelEdit() {
+            const form = document.getElementById("edit-profile-form"); // Correction de l'ID du formulaire
+            if (form) {
+                form.classList.add("hidden");
+                document.querySelector('.profil-info').classList.remove('hidden'); // Afficher les infos initiales
+            }
+        }
+    </script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const menuDiv = document.getElementById("menu");
+
+            fetch("/static/menu.html")
+                .then(response => response.text())
+                .then(data => {
+                    if (menuDiv) {
+                        menuDiv.innerHTML = data;
+                        attachEventListenersToNav('.desktop-nav');
+                        attachEventListenersToNav('.mobile-nav');
+                        checkAndApplyActiveStateOnLoad();
+                    }
+                })
+                .catch(error => console.error('Erreur lors du chargement du menu :', error));
+
+            function attachEventListenersToNav(navSelector) {
+                const nav = document.querySelector(navSelector);
+                if (nav) {
+                    const navItems = nav.querySelectorAll('.nav-item, .mobile-nav-item');
+                    navItems.forEach(item => {
+                        item.addEventListener('click', function() {
+                            activateNavItem(this, navSelector);
+                        });
+                    });
+                }
+            }
+
+            function activateNavItem(item, navSelector) {
+                const activeItem = document.querySelector(`${navSelector} .nav-item.active, ${navSelector} .mobile-nav-item.active`);
+                if (activeItem && activeItem !== item) {
+                    activeItem.classList.remove('active');
+                }
+                item.classList.add('active');
+                localStorage.setItem('activeNavLink', item.dataset.navlink);
+            }
+
+            function checkAndApplyActiveStateOnLoad() {
+                const storedActiveNavLink = localStorage.getItem('activeNavLink');
+                const desktopNavItems = document.querySelectorAll('.desktop-nav .nav-item');
+                const mobileNavItems = document.querySelectorAll('.mobile-nav .mobile-nav-item');
+                const currentPage = window.location.pathname;
+                const allNavItems = [...desktopNavItems, ...mobileNavItems];
+
+                if (storedActiveNavLink) {
+                    allNavItems.forEach(item => {
+                        if (item.dataset.navlink === storedActiveNavLink) {
+                            item.classList.add('active');
+                        }
+                    });
+                } else {
+                    if (currentPage === '/' || currentPage === '/dashboard') {
+                        allNavItems.forEach(item => {
+                            if (item.dataset.navlink === 'accueil') {
+                                item.classList.add('active');
+                                localStorage.setItem('activeNavLink', 'accueil');
+                            }
+                        });
+                    } else {
+                        allNavItems.forEach(item => {
+                            if (item.getAttribute('href') === currentPage) {
+                                item.classList.add('active');
+                                localStorage.setItem('activeNavLink', item.dataset.navlink);
+                            }
+                        });
+                    }
+                }
+            }
         });
     </script>
 </body>
