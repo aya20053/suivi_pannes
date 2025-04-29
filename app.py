@@ -6,10 +6,11 @@ from werkzeug.utils import secure_filename
 from datetime import datetime, timedelta
 import pymysql
 import json
-import bcrypt  # For password hashing (commented out for now as per previous request)
 import logging  # For better logging
 import threading
 from tasks import run_monitoring_loop
+UPLOAD_FOLDER = 'uploads'
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 
 app = Flask(__name__)
 CORS(app)
@@ -378,11 +379,10 @@ def api_get_user(id):
         return jsonify({"error": f"Database error: {e}"}), 500
     finally:
         conn.close()
-
+# Configuration
 @app.route("/api/users", methods=["POST"])
 def api_add_user():
     data = request.get_json()
-    logging.info(f"Données reçues pour l'ajout d'un utilisateur: {data}")
     username = data.get('username')
     prenom = data.get('prenom')
     email = data.get('email')
@@ -391,89 +391,49 @@ def api_add_user():
     password = data.get('password')
     role = data.get('role')
 
+    logging.info(f"Données reçues pour l'ajout d'un utilisateur: {username}, {email}, {role}")
+
+    # Vérification des champs obligatoires
     if not all([username, prenom, email, password, role]):
         logging.error("Champs obligatoires manquants pour l'ajout d'un utilisateur.")
         return jsonify({'error': 'Tous les champs obligatoires doivent être remplis.'}), 400
 
     conn = get_db_connection()
     if not conn:
-        logging.error("Erreur de connexion à la base de données lors de l'ajout d'un utilisateur.")
+        logging.error("Erreur de connexion à la base de données.")
         return jsonify({"error": "Database connection failed"}), 500
+
     try:
         with conn.cursor() as cursor:
-            try:
-                cursor.execute("SELECT username FROM users WHERE username = %s", (username,))
-                if cursor.fetchone():
-                    logging.warning(f"Tentative d'ajout d'un utilisateur avec un nom d'utilisateur existant: {username}")
-                    return jsonify({'error': 'Nom d\'utilisateur déjà existant.'}), 409
-                cursor.execute("SELECT email FROM users WHERE email = %s", (email,))
-                if cursor.fetchone():
-                    logging.warning(f"Tentative d'ajout d'un utilisateur avec un email existant: {email}")
-                    return jsonify({'error': 'Email déjà existant.'}), 409
-
-                cursor.execute("""
-                    INSERT INTO users (username, prenom, email, poste, telephone, password, role)
-                    VALUES (%s, %s, %s, %s, %s, %s, %s)
-                """, (username, prenom, email, poste, telephone, password, role))
-                conn.commit()
-                logging.info(f"Utilisateur '{username}' ajouté avec succès.")
-                return jsonify({'message': 'Utilisateur ajouté avec succès.'}), 201
-            except pymysql.MySQLError as e:
-                logging.error(f"Erreur SQL lors de l'ajout d'un utilisateur: {e}")
-                conn.rollback()
-                return jsonify({"error": f"Database error: {e}"}), 500
-    finally:
-        conn.close()
-
-@app.route("/api/users/<int:id>", methods=["PUT"])
-def api_update_user(id):
-    data = request.get_json()
-    username = data.get('username')
-    prenom = data.get('prenom')
-    email = data.get('email')
-    poste = data.get('poste')
-    telephone = data.get('telephone')
-    password = data.get('password')
-    role = data.get('role')
-
-    if not all([username, prenom, email, role]):
-        return jsonify({'error': 'Les champs nom, prénom, email et rôle sont obligatoires.'}), 400
-
-    conn = get_db_connection()
-    if not conn:
-        return jsonify({"error": "Database connection failed"}), 500
-    try:
-        with conn.cursor() as cursor:
-            # Check if the user exists
-            cursor.execute("SELECT id FROM users WHERE id = %s", (id,))
-            if not cursor.fetchone():
-                return jsonify({'error': 'Utilisateur non trouvé.'}), 404
-
-            # Check for duplicate username (excluding the current user)
-            cursor.execute("SELECT id FROM users WHERE username = %s AND id != %s", (username, id))
+            # Vérifier unicité du username
+            cursor.execute("SELECT username FROM users WHERE username = %s", (username,))
             if cursor.fetchone():
+                logging.warning(f"Nom d'utilisateur existant: {username}")
                 return jsonify({'error': 'Nom d\'utilisateur déjà existant.'}), 409
 
-            # Check for duplicate email (excluding the current user)
-            cursor.execute("SELECT id FROM users WHERE email = %s AND id != %s", (email, id))
+            # Vérifier unicité de l'email
+            cursor.execute("SELECT email FROM users WHERE email = %s", (email,))
             if cursor.fetchone():
+                logging.warning(f"Email existant: {email}")
                 return jsonify({'error': 'Email déjà existant.'}), 409
 
-            update_query = """
-                UPDATE users
-                SET username = %s, prenom = %s, email = %s, poste = %s,
-                    telephone = %s, password = %s, role = %s
-                WHERE id = %s
-            """
-            cursor.execute(update_query, (username, prenom, email, poste, telephone, password, role, id))
+            # Insertion dans la BDD (sans photo_profile)
+            cursor.execute("""
+                INSERT INTO users (username, prenom, email, poste, telephone, password, role)
+                VALUES (%s, %s, %s, %s, %s, %s, %s)
+            """, (username, prenom, email, poste, telephone, password, role))
+
             conn.commit()
-        return jsonify({'message': 'Utilisateur mis à jour avec succès.'}), 200
+            logging.info(f"Utilisateur '{username}' ajouté avec succès.")
+            return jsonify({'message': 'Utilisateur ajouté avec succès.'}), 201
+
     except pymysql.MySQLError as e:
-        logging.error(f"Error updating user: {e}")
+        logging.error(f"Erreur SQL : {e}")
         conn.rollback()
-        return jsonify({"error": f"Database error: {e}"}), 500
+        return jsonify({"error": f"Erreur SQL : {e}"}), 500
     finally:
         conn.close()
+
 
 @app.route("/api/users/<int:id>", methods=["DELETE"])
 def api_delete_user(id):
@@ -495,39 +455,63 @@ def api_delete_user(id):
     finally:
         conn.close()
 
-# --- File Upload Route (for profile picture) ---
-@app.route('/api/profile/upload', methods=['POST'])
-def upload_file():
-    if 'username' not in session:
-        return jsonify({'error': 'Non autorisé'}), 401
+@app.route("/api/users/<int:id>", methods=["PUT"])
+def api_update_user(id):
+    data = request.get_json()
+    username = data.get('username')
+    prenom = data.get('prenom')
+    email = data.get('email')
+    poste = data.get('poste')
+    telephone = data.get('telephone')
+    password = data.get('password')
+    role = data.get('role')
 
-    if 'file' not in request.files:
-        return jsonify({'error': 'Pas de fichier envoyé'}), 400
-    file = request.files['file']
-    if file.filename == '':
-        return jsonify({'error': 'Nom de fichier vide'}), 400
-    if file and allowed_file(file.filename):
-        filename = secure_filename(file.filename)
-        filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-        file.save(filepath)
+    if not all([username, prenom, email, role]):
+        return jsonify({'error': 'Les champs username, prenom, email et role sont obligatoires.'}), 400
 
-        conn = get_db_connection()
-        if not conn:
-            return jsonify({"error": "Database connection failed"}), 500
-        try:
-            with conn.cursor() as cursor:
-                cursor.execute("UPDATE users SET photo_profile = %s WHERE username = %s", (filename, session['username']))
-                conn.commit()
-            return jsonify({'message': 'Photo de profil mise à jour avec succès', 'filename': filename}), 200
-        except pymysql.MySQLError as e:
-            logging.error(f"Error updating profile picture: {e}")
-            conn.rollback()
-            return jsonify({'error': f"Database error: {e}"}), 500
-        finally:
-            conn.close()
-    else:
-        return jsonify({'error': 'Type de fichier non autorisé'}), 400
+    conn = get_db_connection()
+    if not conn:
+        return jsonify({"error": "Database connection failed"}), 500
 
+    try:
+        with conn.cursor() as cursor:
+            # Vérifier si l'utilisateur existe
+            cursor.execute("SELECT id FROM users WHERE id = %s", (id,))
+            if not cursor.fetchone():
+                return jsonify({'error': 'Utilisateur non trouvé.'}), 404
+
+            # Vérifier unicité du username
+            cursor.execute("SELECT id FROM users WHERE username = %s AND id != %s", (username, id))
+            if cursor.fetchone():
+                return jsonify({'error': 'Nom d\'utilisateur déjà existant.'}), 409
+
+            # Vérifier unicité de l'email
+            cursor.execute("SELECT id FROM users WHERE email = %s AND id != %s", (email, id))
+            if cursor.fetchone():
+                return jsonify({'error': 'Email déjà existant.'}), 409
+
+            # Mise à jour sans photo_profile
+            update_query = """
+                UPDATE users
+                SET username = %s, prenom = %s, email = %s, poste = %s,
+                    telephone = %s, password = %s, role = %s
+                WHERE id = %s
+            """
+            cursor.execute(update_query, (username, prenom, email, poste, telephone, password, role, id))
+            conn.commit()
+
+        return jsonify({'message': 'Utilisateur mis à jour avec succès.'}), 200
+
+    except pymysql.MySQLError as e:
+        logging.error(f"Erreur SQL lors de la mise à jour: {e}")
+        conn.rollback()
+        return jsonify({"error": f"Erreur SQL : {e}"}), 500
+    finally:
+        conn.close()
+
+
+
+      
 
 def start_monitoring():
     """Démarre la boucle de monitoring dans un thread séparé."""
@@ -562,6 +546,37 @@ def api_get_alerts():
     finally:
         if conn:  # Vérifiez si la connexion existe avant de la fermer
             conn.close()
+            
+
+
+@app.route('/api/alerts', methods=['DELETE'])
+def delete_all_alerts():
+    try:
+        connection= get_db_connection()
+        cursor = connection.cursor()
+        cursor.execute("DELETE FROM alerts")
+        connection.commit()
+        return jsonify({'message': 'Toutes les alertes ont été supprimées'}), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+    finally:
+        cursor.close()
+        connection.close()
+
+
+@app.route('/api/alerts/<int:alert_id>', methods=['DELETE'])
+def delete_alert(alert_id):
+    try:
+        connection= get_db_connection()
+        cursor = connection.cursor()
+        cursor.execute("DELETE FROM alerts WHERE id = %s", (alert_id,))
+        connection.commit()
+        return jsonify({'message': 'Alerte supprimée'}), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+    finally:
+        cursor.close()
+        connection.close()
 
 
 if __name__ == '__main__':

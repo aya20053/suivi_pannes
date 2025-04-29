@@ -268,6 +268,13 @@
                 <p><i class='bx bx-phone'></i><strong>Téléphone:</strong> {{ user['telephone'] }}</p>
                 <p><i class='bx bx-lock'></i><strong>Role:</strong> {{ user['role'] }}</p>
             </div>
+           
+        </div>
+
+        <div style="text-align: center; margin-top: 20px;">
+            <button onclick="toggleEditForm()" class="edit-button" id="edit-button">
+                <i class='bx bx-edit'></i> Modifier Profil
+            </button>
         </div>
 
         <form id="edit-profile-form" class="hidden mt-6 p-6 bg-blue-50 rounded-xl shadow-lg border border-blue-200">
@@ -324,19 +331,19 @@
             </div>
         </form>
 
-        <div style="text-align: center; margin-top: 20px;">
-            <button onclick="toggleEditForm()" class="edit-button">
-                <i class='bx bx-edit'></i> Modifier Profil
-            </button>
-        </div>
+       
     </div>
 
     <script>
         function toggleEditForm() {
             const profileInfo = document.querySelector('.profil-info');
             const editForm = document.getElementById('edit-profile-form');
+            const editbtn = document.getElementById('edit-button');
             profileInfo.classList.toggle('hidden');
             editForm.classList.toggle('hidden');
+            editbtn.classList.toggle('hidden');
+
+
         }
 
         document.getElementById('edit-profile-form').addEventListener('submit', async (e) => {

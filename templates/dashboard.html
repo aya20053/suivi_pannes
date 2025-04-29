@@ -6,23 +6,24 @@
   <title>Statistiques Réseau</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
   <link rel="icon" type="image/png" href="/static/image/logo.jpeg">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
 
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@1.0.2"></script>
   <style>
     
+
     .home-container {
     
       margin: 30px auto;
       padding: 2rem;
-      border-radius: 12px;
       text-align: center;
     }
 
-    h2 {
+    h2  , i ,.pa{
       margin-bottom: 1rem;
-      color: #EB5B00;
+      color: #205781;
     }
 
     #pieChart {
@@ -34,26 +35,32 @@
       display: flex;
       justify-content: space-between;
       padding: 1rem;
-      background: rgb(203, 220, 235);
       margin-top: 1rem;
-      border-radius: 8px;
-      box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
     }
-
+    body {
+        margin: 0;
+        padding: 0;
+        min-height: 100vh; 
+        background-color: #D5E5D5;
+    }
     .statistic-box p {
       margin: 0;
     }
-
-    .statistic-box .stat-title {
+   
+    .statistic-box .stat-title  {
       font-weight: bold;
       font-size: 18px;
     
-      color: #205781;
+      color: #4F959D;
     }
     canvas[id^="hourlyChart"] {
   height: 120px !important;
   max-width: 100% !important;
 }
+.custom-hover-link:hover {
+    background-color: #EEF7FF;
+  }
+
 
 @keyframes fadeIn {
     from {
@@ -73,27 +80,34 @@
   </style>
 </head>
 
-<body class="bg-gray-50 text-gray-800">
+<body >
   <div class="max-w-6xl mx-auto px-4 py-8">
-    <h2 class="text-2xl font-bold text-orange-600 mb-4 text-center">
-      📈 Tableau de bord - Surveillance des Sites Web
+    <h2 class="text-2xl font-bold  mb-4 text-center">
+      <i class="fas fa-chart-line mr-2"></i>
+      Tableau de bord - Surveillance des Sites Web
     </h2>
 
-    <!-- ⏱️ Dernière vérification -->
-    <p class="text-center text-lg mb-4">
-      ⏱️ Dernière vérification : 
+    
+    <p class="text-center text-lg mb-4" id="pa">
+      <i class="fas fa-clock  mr-2"></i>
+      Dernière vérification : 
       <strong>{{ last_check or "Non disponible" }}</strong>
     </p>
+    
 
     <!-- Statistiques globales -->
-    <div class="flex flex-col md:flex-row justify-between bg-blue-100 p-4 rounded-lg shadow mb-6 gap-4">
+    <div class="flex flex-col md:flex-row justify-between bg-white p-4 rounded-lg shadow mb-6 gap-4">
       <div>
-        <p class="text-blue-900 font-bold text-lg">👤 Nombre d'utilisateurs</p>
+        <p class=" font-bold text-lg">
+          <i class="fas fa-user mr-2"></i> Nombre d'utilisateurs
+        </p>
         <p class="text-lg">{{ user_count }}</p>
       </div>
       <div>
-        <p class="text-blue-900 font-bold text-lg">🌐 Nombre total de sites</p>
-        <p class="text-lg">{{ total_sites }}</p>
+        <p class=" font-bold text-lg">
+          <i class="fas fa-globe mr-2"></i> Nombre total de sites
+        </p>
+                <p class="text-lg">{{ total_sites }}</p>
       </div>
     </div>
 
@@ -118,31 +132,32 @@
         </div>
       </div>
 
-      <!-- Contenu en ligne -->
-      <div class="flex flex-col md:flex-row gap-4">
-        <!-- Graphique -->
-        <div class="w-full md:w-2/3">
-          <canvas id="hourlyChart{{ site.id }}" class="w-full h-32 mt-4"></canvas>
-        </div>
+      <a href="/manage-networks"  class="block transition rounded-lg p-4 shadow-md custom-hover-link">
 
-        <!-- Infos -->
-        <div class="w-full md:w-1/3 flex flex-col justify-center gap-2 text-sm">
-          <div class="flex justify-between">
-            <span>En ligne :</span>
-            <span class="font-semibold">{{ site.online_count }} fois</span>
+        <div class="flex flex-col md:flex-row gap-4">
+          <!-- Graphique -->
+          <div class="w-full md:w-2/3">
+            <canvas id="hourlyChart{{ site.id }}" class="w-full h-32 mt-4"></canvas>
           </div>
-          <div class="flex justify-between">
-            <span>Hors ligne :</span>
-            <span class="font-semibold">{{ site.offline_count }} fois</span>
-          </div>
-          <div class="flex justify-between">
-            <span>Dernier check :</span>
-            <span>{{ site.last_checked }}</span>
+      
+          <!-- Infos -->
+          <div class="w-full md:w-1/3 flex flex-col justify-center gap-2 text-sm">
+            <div class="flex justify-between">
+              <span>En ligne :</span>
+              <span class="font-semibold">{{ site.online_count }} fois</span>
+            </div>
+            <div class="flex justify-between">
+              <span>Hors ligne :</span>
+              <span class="font-semibold">{{ site.offline_count }} fois</span>
+            </div>
+            <div class="flex justify-between">
+              <span>Dernier check :</span>
+              <span>{{ site.last_checked }}</span>
+            </div>
           </div>
         </div>
-      </div>
-    </div>
-
+      </a>
+      
     <script>
       new Chart(document.getElementById('hourlyChart{{ site.id }}'), {
         type: 'line',
@@ -198,7 +213,7 @@
           labels: ['En ligne', 'Hors ligne'],
           datasets: [{
             data: [{{ total_online | default(0) }}, {{ total_offline | default(0) }}],
-            backgroundColor: ['rgba(137, 168, 178, 0.6)', 'rgba(54, 116, 181, 0.6)'],
+            backgroundColor: ['rgba(77, 134, 156, 0.6)', 'rgba(32, 87, 129, 0.6)'],
             borderColor: ['rgba(137, 168, 178, 1)', 'rgba(54, 116, 181, 1)'],
             borderWidth: 1
           }]
@@ -212,17 +227,80 @@
   <div id="menu"></div>
   
   <script>
-    fetch("/static/menu.html")
-      .then(response => response.text())
-      .then(data => {
-        const menuDiv = document.getElementById("menu");
-        if (menuDiv) {
-          menuDiv.innerHTML = data;
-        }
-      })
-      .catch(error => {
-        console.error('Erreur lors du chargement du menu :', error);
+     document.addEventListener('DOMContentLoaded', () => {
+  const menuDiv = document.getElementById("menu");
+
+  fetch("/static/menu.html")
+    .then(response => response.text())
+    .then(data => {
+      if (menuDiv) {
+        menuDiv.innerHTML = data;
+        // Maintenant que le menu est chargé, nous pouvons attacher les événements et vérifier l'état actif pour les deux menus.
+        attachEventListenersToNav('.desktop-nav');
+        attachEventListenersToNav('.mobile-nav');
+        checkAndApplyActiveStateOnLoad();
+      }
+    })
+    .catch(error => {
+      console.error('Erreur lors du chargement du menu :', error);
+    });
+
+  function attachEventListenersToNav(navSelector) {
+    const nav = document.querySelector(navSelector);
+    if (nav) {
+      const navItems = nav.querySelectorAll('.nav-item, .mobile-nav-item');
+      navItems.forEach(item => {
+        item.addEventListener('click', function(event) {
+          activateNavItem(this, navSelector);
+          // La navigation vers la nouvelle page se fera normalement grâce au lien <a>
+        });
       });
+    }
+  }
+
+  function activateNavItem(item, navSelector) {
+    const activeItem = document.querySelector(`${navSelector} .nav-item.active, ${navSelector} .mobile-nav-item.active`);
+    if (activeItem && activeItem !== item) {
+      activeItem.classList.remove('active');
+    }
+    item.classList.add('active');
+    localStorage.setItem('activeNavLink', item.dataset.navlink);
+  }
+
+  function checkAndApplyActiveStateOnLoad() {
+    const storedActiveNavLink = localStorage.getItem('activeNavLink');
+    const desktopNavItems = document.querySelectorAll('.desktop-nav .nav-item');
+    const mobileNavItems = document.querySelectorAll('.mobile-nav .mobile-nav-item');
+    const currentPage = window.location.pathname;
+
+    const allNavItems = [...desktopNavItems, ...mobileNavItems]; // Combine les deux listes
+
+    if (storedActiveNavLink) {
+      allNavItems.forEach(item => {
+        if (item.dataset.navlink === storedActiveNavLink) {
+          item.classList.add('active');
+        }
+      });
+    } else {
+      // Logique pour activer un élément par défaut au chargement initial (si nécessaire)
+      if (currentPage === '/' || currentPage === '/dashboard') {
+        allNavItems.forEach(item => {
+          if (item.dataset.navlink === 'accueil') {
+            item.classList.add('active');
+            localStorage.setItem('activeNavLink', 'accueil');
+          }
+        });
+      } else {
+        allNavItems.forEach(item => {
+          if (item.getAttribute('href') === currentPage) {
+            item.classList.add('active');
+            localStorage.setItem('activeNavLink', item.dataset.navlink);
+          }
+        });
+      }
+    }
+  }
+});
   </script>
   
 

@@ -6,19 +6,32 @@
   <script src="https://unpkg.com/lucide@latest"></script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link href="https://cdn.jsdelivr.net/npm/lucide-icons@0.1.0/dist/lucide.min.css" rel="stylesheet">
-
+  <link rel="icon" type="image/png" href="/static/image/logo.jpeg">
   <script src="script.js" defer></script>
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
   <style>button i {
     font-size: 24px; /* Taille des icônes */
     color: #1c3d5a; /* Couleur des icônes (exemple bleu) */
   }
+  
+  .mobile-nav-item.active {
+        color: var(--primary-color);
+    }
+
+    .mobile-nav-item.active .mobile-nav-icon {
+        color: var(--primary-color);
+    }
+
+    .mobile-nav-item.active .mobile-nav-label {
+        color: var(--active-text-color);
+    }
   </style>
 </head>
 <body class=" p-4 sm:p-10">
   <div class="max-w-5xl mx-auto">
     <div class="flex justify-between items-center mb-6 flex-wrap">
-      <h1 class="text-2xl sm:text-3xl font-bold w-full text-center flex justify-center items-center gap-2" style="color: #EB5B00;">
+      <h1 class="text-2xl sm:text-3xl font-bold w-full text-center flex justify-center items-center gap-2"style="  margin-bottom: 1rem;
+      color: #205781;">
         <i class='bx bx-network-chart text-3xl'></i>
         Réseaux Monitorés
     </h1>
@@ -48,15 +61,16 @@
 
 
     <!-- Barre de recherche -->
-    <div class="mb-4 relative">
-      <i data-lucide="search" class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500"></i>
+    <div class="mb-4 relative w-full max-w-md mx-auto">
+      <i data-lucide="search" class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
       <input 
-        type="text" 
-        id="search" 
-        placeholder="Rechercher un réseau..." 
-        class="w-full pl-10 p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-300"
+          type="text" 
+          id="search" 
+          placeholder="Rechercher un réseau..." 
+          class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 bg-white text-gray-800"
       >
-    </div>
+  </div>
+  
     
 
     <div id="site-list" class="space-y-4">
@@ -129,7 +143,8 @@
 
               <br>
             </div>
-            <div class="hidden mt-2 details text-sm text-gray-700">
+<div class="hidden details text-sm p-3 rounded w-full sm:w-1/2" style="background-color: #D5E5D5 !important">
+ 
               <p><strong>Adresse :</strong> ${site.url_or_ip}</p>
               <p><strong>Status :</strong> ${site.last_status}</p>
               <p><strong>Dernier check :</strong> ${site.last_checked}</p>
@@ -251,17 +266,80 @@
 <script src="https://cdn.jsdelivr.net/npm/lucide@0.0.0/dist/lucide.min.js"></script>
 
 <script>
+  document.addEventListener('DOMContentLoaded', () => {
+  const menuDiv = document.getElementById("menu");
+
   fetch("/static/menu.html")
     .then(response => response.text())
     .then(data => {
-      const menuDiv = document.getElementById("menu");
       if (menuDiv) {
         menuDiv.innerHTML = data;
+        // Maintenant que le menu est chargé, nous pouvons attacher les événements et vérifier l'état actif pour les deux menus.
+        attachEventListenersToNav('.desktop-nav');
+        attachEventListenersToNav('.mobile-nav');
+        checkAndApplyActiveStateOnLoad();
       }
     })
     .catch(error => {
       console.error('Erreur lors du chargement du menu :', error);
     });
+
+  function attachEventListenersToNav(navSelector) {
+    const nav = document.querySelector(navSelector);
+    if (nav) {
+      const navItems = nav.querySelectorAll('.nav-item, .mobile-nav-item');
+      navItems.forEach(item => {
+        item.addEventListener('click', function(event) {
+          activateNavItem(this, navSelector);
+          // La navigation vers la nouvelle page se fera normalement grâce au lien <a>
+        });
+      });
+    }
+  }
+
+  function activateNavItem(item, navSelector) {
+    const activeItem = document.querySelector(`${navSelector} .nav-item.active, ${navSelector} .mobile-nav-item.active`);
+    if (activeItem && activeItem !== item) {
+      activeItem.classList.remove('active');
+    }
+    item.classList.add('active');
+    localStorage.setItem('activeNavLink', item.dataset.navlink);
+  }
+
+  function checkAndApplyActiveStateOnLoad() {
+    const storedActiveNavLink = localStorage.getItem('activeNavLink');
+    const desktopNavItems = document.querySelectorAll('.desktop-nav .nav-item');
+    const mobileNavItems = document.querySelectorAll('.mobile-nav .mobile-nav-item');
+    const currentPage = window.location.pathname;
+
+    const allNavItems = [...desktopNavItems, ...mobileNavItems]; // Combine les deux listes
+
+    if (storedActiveNavLink) {
+      allNavItems.forEach(item => {
+        if (item.dataset.navlink === storedActiveNavLink) {
+          item.classList.add('active');
+        }
+      });
+    } else {
+      // Logique pour activer un élément par défaut au chargement initial (si nécessaire)
+      if (currentPage === '/' || currentPage === '/dashboard') {
+        allNavItems.forEach(item => {
+          if (item.dataset.navlink === 'accueil') {
+            item.classList.add('active');
+            localStorage.setItem('activeNavLink', 'accueil');
+          }
+        });
+      } else {
+        allNavItems.forEach(item => {
+          if (item.getAttribute('href') === currentPage) {
+            item.classList.add('active');
+            localStorage.setItem('activeNavLink', item.dataset.navlink);
+          }
+        });
+      }
+    }
+  }
+});
 </script>
 </body>
 </html>

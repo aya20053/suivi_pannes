@@ -7,19 +7,25 @@
     <script src="https://unpkg.com/lucide@latest"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://cdn.jsdelivr.net/npm/lucide-icons@0.1.0/dist/lucide.min.css" rel="stylesheet">
+    <link rel="icon" type="image/png" href="/static/image/logo.jpeg">
 
     <script src="script.js" defer></script>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-    <style>button i {
+    <style>
+    button i {
         font-size: 24px; /* Taille des icônes */
         color: #1c3d5a; /* Couleur des icônes (exemple bleu) */
+    }
+    i {
+      color: #205781;
     }
     </style>
 </head>
 <body class=" p-4 sm:p-10">
     <div class="max-w-5xl mx-auto">
         <div class="flex justify-between items-center mb-6 flex-wrap">
-          <h1 class="text-2xl sm:text-3xl font-bold w-full text-center flex justify-center items-center gap-2" style="color: #EB5B00;">
+          <h1 class="text-2xl sm:text-3xl font-bold w-full text-center flex justify-center items-center gap-2" style="  margin-bottom: 1rem;
+      color: #205781;">
             <i class='bx bx-user-check text-3xl'></i>
             Gestion des utilisateurs
         </h1>
@@ -65,15 +71,16 @@
         </form>
 
 
-        <div class="mb-4 relative">
-            <i data-lucide="search" class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500"></i>
+        <div class="mb-4 relative w-full max-w-md mx-auto">
+            <i data-lucide="search" class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
             <input
                 type="text"
                 id="search"
                 placeholder="Rechercher un utilisateur..."
-                class="w-full pl-10 p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-300"
+                class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition duration-200"
             >
         </div>
+        
 
 
         <div id="site-list" class="space-y-4">
@@ -147,7 +154,7 @@
 
                         container.innerHTML = `
                             <div class="flex justify-between items-center flex-wrap">
-                                <h2 class="text-lg font-bold flex-1">${user.username}</h2>
+                                <h2 class="text-lg font-bold flex-1">${user.username} ${user.prenom} </h2>
 
                                 <div class="flex items-center gap-2 w-full sm:w-auto">
 
@@ -162,7 +169,7 @@
 
                                 <br>
                                 </div>
-                                <div class="hidden mt-2 details text-sm text-gray-700">
+        <div class="hidden details text-sm text-gray-700 bg-gray-100 p-3 rounded w-full sm:w-1/2">
                                     <p><strong>Nom :</strong> ${user.username}</p>
                                     <p><strong>Prénom :</strong> ${user.prenom}</p>
                                     <p><strong>Email :</strong> ${user.email}</p>
@@ -181,16 +188,19 @@
             }
         }
         function toggleDetails(btn) {
-            const details = btn.parentElement.nextElementSibling; // On cible le div avec les détails
-            details.classList.toggle("hidden"); // On ajoute ou enlève la classe "hidden"
+    const details = btn.parentElement.nextElementSibling; // On cible le div avec les détails
+    details.classList.toggle("hidden"); // On ajoute ou enlève la classe "hidden"
 
-            // Ici on change le texte du bouton en fonction de l'état d'affichage
-            if (details.classList.contains("hidden")) {
-                btn.textContent = "👁‍🗨";  // Afficher l'icône pour "Afficher"
-            } else {
-                btn.textContent = "Masquer";  // Texte pour masquer
-            }
-        }
+    // Ici on change l'icône du bouton en fonction de l'état d'affichage
+    const icon = btn.querySelector('i');
+    if (details.classList.contains("hidden")) {
+        icon.classList.remove("fa-eye-slash");
+        icon.classList.add("fa-eye");
+    } else {
+        icon.classList.remove("fa-eye");
+        icon.classList.add("fa-eye-slash");
+    }
+}
 
         document.getElementById("add-form").addEventListener("submit", async (e) => {
             e.preventDefault();
