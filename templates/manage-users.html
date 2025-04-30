@@ -13,9 +13,8 @@
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <style>
     button i {
-        font-size: 24px; /* Taille des icônes */
-        color: #1c3d5a; /* Couleur des icônes (exemple bleu) */
-    }
+        font-size: 24px; 
+        color: #1c3d5a;}
     i {
       color: #205781;
     }
@@ -114,6 +113,8 @@
             <select name="edit-role" id="edit-role" class="p-3 border border-blue-200 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
                 <option value="chef admin">chef admin</option>
                 <option value="admin">admin</option>
+                    <option value="admin">admin</option>
+
             </select>
 
         </div>
@@ -182,16 +183,14 @@
                         list.appendChild(container);
                     });
 
-                lucide.createIcons(); // Recréer les icônes
+                lucide.createIcons(); 
             } catch (error) {
                 console.error("Erreur lors du chargement des utilisateurs :", error);
             }
         }
         function toggleDetails(btn) {
-    const details = btn.parentElement.nextElementSibling; // On cible le div avec les détails
-    details.classList.toggle("hidden"); // On ajoute ou enlève la classe "hidden"
-
-    // Ici on change l'icône du bouton en fonction de l'état d'affichage
+    const details = btn.parentElement.nextElementSibling; 
+    details.classList.toggle("hidden"); 
     const icon = btn.querySelector('i');
     if (details.classList.contains("hidden")) {
         icon.classList.remove("fa-eye-slash");
@@ -209,14 +208,14 @@
             const email = document.getElementById("email").value;
             const poste = document.getElementById("poste").value;
             const telephone = document.getElementById("telephone").value;
-            const password = document.getElementById("password").value; // Récupérer le mot de passe
+            const password = document.getElementById("password").value;  
             const role = document.getElementById("role").value;
 
             try {
                 const response = await fetch(API_URL, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ username, prenom, email, poste, telephone, password, role }) // Inclure le mot de passe
+                    body: JSON.stringify({ username, prenom, email, poste, telephone, password, role }) 
                 });
 
                 if (!response.ok) {
@@ -267,7 +266,7 @@
                 document.getElementById("edit-poste").value = user.poste;
                 document.getElementById("edit-telephone").value = user.telephone;
                 document.getElementById("edit-role").value = user.role;
-                document.getElementById("edit-password").value = user.password; // Pré-remplir le mot de passe (attention à la sécurité en production)
+                document.getElementById("edit-password").value = user.password;
 
 
                 document.getElementById("edit-form").classList.remove("hidden");
@@ -286,14 +285,14 @@
             const poste = document.getElementById("edit-poste").value;
             const telephone = document.getElementById("edit-telephone").value;
             const role = document.getElementById("edit-role").value;
-            const password = document.getElementById("edit-password").value; // Récupérer le mot de passe de l'édition
+            const password = document.getElementById("edit-password").value; 
 
 
             try {
                 const response = await fetch(`${API_URL}/${id}`, {
                     method: "PUT",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ username, prenom, email, poste, telephone, role, password }) // Inclure le rôle et le mot de passe pour la modification
+                    body: JSON.stringify({ username, prenom, email, poste, telephone, role, password }) 
                 });
 
                 if (!response.ok) {
@@ -318,9 +317,7 @@
         document.getElementById("search").addEventListener("input", (e) => {
             fetchUsers(e.target.value);
         });
-        lucide.createIcons(); // Ajoute ça après toute modification du DOM
-
-        // Charger les sites au démarrage
+        lucide.createIcons(); 
         fetchUsers();
     </script>
     <div id="menu"></div>
@@ -335,7 +332,6 @@
     .then(data => {
       if (menuDiv) {
         menuDiv.innerHTML = data;
-        // Maintenant que le menu est chargé, nous pouvons attacher les événements et vérifier l'état actif pour les deux menus.
         attachEventListenersToNav('.desktop-nav');
         attachEventListenersToNav('.mobile-nav');
         checkAndApplyActiveStateOnLoad();
@@ -352,7 +348,7 @@
       navItems.forEach(item => {
         item.addEventListener('click', function(event) {
           activateNavItem(this, navSelector);
-          // La navigation vers la nouvelle page se fera normalement grâce au lien <a>
+        
         });
       });
     }
@@ -373,7 +369,7 @@
     const mobileNavItems = document.querySelectorAll('.mobile-nav .mobile-nav-item');
     const currentPage = window.location.pathname;
 
-    const allNavItems = [...desktopNavItems, ...mobileNavItems]; // Combine les deux listes
+    const allNavItems = [...desktopNavItems, ...mobileNavItems]; 
 
     if (storedActiveNavLink) {
       allNavItems.forEach(item => {
@@ -382,7 +378,7 @@
         }
       });
     } else {
-      // Logique pour activer un élément par défaut au chargement initial (si nécessaire)
+      
       if (currentPage === '/' || currentPage === '/dashboard') {
         allNavItems.forEach(item => {
           if (item.dataset.navlink === 'accueil') {

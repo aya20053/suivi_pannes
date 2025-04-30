@@ -61,7 +61,7 @@
 
         .profil-info i {
             margin-right: 8px;
-            color: #EB5B00;
+            color: #4F959D;
             font-size: 1.2em;
         }
 
@@ -95,20 +95,24 @@
 
         .edit-button {
             display: inline-block;
-            background-color: #EB5B00;
+            margin-top: 40px;
+            padding: 12px 25px;
+            background-color: #4F959D;
             color: white;
-            padding: 12px 24px;
-            border-radius: 8px;
             text-decoration: none;
+            filter: drop-shadow(0,0,10px,#4F959D);
+            border-radius: 8px;
             font-weight: bold;
-            transition: background-color 0.3s;
-            font-size: 1em;
-            border: none;
-            cursor: pointer;
+            transition: background-color 0.3s ease, color 0.3s ease; /* Transition pour la couleur du texte et le fond */
+            border: #4F959D 1px solid;
         }
 
         .edit-button:hover {
-            background-color: #c94a00;
+            background-color: white; /* Couleur de fond au survol */
+    color: #4F959D; /* Couleur de texte au survol */
+    transition: 1s ease-in-out;
+    border: #4F959D 1px solid;
+    
         }
 
         .hidden {
@@ -309,7 +313,7 @@
                            class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
                 </div>
                 <div>
-                    <label for="edit-password" class="block text-gray-700 text-sm font-bold mb-2">Nouveau Mot de passe (laisser vide pour ne pas changer):</label>
+                    <label for="edit-password" class="block text-gray-700 text-sm font-bold mb-2">Nouveau Mot de passe :</label>
                     <input type="password" id="edit-password" name="password"
                            class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
                 </div>
@@ -322,10 +326,10 @@
                 </div>
             </div>
             <div class="mt-4 flex gap-2">
-                <button type="submit" class="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-700 transition-all duration-200 flex items-center gap-1">
+                <button type="submit"class="mt-5 px-4 py-2 bg-blue-100 text-blue-800 rounded-md hover:bg-blue-200 transition-all duration-200 flex items-center gap-1">
                     <i data-lucide="save"></i> Enregistrer les modifications
                 </button>
-                <button type="button" onclick="toggleEditForm()" class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 transition-all duration-200 flex items-center gap-1">
+                <button type="button" onclick="toggleEditForm()" class="mt-5 px-4 py-2 bg-blue-100 text-blue-800 rounded-md hover:bg-blue-200 transition-all duration-200 flex items-center gap-1">
                     <i data-lucide="x"></i> Annuler
                 </button>
             </div>
@@ -367,13 +371,13 @@
                 role: role
             };
 
-            // N'envoyer le mot de passe que s'il a été modifié
+          
             if (password) {
                 formData.password = password;
             }
 
             try {
-                const response = await fetch(`/api/users/${id}`, { // Assurez-vous que votre route de mise à jour est correcte
+                const response = await fetch(`/api/users/${id}`, { 
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json'
@@ -383,7 +387,7 @@
 
                 if (response.ok) {
                     alert('Profil mis à jour avec succès!');
-                    window.location.reload(); // Recharger la page pour afficher les nouvelles informations
+                    window.location.reload(); 
                 } else {
                     const errorData = await response.json();
                     alert(`Erreur lors de la mise à jour du profil: ${errorData.error || response.statusText}`);
@@ -396,13 +400,13 @@
                 }
             });
 
-        lucide.createIcons(); // Assurez-vous que lucide est initialisé
+        lucide.createIcons(); 
     </script>
     <div id="menu"></div>
 
     <script>
-        // Suppression de la redéfinition de toggleEditForm()
-        const API_URL = '/api/users'; // <-- Ajouté ici ton API d'utilisateur (à ajuster selon ton backend)
+       
+        const API_URL = '/api/users'; 
 
         async function editUser(id) {
             try {
@@ -410,12 +414,11 @@
                 if (!res.ok) throw new Error("Erreur HTTP " + res.status);
                 const user = await res.json();
 
-                // Assurez-vous que le formulaire existe avant d'essayer de remplir ses champs
-                const form = document.getElementById("edit-profile-form"); // Correction de l'ID du formulaire
+               
+                const form = document.getElementById("edit-profile-form"); 
                 if (form) {
                     form.classList.remove("hidden");
-                    document.querySelector('.profil-info').classList.add('hidden'); // Cacher les infos initiales
-
+                    document.querySelector('.profil-info').classList.add('hidden'); 
                     document.getElementById("edit-id").value = user.id;
                     document.getElementById("edit-username").value = user.username;
                     document.getElementById("edit-prenom").value = user.prenom;
@@ -423,7 +426,7 @@
                     document.getElementById("edit-poste").value = user.poste;
                     document.getElementById("edit-telephone").value = user.telephone;
                     document.getElementById("edit-role").value = user.role;
-                    document.getElementById("edit-password").value = ''; // Ne pas pré-remplir le mot de passe par sécurité
+                    document.getElementById("edit-password").value = ''; 
 
                     window.scrollTo({ top: 0, behavior: 'smooth' });
                 } else {
@@ -435,10 +438,10 @@
         }
 
         function cancelEdit() {
-            const form = document.getElementById("edit-profile-form"); // Correction de l'ID du formulaire
+            const form = document.getElementById("edit-profile-form");  
             if (form) {
                 form.classList.add("hidden");
-                document.querySelector('.profil-info').classList.remove('hidden'); // Afficher les infos initiales
+                document.querySelector('.profil-info').classList.remove('hidden');
             }
         }
     </script>

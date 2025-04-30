@@ -10,7 +10,7 @@
     <script src="https://cdn.jsdelivr.net/npm/heroicons@2.1.1/script.js"></script>
     <style>
         body {
-            background-image: url('/static/image/ARR1.jpeg'); /* Assurez-vous que le chemin est correct */
+            background-image: url('/static/image/ARR1.jpeg'); 
             background-size: cover;
             background-position: center;
             background-repeat: no-repeat;
@@ -21,51 +21,62 @@
         }
 
         .form-container {
-            background-color: rgba(255, 255, 255, 0.2); /* Blanc transparent */
-            backdrop-filter: blur(10px); /* Effet de flou */
-            -webkit-backdrop-filter: blur(10px); /* Pour Safari */
-            padding: 2rem; /* Augmenter le padding pour un meilleur aspect */
+            background-color: rgba(255, 255, 255, 0.2); 
+            backdrop-filter: blur(10px); 
+            -webkit-backdrop-filter: blur(10px); 
+            padding: 2rem; 
             border-radius: 1rem;
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-            width: 96; /* Correspond à w-96 */
-            max-width: sm; /* Correspond à max-w-sm */
+            width: 96; 
+            max-width: sm; 
         }
 
-        .form-container h2 ,.form-container label{
+        .form-container h2 {
+            color: #4F959D;
+            font-weight: bold;
+        }
+        .form-container label{
             color: aliceblue;
         }
         
         .form-container input,
         .form-container .text-gray-600,
         .form-container .text-indigo-600 {
-            color: rgb(22, 21, 21); /* Texte blanc pour contraster avec le fond flou */
+            color: rgb(22, 21, 21);  
         }
         .form-container button{
-            background-color: #205781;
+           
+            padding: 12px 25px;
+            background-color: #4F959D;
             color: white;
+            text-decoration: none;
+            filter: drop-shadow(0,0,10px,#4F959D);
+            border-radius: 8px;
+            font-weight: bold;
+            transition: background-color 0.3s ease, color 0.3s ease;
+            border: #4F959D 1px solid;
         }
         .form-container button:hover{
-            background-color: white;
-            color: #205781;
-            border: #205781 solid  3px;
-            ;
-        }
+            background-color: white; 
+    color: #4F959D; 
+    transition: 1s ease-in-out;
+    border: #4F959D 1px solid;}
 
         .form-container input {
-            background-color: rgba(255, 248, 248, 0.8); /* Fond légèrement transparent pour les inputs et le bouton */
+            background-color: rgba(255, 248, 248, 0.8); 
             border-color: rgba(255, 255, 255, 0.8);
         }
 
         .form-container input:focus {
-            outline: 2px solid rgba(255, 255, 255, 0.8); /* Anneau de focus plus visible */
+            outline: 2px solid rgba(255, 255, 255, 0.8); 
             border-color: #205781;
         }
 
       
 
         .form-container svg {
-            fill: #205781!important; 
-            color: #205781 !important;
+            fill: #4F959D!important; 
+            color: #4F959D !important;
         }
 
         

@@ -23,13 +23,13 @@
 
         h1 {
             font-size: 36px;
-            color: #2f3640;
+            color: #205781;
             margin-bottom: 20px;
         }
 
         .welcome {
             font-size: 20px;
-            color: #353b48;
+            color: #0a3b61;
             margin-bottom: 30px;
         }
 
@@ -50,7 +50,7 @@
 
         .feature i {
             font-size: 40px;
-            color: #EB5B00;
+            color: #4F959D;
             margin-bottom: 15px;
         }
 
@@ -73,18 +73,25 @@
             display: inline-block;
             margin-top: 40px;
             padding: 12px 25px;
-            background-color: #EB5B00;
+            background-color: #4F959D;
             color: white;
             text-decoration: none;
-            filter: drop-shadow(0,0,10px,#EB5B00);
+            filter: drop-shadow(0,0,10px,#4F959D);
             border-radius: 8px;
             font-weight: bold;
-            transition: background-color 0.3s ease;
+            transition: background-color 0.3s ease, color 0.3s ease; 
+            border: #4F959D 1px solid;
+
         }
 
         .btn:hover {
-            background-color: #EB5B00;
-        }
+            
+    background-color: white;  
+    color: #4F959D; 
+    transition: 1s ease-in-out;
+    border: #4F959D 1px solid;
+    
+}
 
     </style>
 </head>
@@ -112,7 +119,7 @@
             <div class="feature">
                 <i class='bx bx-user-circle'></i>
                 <h3>Profil Utilisateur</h3>
-                <p>Gérez vos informations personnelles et consultez votre activité.</p>
+                <p>Gérez vos informations personnelles .</p>
             </div>
         </div>
         <a href="/dashboard" class="btn">Accéder au tableau de bord</a>

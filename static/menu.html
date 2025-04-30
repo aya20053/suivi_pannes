@@ -11,15 +11,14 @@
 
     <style>
     :root {
-        --primary-color: #FC4100; 
-        --text-color: #666666;
+        --primary-color: #00215E; 
         --active-text-color: #00215E;
         --bg-color: #ffffff;
     }
     
     ::selection {
-        color: #FC4100;
-        background-color: #00215E;
+        color: white;
+        background-color: #4F959D;
     }
     
     * {
@@ -68,8 +67,8 @@
     }
 
     .nav-item:hover {
-      background-color: rgb(38, 80, 115);
-        color: white;
+      background-color: #D5E5D5;
+   
     }
 
     .nav-item .nav-icon {
@@ -130,6 +129,7 @@
 
     .mobile-nav-item:hover {
         background-color: rgba(38, 80, 115, 0.4);
+        color: white;
     }
 
     .mobile-nav-icon {
@@ -144,19 +144,27 @@
     }
 
     .mobile-nav-item.active {
-        color: var(--primary-color);
-    }
+      color: var(--active-text-color);}
 
     .mobile-nav-item.active .mobile-nav-icon {
-        color: var(--primary-color);
-    }
+      color: var(--primary-color);    }
 
     .mobile-nav-item.active .mobile-nav-label {
         color: var(--active-text-color);
     }
 
+    .mobile-nav-item.active::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 3px;
+        background-color: var(--primary-color);
+        border-radius: 0 3px 3px 0;
+    }
     .main-content {
-        margin-right: 120px; /* Adjust margin for desktop nav width */
+        margin-right: 120px; 
         padding: 20px;
         min-height: calc(100vh - 80px);
     }
@@ -167,6 +175,7 @@
         position: absolute;
         background-color: rgba(205, 232, 229, 0.4);
         color: black;
+        font-weight: bold;
         padding: 5px 10px;
         border-radius: 5px;
         font-size: 12px;
@@ -216,9 +225,9 @@
         from { opacity: 0; }
         to { opacity: 1; }
     }
-     i a{
+      a i {
       margin-bottom: 1rem;
-      color: #205781;
+      color: #4F959D;
     }
     </style>
 </head>
@@ -249,7 +258,7 @@
         <span class="nav__tooltip">Mon profil</span>
       </a>
       <a href="/logout" class="nav-item" data-navlink="deconnexion">
-        <i class='bx bx-log-out nav-icon'></i>
+        <i class='bx bx-log-oAut nav-icon'></i>
         <span class="nav__tooltip">Se déconnecter</span>
       </a>
     </nav>

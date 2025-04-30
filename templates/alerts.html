@@ -62,7 +62,6 @@
     .then(data => {
       if (menuDiv) {
         menuDiv.innerHTML = data;
-        // Maintenant que le menu est chargé, nous pouvons attacher les événements et vérifier l'état actif pour les deux menus.
         attachEventListenersToNav('.desktop-nav');
         attachEventListenersToNav('.mobile-nav');
         checkAndApplyActiveStateOnLoad();
@@ -79,7 +78,6 @@
       navItems.forEach(item => {
         item.addEventListener('click', function(event) {
           activateNavItem(this, navSelector);
-          // La navigation vers la nouvelle page se fera normalement grâce au lien <a>
         });
       });
     }
@@ -100,8 +98,7 @@
     const mobileNavItems = document.querySelectorAll('.mobile-nav .mobile-nav-item');
     const currentPage = window.location.pathname;
 
-    const allNavItems = [...desktopNavItems, ...mobileNavItems]; // Combine les deux listes
-
+    const allNavItems = [...desktopNavItems, ...mobileNavItems]; 
     if (storedActiveNavLink) {
       allNavItems.forEach(item => {
         if (item.dataset.navlink === storedActiveNavLink) {
@@ -109,7 +106,6 @@
         }
       });
     } else {
-      // Logique pour activer un élément par défaut au chargement initial (si nécessaire)
       if (currentPage === '/' || currentPage === '/dashboard') {
         allNavItems.forEach(item => {
           if (item.dataset.navlink === 'accueil') {
@@ -218,7 +214,6 @@ async function deleteAlert(id) {
             throw new Error(`Erreur HTTP ${response.status}`);
         }
 
-        // Recharger les alertes après suppression
         fetchAndDisplayAlerts();
     } catch (error) {
         console.error("Erreur lors de la suppression de l'alerte:", error);

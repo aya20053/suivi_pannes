@@ -111,7 +111,7 @@
       </div>
     </div>
 
-    <!-- 🥧 Diagramme circulaire -->
+    <!--  Diagramme circulaire -->
     <div class="flex justify-center mb-8">
       <canvas id="pieChart" width="400" height="200"></canvas>
     </div>
@@ -126,9 +126,7 @@
             {% if site.current_status == 'En ligne' %} bg-green-500 {% else %} bg-red-500 {% endif %}">
             {{ site.current_status }}
           </span>
-          <span class="px-3 py-1 rounded-full bg-blue-200 text-blue-800 text-sm">
-            Disponibilité: {{ site.availability }}%
-          </span>
+         
         </div>
       </div>
 

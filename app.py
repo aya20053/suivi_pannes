@@ -9,8 +9,6 @@ import json
 import logging  # For better logging
 import threading
 from tasks import run_monitoring_loop
-UPLOAD_FOLDER = 'uploads'
-ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 
 app = Flask(__name__)
 CORS(app)
@@ -336,14 +334,6 @@ def manage_users():
         return redirect(url_for('index'))
     return render_template('manage-users.html', active_page='gestion-utilisateurs')
 
-# Configuration for file uploads
-UPLOAD_FOLDER = 'uploads'
-ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-os.makedirs(UPLOAD_FOLDER, exist_ok=True)
-
-def allowed_file(filename):
-    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 @app.route("/api/users", methods=["GET"])
 def api_get_users():
@@ -368,7 +358,7 @@ def api_get_user(id):
         return jsonify({"error": "Database connection failed"}), 500
     try:
         with conn.cursor() as cursor:
-            cursor.execute("SELECT id, username, prenom, email, poste, telephone, photo_profile, role, password FROM users WHERE id = %s", (id,)) # Include password
+            cursor.execute("SELECT id, username, prenom, email, poste, telephone, photo_profile, role, password FROM users WHERE id = %s", (id,)) 
             user = cursor.fetchone()
             if user:
                 return jsonify(user), 200
@@ -535,7 +525,7 @@ def api_get_alerts():
         return jsonify({"error": "Database connection failed"}), 500
     try:
         with conn.cursor() as cursor:
-            cursor.execute("SELECT id, timestamp, site_name, url_or_ip, reason, is_acknowledged FROM alerts ORDER BY timestamp DESC")
+            cursor.execute("SELECT id, timestamp, site_name, url_or_ip, reason FROM alerts ORDER BY timestamp DESC")
             alerts = cursor.fetchall()
             # Formatter la date pour l'affichage (optionnel)
             formatted_alerts = [{**alert, 'timestamp': alert['timestamp'].isoformat() + 'Z'} for alert in alerts]
