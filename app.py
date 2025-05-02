@@ -55,11 +55,13 @@ def login():
             user = cursor.fetchone()
         if user and user['password'] == password:
             session['username'] = username
+            session['role'] = user['role']  # Corrected: Access role directly from the 'user' dictionary
             return redirect(url_for('home'))
         else:
             return render_template('login.html', error="Nom d'utilisateur ou mot de passe incorrect")
     finally:
-        conn.close()
+        if conn:
+            conn.close()
 
 @app.route('/logout')
 def logout():
@@ -145,18 +147,18 @@ def dashboard():
                     ])
                 })
 
-            user_role = get_user_role(conn)
-
+            user_role = session.get('role')  # Get the role directly from the session
             return render_template('dashboard.html',
-                                     total_online=total_online,
-                                     total_offline=total_offline,
-                                     total_sites=total_sites,
-                                     user_count=user_count,
-                                     last_check=last_check,
-                                     sites_data=sites_data,
-                                     now=datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-                                     user_role=g.user_role
-                                     )
+                                   total_online=total_online,
+                                   total_offline=total_offline,
+                                   total_sites=total_sites,
+                                   user_count=user_count,
+                                   last_check=last_check,
+                                   sites_data=sites_data,
+                                   now=datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+                                   user_role=user_role,
+                                   role=user_role  # Added role here as well for consistency
+                                   )
 
     except pymysql.MySQLError as e:
         logging.error(f"Dashboard database error: {e}")
@@ -165,30 +167,20 @@ def dashboard():
         logging.error(f"Dashboard error: {e}")
         return "An error occurred while fetching dashboard data", 500
     finally:
-        conn.close()
+        if conn:
+            conn.close()
 
+@app.route('/api/user-role')
+def get_user_role_api():
+    role = session.get('role', 'visiteur')  # valeur par défaut
+    return jsonify({'role': role})
 
 @app.before_request
 def before_request():
     # Vérifier si un utilisateur est connecté (session)
-    username = session.get('username')
-    if username:
-        conn = get_db_connection()
-        try:
-            with conn.cursor() as cursor:
-                cursor.execute("SELECT role FROM users WHERE username = %s", (username,))
-                user = cursor.fetchone()
-                if user:
-                    g.user_role = user['role']  # Stocker le rôle dans g (objet global)
-                else:
-                    g.user_role = None  # Si l'utilisateur n'existe pas, mettre son rôle à None
-        except pymysql.MySQLError as e:
-            print(f"Erreur lors de la récupération du rôle de l'utilisateur : {e}")
-            g.user_role = None
-        finally:
-            conn.close()
-    else:
-        g.user_role = None  # Si l'utilisateur n'est pas connecté, pas de rôle
+    g.user_role = session.get('role') # Store the role directly from the session
+    # The database query to fetch the role is no longer needed here
+    pass
 
 # --- Other HTML Views ---
 @app.route('/network-stats')
@@ -196,8 +188,6 @@ def network_stats():
     if 'username' not in session:
         return redirect(url_for('index'))
     return render_template('network_stats.html')
-
-
 
 @app.route('/manage-networks')
 def manage_networks():
@@ -216,7 +206,8 @@ def profile():
             return render_template('profile.html', user=user_data, active_page='profil')
         return redirect(url_for('index'))
     finally:
-        conn.close()
+        if conn:
+            conn.close()
 
 # --- User Data Retrieval ---
 def get_logged_in_user_data(conn):
@@ -259,7 +250,8 @@ def api_get_sites():
         logging.error(f"Error getting sites: {e}")
         return jsonify({"error": f"Database error: {e}"}), 500
     finally:
-        conn.close()
+        if conn:
+            conn.close()
 
 @app.route("/api/sites", methods=["POST"])
 def api_add_site():
@@ -280,7 +272,8 @@ def api_add_site():
         conn.rollback()
         return jsonify({"error": f"Database error: {e}"}), 500
     finally:
-        conn.close()
+        if conn:
+            conn.close()
 
 @app.route("/api/sites/<int:id>", methods=["DELETE"])
 def api_delete_site(id):
@@ -297,7 +290,8 @@ def api_delete_site(id):
         conn.rollback()
         return jsonify({"error": f"Database error: {e}"}), 500
     finally:
-        conn.close()
+        if conn:
+            conn.close()
 
 @app.route("/api/sites/<int:id>", methods=["GET"])
 def get_site(id):
@@ -316,7 +310,8 @@ def get_site(id):
         logging.error(f"Error getting site details: {e}")
         return jsonify({"error": f"Database error: {e}"}), 500
     finally:
-        conn.close()
+        if conn:
+            conn.close()
 
 @app.route("/api/sites/<int:id>", methods=["PUT"])
 def update_site(id):
@@ -349,15 +344,19 @@ def update_site(id):
         conn.rollback()
         return jsonify({"error": f"Database error: {e}"}), 500
     finally:
-        conn.close()
+        if conn:
+            conn.close()
 
 # --- User Management API ---
 @app.route('/manage_users')
 def manage_users():
     if 'username' not in session:
         return redirect(url_for('index'))
-    return render_template('manage-users.html', active_page='gestion-utilisateurs')
 
+    if session.get('role') != 'chef admin':
+        return "Accès refusé", 403  # ou tu peux rediriger vers une page d'erreur personnalisée
+
+    return render_template('manage-users.html', active_page='gestion-utilisateurs')
 
 @app.route("/api/users", methods=["GET"])
 def api_get_users():
@@ -373,7 +372,8 @@ def api_get_users():
         logging.error(f"Error getting users: {e}")
         return jsonify({"error": f"Database error: {e}"}), 500
     finally:
-        conn.close()
+        if conn:
+            conn.close()
 
 @app.route("/api/users/<int:id>", methods=["GET"])
 def api_get_user(id):
@@ -392,7 +392,8 @@ def api_get_user(id):
         logging.error(f"Error getting user: {e}")
         return jsonify({"error": f"Database error: {e}"}), 500
     finally:
-        conn.close()
+        if conn:
+            conn.close()
 # Configuration
 @app.route("/api/users", methods=["POST"])
 def api_add_user():
@@ -446,7 +447,8 @@ def api_add_user():
         conn.rollback()
         return jsonify({"error": f"Erreur SQL : {e}"}), 500
     finally:
-        conn.close()
+        if conn:
+            conn.close()
 
 
 @app.route("/api/users/<int:id>", methods=["DELETE"])
@@ -467,7 +469,8 @@ def api_delete_user(id):
         conn.rollback()
         return jsonify({"error": f"Database error: {e}"}), 500
     finally:
-        conn.close()
+        if conn:
+            conn.close()
 
 @app.route("/api/users/<int:id>", methods=["PUT"])
 def api_update_user(id):
@@ -521,7 +524,8 @@ def api_update_user(id):
         conn.rollback()
         return jsonify({"error": f"Erreur SQL : {e}"}), 500
     finally:
-        conn.close()
+        if conn:
+            conn.close()
 
 
 def get_user_role(conn):
