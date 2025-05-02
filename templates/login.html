@@ -83,10 +83,17 @@
     </style>
 </head>
 <body class="h-screen flex items-center justify-center">
+    {% if error %}
+    <div class="alert alert-danger" role="alert">
+        {{ error }}
+    </div>
+{% endif %}
+
+
 
 <div class="form-container relative rounded-xl shadow-lg w-96 max-w-sm">
     
-    <h2 class="text-2xl font-semibold text-center mb-6">Se connecter</h2>
+    <h2 class="text-2xl font-semibold text-center mb-6"> Connection</h2>
     <form action="/login" method="POST">
         <div class="mb-4">
             <label for="username" class="block text-sm font-medium">Nom d'utilisateur</label>

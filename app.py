@@ -1,6 +1,5 @@
-
 import os
-from flask import Flask, jsonify, render_template, request, redirect, url_for, session
+from flask import Flask, g, jsonify, render_template, request, redirect, url_for, session
 from flask_cors import CORS
 from werkzeug.utils import secure_filename
 from datetime import datetime, timedelta
@@ -76,6 +75,7 @@ def home():
 
 @app.route('/dashboard')
 def dashboard():
+
     if 'username' not in session:
         return redirect(url_for('index'))
 
@@ -145,17 +145,18 @@ def dashboard():
                     ])
                 })
 
-            user = get_user(conn)
+            user_role = get_user_role(conn)
+
             return render_template('dashboard.html',
-                                   total_online=total_online,
-                                   total_offline=total_offline,
-                                   total_sites=total_sites,
-                                   user_count=user_count,
-                                   last_check=last_check,
-                                   sites_data=sites_data,
-                                   now=datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-                                   user_role=user['role'] if user else 'unknown'
-                                   )
+                                     total_online=total_online,
+                                     total_offline=total_offline,
+                                     total_sites=total_sites,
+                                     user_count=user_count,
+                                     last_check=last_check,
+                                     sites_data=sites_data,
+                                     now=datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+                                     user_role=g.user_role
+                                     )
 
     except pymysql.MySQLError as e:
         logging.error(f"Dashboard database error: {e}")
@@ -165,6 +166,29 @@ def dashboard():
         return "An error occurred while fetching dashboard data", 500
     finally:
         conn.close()
+
+
+@app.before_request
+def before_request():
+    # Vérifier si un utilisateur est connecté (session)
+    username = session.get('username')
+    if username:
+        conn = get_db_connection()
+        try:
+            with conn.cursor() as cursor:
+                cursor.execute("SELECT role FROM users WHERE username = %s", (username,))
+                user = cursor.fetchone()
+                if user:
+                    g.user_role = user['role']  # Stocker le rôle dans g (objet global)
+                else:
+                    g.user_role = None  # Si l'utilisateur n'existe pas, mettre son rôle à None
+        except pymysql.MySQLError as e:
+            print(f"Erreur lors de la récupération du rôle de l'utilisateur : {e}")
+            g.user_role = None
+        finally:
+            conn.close()
+    else:
+        g.user_role = None  # Si l'utilisateur n'est pas connecté, pas de rôle
 
 # --- Other HTML Views ---
 @app.route('/network-stats')
@@ -187,15 +211,15 @@ def profile():
     if not conn:
         return "Database connection failed", 500
     try:
-        user = get_user(conn)
-        if user:
-            return render_template('profile.html', user=user, active_page='profil')
+        user_data = get_logged_in_user_data(conn)
+        if user_data:
+            return render_template('profile.html', user=user_data, active_page='profil')
         return redirect(url_for('index'))
     finally:
         conn.close()
 
 # --- User Data Retrieval ---
-def get_user(conn):
+def get_logged_in_user_data(conn):
     username = session.get('username')
     if not username:
         return None
@@ -218,7 +242,7 @@ def get_user(conn):
                 }
             return None
     except pymysql.MySQLError as e:
-        logging.error(f"Error fetching user: {e}")
+        logging.error(f"Error fetching user data: {e}")
         return None
 
 # --- API Routes ---
@@ -358,7 +382,7 @@ def api_get_user(id):
         return jsonify({"error": "Database connection failed"}), 500
     try:
         with conn.cursor() as cursor:
-            cursor.execute("SELECT id, username, prenom, email, poste, telephone, photo_profile, role, password FROM users WHERE id = %s", (id,)) 
+            cursor.execute("SELECT id, username, prenom, email, poste, telephone, photo_profile, role, password FROM users WHERE id = %s", (id,))
             user = cursor.fetchone()
             if user:
                 return jsonify(user), 200
@@ -500,8 +524,22 @@ def api_update_user(id):
         conn.close()
 
 
+def get_user_role(conn):
+    username = session.get('username')  # Récupérer le nom d'utilisateur depuis la session
+    if not username:
+        return None
 
-      
+    try:
+        with conn.cursor() as cursor:
+            cursor.execute("SELECT role FROM users WHERE username = %s", (username,))
+            user = cursor.fetchone()
+            if user:
+                return user['role']  # Retourner seulement le rôle
+            return None
+    except pymysql.MySQLError as e:
+        print(f"Erreur lors de la récupération de l'utilisateur : {e}")
+        return None
+
 
 def start_monitoring():
     """Démarre la boucle de monitoring dans un thread séparé."""
@@ -536,7 +574,6 @@ def api_get_alerts():
     finally:
         if conn:  # Vérifiez si la connexion existe avant de la fermer
             conn.close()
-            
 
 
 @app.route('/api/alerts', methods=['DELETE'])
@@ -550,8 +587,10 @@ def delete_all_alerts():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
     finally:
-        cursor.close()
-        connection.close()
+        if 'cursor' in locals() and cursor:
+            cursor.close()
+        if 'connection' in locals() and connection:
+            connection.close()
 
 
 @app.route('/api/alerts/<int:alert_id>', methods=['DELETE'])
@@ -565,8 +604,10 @@ def delete_alert(alert_id):
     except Exception as e:
         return jsonify({'error': str(e)}), 500
     finally:
-        cursor.close()
-        connection.close()
+        if 'cursor' in locals() and cursor:
+            cursor.close()
+        if 'connection' in locals() and connection:
+            connection.close()
 
 
 if __name__ == '__main__':
@@ -579,5 +620,5 @@ if __name__ == '__main__':
         thread.daemon = True
         thread.start()
 
-    start_monitoring()
+    #start_monitoring()
     app.run(debug=True)

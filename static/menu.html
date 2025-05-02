@@ -191,13 +191,13 @@
     }
 
     @media (max-width: 768px) {
-        .desktop-nav {
-            display: none;
-        }
+      .desktop-nav {
+        display: none;
+    }
 
-        .mobile-nav {
-            display: flex;
-        }
+    .mobile-nav {
+        display: flex;
+    }
 
         .main-content {
             margin-right: 0;
@@ -258,42 +258,41 @@
         <span class="nav__tooltip">Mon profil</span>
       </a>
       <a href="/logout" class="nav-item" data-navlink="deconnexion">
-        <i class='bx bx-log-oAut nav-icon'></i>
+        <i class='bx bx-log-out nav-icon'></i>
         <span class="nav__tooltip">Se déconnecter</span>
-      </a>
-    </nav>
+    </a>
   
 
   
     <nav class="mobile-nav">
       <a href="/dashboard" class="mobile-nav-item " data-navlink="accueil">
-        <i class='bx bx-home-alt-2 nav-icon'></i>
-        <span class="nav__tooltip">Tableau de bord</span>
+          <i class='bx bx-home-alt-2 mobile-nav-icon'></i>
+          <span class="mobile-nav-label">Tableau de bord</span>
       </a>
-
-        <a href="/manage_users" class="mobile-nav-item"  data-navlink="gestion-utilisateurs" >
-        <i class='bx bx-user-check nav-icon'></i>
-        <span class="nav__tooltip">Gestion des utilisateurs</span>
+  
+      <a href="/manage_users" class="mobile-nav-item"  data-navlink="gestion-utilisateurs" >
+          <i class='bx bx-user-check mobile-nav-icon'></i>
+          <span class="mobile-nav-label">Gestion des utilisateurs</span>
       </a>
       <a href="/manage-networks" class="mobile-nav-item" data-navlink="reseau">
-        <i class='bx bx-network-chart nav-icon'></i>
-        <span class="nav__tooltip">Gestion du réseau</span>
+          <i class='bx bx-network-chart mobile-nav-icon'></i>
+          <span class="mobile-nav-label">Gestion du réseau</span>
       </a>
-       <a href="/alerts" class="mobile-nav-item" data-navlink="Alertes">
-        <i class='bx bx-bell nav-icon'></i>
-        <span class="nav__tooltip">Alertes</span>
-    </a>
-    
-     <a href="/profile" class="mobile-nav-item" data-navlink="profil">
-        <i class='bx bx-user nav-icon'></i>
-        <span class="nav__tooltip">Mon profil</span>
+      <a href="/alerts" class="mobile-nav-item" data-navlink="Alertes">
+          <i class='bx bx-bell mobile-nav-icon'></i>
+          <span class="mobile-nav-label">Alertes</span>
       </a>
-      
+  
+      <a href="/profile" class="mobile-nav-item" data-navlink="profil">
+          <i class='bx bx-user mobile-nav-icon'></i>
+          <span class="mobile-nav-label">Mon profil</span>
+      </a>
+  
       <a href="/logout" class="mobile-nav-item" data-navlink="deconnexion">
-        <i class='bx bx-log-out nav-icon'></i>
-        <span class="nav__tooltip">Se déconnecter</span>
+          <i class='bx bx-log-out mobile-nav-icon'></i>
+          <span class="mobile-nav-label">Se déconnecter</span>
       </a>
-    </nav>
+  </nav>
 
 
 </div>
