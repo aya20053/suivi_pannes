@@ -354,7 +354,7 @@ def manage_users():
         return redirect(url_for('index'))
 
     if session.get('role') != 'chef admin':
-        return "Accès refusé", 403  # ou tu peux rediriger vers une page d'erreur personnalisée
+        return render_template('erreur.html')  # Utilise render_template pour afficher une page HTML
 
     return render_template('manage-users.html', active_page='gestion-utilisateurs')
 
