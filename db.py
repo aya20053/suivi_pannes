@@ -1,4 +1,5 @@
 import pymysql
+from datetime import datetime, timedelta
 
 def get_db_connection():
     """Établit et retourne une connexion à la base de données MySQL."""
@@ -48,3 +49,37 @@ def fetch_one(query, params=()):
     finally:
         close_db_connection(conn)
     return result
+
+def enregistrer_pdf(file_name, file_path):
+    query = """
+        INSERT INTO weekly_report (file_name, file_path)
+        VALUES (%s, %s)
+    """
+    execute_query(query, (file_name, file_path))
+def get_db_connection():
+    """Retourne la connexion à la base de données."""
+    return pymysql.connect(host='localhost', user='root', password='', database='suivi_pannes', cursorclass=pymysql.cursors.DictCursor)
+
+def get_data_for_last_7_days(site_id):
+    """Récupère les événements pour un site sur les 7 derniers jours."""
+    seven_days_ago = datetime.now() - timedelta(days=7)
+
+    # Connexion à la base de données
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    # Requête SQL pour récupérer les événements
+    query = """
+    SELECT status, timestamp 
+    FROM monitoring_events 
+    WHERE site_id = %s AND timestamp >= %s
+    ORDER BY timestamp ASC
+    """
+    cursor.execute(query, (site_id, seven_days_ago))
+    data = cursor.fetchall()
+
+    # Fermer la connexion
+    cursor.close()
+    conn.close()
+
+    return data

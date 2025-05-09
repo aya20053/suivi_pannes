@@ -58,7 +58,7 @@ def login():
             session['role'] = user['role']  # Corrected: Access role directly from the 'user' dictionary
             return redirect(url_for('home'))
         else:
-            return render_template('login.html', error="Nom d'utilisateur ou mot de passe incorrect")
+            return render_template('login.html', error="Nom d utilisateur ou mot de passe incorrect")
     finally:
         if conn:
             conn.close()
@@ -74,37 +74,42 @@ def home():
     if 'username' not in session:
         return redirect(url_for('index'))
     return render_template('home.html')
-
 @app.route('/dashboard')
 def dashboard():
-
     if 'username' not in session:
         return redirect(url_for('index'))
 
     conn = get_db_connection()
     if not conn:
         return "Database connection failed", 500
+
     try:
         with conn.cursor() as cursor:
-            cursor.execute("SELECT COUNT(*) FROM users")
-            user_count = cursor.fetchone()['COUNT(*)']
+            # Nombre d'utilisateurs
+            cursor.execute("SELECT COUNT(*) AS count FROM users")
+            user_count = cursor.fetchone()['count']
 
-            cursor.execute("SELECT COUNT(*) FROM monitored_sites WHERE last_status = 'En ligne'")
-            total_online = cursor.fetchone()['COUNT(*)']
+            # Sites en ligne
+            cursor.execute("SELECT COUNT(*) AS count FROM monitored_sites WHERE last_status = 'En ligne'")
+            total_online = cursor.fetchone()['count']
 
-            cursor.execute("SELECT COUNT(*) FROM monitored_sites WHERE last_status = 'Hors ligne'")
-            total_offline = cursor.fetchone()['COUNT(*)']
+            # Sites hors ligne
+            cursor.execute("SELECT COUNT(*) AS count FROM monitored_sites WHERE last_status = 'Hors ligne'")
+            total_offline = cursor.fetchone()['count']
 
-            cursor.execute("SELECT COUNT(*) FROM monitored_sites")
-            total_sites = cursor.fetchone()['COUNT(*)']
+            # Nombre total de sites
+            cursor.execute("SELECT COUNT(*) AS count FROM monitored_sites")
+            total_sites = cursor.fetchone()['count']
 
-            cursor.execute("SELECT MAX(last_checked) FROM monitored_sites")
+            # Dernier contrôle effectué
+            cursor.execute("SELECT MAX(last_checked) AS last_check FROM monitored_sites")
             result = cursor.fetchone()
-            last_check = result['MAX(last_checked)'] if result and result['MAX(last_checked)'] else None
+            last_check = result['last_check'] if result and result['last_check'] else None
 
             twenty_four_hours_ago = datetime.now() - timedelta(hours=24)
 
-            cursor.execute("SELECT id, name, last_status, last_checked FROM monitored_sites")
+            # Récupérer tous les sites
+            cursor.execute("SELECT id, name, url_or_ip, last_status, last_checked FROM monitored_sites")
             sites = cursor.fetchall()
 
             sites_data = []
@@ -120,6 +125,7 @@ def dashboard():
                 offline_count = len(events) - online_count
                 availability = (online_count / len(events) * 100) if events else 0
 
+                # Calcul des ratios horaires
                 hourly_data = {}
                 for e in events:
                     hour = e['timestamp'].strftime('%H:00')
@@ -134,6 +140,7 @@ def dashboard():
                 sites_data.append({
                     'id': site['id'],
                     'name': site['name'],
+                    'url_or_ip': site['url_or_ip'],
                     'current_status': site['last_status'],
                     'last_checked': site['last_checked'].strftime('%Y-%m-%d %H:%M:%S') if site['last_checked'] else 'N/A',
                     'availability': round(availability, 2),
@@ -147,7 +154,7 @@ def dashboard():
                     ])
                 })
 
-            user_role = session.get('role')  # Get the role directly from the session
+            user_role = session.get('role')
             return render_template('dashboard.html',
                                    total_online=total_online,
                                    total_offline=total_offline,
@@ -157,8 +164,7 @@ def dashboard():
                                    sites_data=sites_data,
                                    now=datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
                                    user_role=user_role,
-                                   role=user_role  # Added role here as well for consistency
-                                   )
+                                   role=user_role)
 
     except pymysql.MySQLError as e:
         logging.error(f"Dashboard database error: {e}")
@@ -169,6 +175,7 @@ def dashboard():
     finally:
         if conn:
             conn.close()
+
 
 @app.route('/api/user-role')
 def get_user_role_api():
