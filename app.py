@@ -478,7 +478,6 @@ def api_delete_user(id):
     finally:
         if conn:
             conn.close()
-
 @app.route("/api/users/<int:id>", methods=["PUT"])
 def api_update_user(id):
     data = request.get_json()
@@ -487,7 +486,7 @@ def api_update_user(id):
     email = data.get('email')
     poste = data.get('poste')
     telephone = data.get('telephone')
-    password = data.get('password')
+    password = data.get('password')  # Peut être vide
     role = data.get('role')
 
     if not all([username, prenom, email, role]):
@@ -514,16 +513,25 @@ def api_update_user(id):
             if cursor.fetchone():
                 return jsonify({'error': 'Email déjà existant.'}), 409
 
-            # Mise à jour sans photo_profile
-            update_query = """
-                UPDATE users
-                SET username = %s, prenom = %s, email = %s, poste = %s,
-                    telephone = %s, password = %s, role = %s
-                WHERE id = %s
-            """
-            cursor.execute(update_query, (username, prenom, email, poste, telephone, password, role, id))
-            conn.commit()
+            # Construire la requête UPDATE dynamiquement
+            if password:
+                update_query = """
+                    UPDATE users
+                    SET username = %s, prenom = %s, email = %s, poste = %s,
+                        telephone = %s, password = %s, role = %s
+                    WHERE id = %s
+                """
+                cursor.execute(update_query, (username, prenom, email, poste, telephone, password, role, id))
+            else:
+                update_query = """
+                    UPDATE users
+                    SET username = %s, prenom = %s, email = %s, poste = %s,
+                        telephone = %s, role = %s
+                    WHERE id = %s
+                """
+                cursor.execute(update_query, (username, prenom, email, poste, telephone, role, id))
 
+            conn.commit()
         return jsonify({'message': 'Utilisateur mis à jour avec succès.'}), 200
 
     except pymysql.MySQLError as e:
