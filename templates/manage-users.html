@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -8,128 +7,274 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://cdn.jsdelivr.net/npm/lucide-icons@0.1.0/dist/lucide.min.css" rel="stylesheet">
     <link rel="icon" type="image/png" href="/static/image/logo.jpeg">
-
     <script src="script.js" defer></script>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <style>
-    button i {
-        font-size: 24px; 
-        color: #1c3d5a;}
-    i {
-      color: #205781;
-    }
+        :root {
+            --primary-color: #205781;
+            --secondary-color: #1c3d5a;
+            --accent-color: #4f81bd;
+            --light-bg: #f0f7ff;
+            --card-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        body {
+            background-color: #f8fafc;
+            color: #333;
+        }
+        
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary:hover {
+            background-color: var(--secondary-color);
+            transform: translateY(-1px);
+        }
+        
+        .user-card {
+            background: white;
+            border-radius: 0.5rem;
+            box-shadow: var(--card-shadow);
+            transition: all 0.3s ease;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .user-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        .form-container {
+            background-color: var(--light-bg);
+            border: 1px solid #dbeafe;
+            border-radius: 0.5rem;
+        }
+        
+        .input-field {
+            border: 1px solid #d1d5db;
+            border-radius: 0.375rem;
+            padding: 0.75rem;
+            transition: all 0.2s;
+        }
+        
+        .input-field:focus {
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 3px rgba(79, 129, 189, 0.2);
+            outline: none;
+        }
+        
+        .action-btn {
+            padding: 0.25rem;
+            border-radius: 0.25rem;
+            transition: all 0.2s;
+        }
+        
+        .action-btn:hover {
+            background-color: #e2e8f0;
+        }
+        
+        .details-panel {
+            background-color: #f8fafc;
+            border-top: 1px solid #e2e8f0;
+        }
+        
+        .search-input {
+            padding-left: 2.5rem;
+            background-color: white;
+            border: 1px solid #d1d5db;
+        }
+        
+        .search-icon {
+            left: 1rem;
+            color: #9ca3af;
+        }
+        
+        .users-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+        
+        @media (max-width: 640px) {
+            .users-grid {
+                grid-template-columns: 1fr;
+            }
+        }
     </style>
 </head>
-<body class=" p-4 sm:p-10">
-    <div class="max-w-5xl mx-auto">
-        <div class="flex justify-between items-center mb-6 flex-wrap">
-          <h1 class="text-2xl sm:text-3xl font-bold w-full text-center flex justify-center items-center gap-2" style="  margin-bottom: 1rem;
-      color: #205781;">
-            <i class='bx bx-user-check text-3xl'></i>
-            Gestion des utilisateurs
-        </h1>
-        
-        
-            <br>
-            <button id="toggle-form-btn" class="px-4 py-2" style="background-color: #205781; color: white; border-radius: 0.375rem;">
-                ➕ Ajouter utilisateur
+<body class="p-4 sm:p-6 bg-gray-50">
+    <div class="max-w-7xl mx-auto">
+        <!-- Header -->
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+            <div class="flex items-center gap-3">
+                <h1 class="text-3xl font-bold text-center mb-2 header">
+                    <i data-lucide="users" class='bx bx-network-chart text-3xl align-middle mr-2' style="color: var(--primary-color);"></i>
+                    Gestion des utilisateurs
+                </h1>
+            </div>
+            <button id="toggle-form-btn" class="btn-primary flex items-center gap-2">
+                <i data-lucide="user-plus"></i>
+                <span>Ajouter utilisateur</span>
             </button>
         </div>
 
-        <form id="add-form" class="bg-blue-50 p-6 rounded-xl shadow-lg border border-blue-200 mb-6 hidden">
-            <h2 class="text-xl font-semibold text-blue-800 mb-4 flex items-center gap-2">
-                <i data-lucide="plus-circle"></i> Ajouter un nouveau utilisateur
+        <!-- Add Form -->
+        <form id="add-form" class="form-container p-6 mb-8 hidden">
+            <h2 class="text-xl font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                <i data-lucide="user-plus" class="text-primary-color" style="color: var(--primary-color);"></i>
+                Ajouter un nouvel utilisateur
             </h2>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <input type="text" id="username" placeholder="Nom" required
-                       class="p-3 border border-blue-200 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
-
-                <input type="text" id="prenom" placeholder="Prénom" required
-                       class="p-3 border border-blue-200 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
-
-                <input type="email" id="email" placeholder="Email" required
-                       class="p-3 border border-blue-200 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
-
-                <input type="text" id="poste" placeholder="Poste" required
-                       class="p-3 border border-blue-200 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
-
-                <input type="number" id="telephone" placeholder="Téléphone" required
-                       class="p-3 border border-blue-200 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
-
-                <input type="password" id="password" placeholder="Mot de passe" required
-                       class="p-3 border border-blue-200 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
-                <select name="role" id="role" class="p-3 border border-blue-200 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
-                    <option value="chef admin">chef admin</option>
-                    <option value="admin">admin</option>
-                </select>
+                <div>
+                    <label for="username" class="block text-sm font-medium text-gray-700 mb-1">Nom</label>
+                    <input type="text" id="username" placeholder="Nom" required class="input-field w-full">
+                </div>
+                <div>
+                    <label for="prenom" class="block text-sm font-medium text-gray-700 mb-1">Prénom</label>
+                    <input type="text" id="prenom" placeholder="Prénom" required class="input-field w-full">
+                </div>
+                <div>
+                    <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                    <input type="email" id="email" placeholder="Email" required class="input-field w-full">
+                </div>
+                <div>
+                    <label for="poste" class="block text-sm font-medium text-gray-700 mb-1">Poste</label>
+                    <input type="text" id="poste" placeholder="Poste" required class="input-field w-full">
+                </div>
+                <div>
+                    <label for="telephone" class="block text-sm font-medium text-gray-700 mb-1">Téléphone</label>
+                    <input type="number" id="telephone" placeholder="Téléphone" required class="input-field w-full">
+                </div>
+                <div>
+                    <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Mot de passe</label>
+                    <input type="password" id="password" placeholder="Mot de passe" required class="input-field w-full">
+                </div>
+                <div>
+                    <label for="role" class="block text-sm font-medium text-gray-700 mb-1">Rôle</label>
+                    <select id="role" class="input-field w-full">
+                        <option value="chef admin">Chef admin</option>
+                        <option value="admin">Admin</option>
+                    </select>
+                </div>
             </div>
-            <button type="submit"
-                    class="mt-5 px-4 py-2 bg-blue-100 text-blue-800 rounded-md hover:bg-blue-200 transition-all duration-200 flex items-center gap-1">
-                <i data-lucide="save"></i> Ajouter
-            </button>
+            <div class="mt-6 flex justify-end">
+                <button type="submit" class="btn-primary flex items-center gap-2">
+                    <i data-lucide="save"></i>
+                    <span>Ajouter</span>
+                </button>
+            </div>
         </form>
 
-
-        <div class="mb-4 relative w-full max-w-md mx-auto">
-            <i data-lucide="search" class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
-            <input
-                type="text"
-                id="search"
-                placeholder="Rechercher un utilisateur..."
-                class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition duration-200"
-            >
-        </div>
-        
-
-
-        <div id="site-list" class="space-y-4">
+        <!-- Search Bar -->
+        <div class="mb-6 relative">
+            <div class="relative max-w-md">
+                <i data-lucide="search" class="absolute search-icon top-1/2 transform -translate-y-1/2"></i>
+                <input type="text" id="search" placeholder="Rechercher un utilisateur..." 
+                       class="search-input w-full pl-10 pr-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-color">
             </div>
+        </div>
+
+        <!-- Users Grid -->
+        <div id="users-container" class="users-grid">
+            <!-- Users will be loaded here -->
+        </div>
+
+        <!-- Edit Form -->
+        <form id="edit-form" class="form-container p-6 mb-8 hidden fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50 w-full max-w-2xl">
+            <h2 class="text-xl font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                <i data-lucide="user-cog" class="text-primary-color" style="color: var(--primary-color);"></i>
+                Modifier l'utilisateur
+            </h2>
+            <input type="hidden" id="edit-id">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                    <label for="edit-username" class="block text-sm font-medium text-gray-700 mb-1">Nom</label>
+                    <input type="text" id="edit-username" placeholder="Nom" required class="input-field w-full">
+                </div>
+                <div>
+                    <label for="edit-prenom" class="block text-sm font-medium text-gray-700 mb-1">Prénom</label>
+                    <input type="text" id="edit-prenom" placeholder="Prénom" required class="input-field w-full">
+                </div>
+                <div>
+                    <label for="edit-email" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                    <input type="email" id="edit-email" placeholder="Email" required class="input-field w-full">
+                </div>
+                <div>
+                    <label for="edit-poste" class="block text-sm font-medium text-gray-700 mb-1">Poste</label>
+                    <input type="text" id="edit-poste" placeholder="Poste" required class="input-field w-full">
+                </div>
+                <div>
+                    <label for="edit-telephone" class="block text-sm font-medium text-gray-700 mb-1">Téléphone</label>
+                    <input type="number" id="edit-telephone" placeholder="Téléphone" required class="input-field w-full">
+                </div>
+                <div>
+                    <label for="edit-password" class="block text-sm font-medium text-gray-700 mb-1">Mot de passe</label>
+                    <input type="password" id="edit-password" placeholder="Laissez vide pour ne pas modifier" class="input-field w-full">
+                </div>
+                <div>
+                    <label for="edit-role" class="block text-sm font-medium text-gray-700 mb-1">Rôle</label>
+                    <select id="edit-role" class="input-field w-full">
+                        <option value="chef admin">Chef admin</option>
+                        <option value="admin">Admin</option>
+                    </select>
+                </div>
+            </div>
+            <div class="mt-6 flex justify-end gap-3">
+                <button type="button" onclick="cancelEdit()" class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 flex items-center gap-2">
+                    <i data-lucide="x"></i>
+                    <span>Annuler</span>
+                </button>
+                <button type="submit" class="btn-primary flex items-center gap-2">
+                    <i data-lucide="save"></i>
+                    <span>Enregistrer</span>
+                </button>
+            </div>
+        </form>
     </div>
 
-    <form id="edit-form" class="bg-blue-50 p-6 rounded-xl shadow-lg border border-blue-200 mb-6 hidden w-150">
-        <h2 class="text-xl font-semibold text-blue-800 mb-4 flex items-center gap-2">
-            <i data-lucide="pencil"></i> Modifier l'utilisateur
-        </h2>
-        <input type="hidden" id="edit-id">
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <input type="text" id="edit-username" placeholder="Nom" required
-                   class="p-3 border border-blue-200 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
-
-            <input type="text" id="edit-prenom" placeholder="Prénom" required
-                   class="p-3 border border-blue-200 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
-
-            <input type="email" id="edit-email" placeholder="Email" required
-                   class="p-3 border border-blue-200 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
-
-            <input type="text" id="edit-poste" placeholder="Poste" required
-                   class="p-3 border border-blue-200 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
-
-            <input type="number" id="edit-telephone" placeholder="Téléphone" required
-                   class="p-3 border border-blue-200 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
-
-            <input type="password" id="edit-password" placeholder="Mot de passe" required
-                   class="p-3 border border-blue-200 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
-
-            <select name="edit-role" id="edit-role" class="p-3 border border-blue-200 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
-                <option value="chef admin">chef admin</option>
-                <option value="admin">admin</option>
-                  
-
-            </select>
-
-        </div>
-        <div class="mt-4 flex gap-2">
-            <button type="submit" class="mt-5 px-4 py-2 bg-blue-100 text-blue-800 rounded-md hover:bg-blue-200 transition-all duration-200 flex items-center gap-1">
-                <i data-lucide="save"></i> Enregistrer
-            </button>
-            <button type="button" onclick="cancelEdit()" class="mt-5 px-4 py-2 bg-blue-100 text-blue-800 rounded-md hover:bg-blue-200 transition-all duration-200 flex items-center gap-1">
-                <i data-lucide="x"></i> Annuler
-            </button>
-        </div>
-    </form>
-
+    <!-- Overlay for edit form -->
+    <div id="overlay" class="fixed inset-0 bg-black bg-opacity-50 z-40 hidden"></div>
 
     <script>
+        // Same JavaScript as before, with adjustments for the grid layout
+        async function editUser(id) {
+            document.getElementById('overlay').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+            
+            try {
+                const res = await fetch(`${API_URL}/${id}`);
+                if (!res.ok) throw new Error("Erreur HTTP " + res.status);
+                const user = await res.json();
+
+                document.getElementById("edit-id").value = user.id;
+                document.getElementById("edit-username").value = user.username;
+                document.getElementById("edit-prenom").value = user.prenom;
+                document.getElementById("edit-email").value = user.email;
+                document.getElementById("edit-poste").value = user.poste;
+                document.getElementById("edit-telephone").value = user.telephone;
+                document.getElementById("edit-role").value = user.role;
+
+                document.getElementById("edit-form").classList.remove("hidden");
+            } catch (error) {
+                console.error(error);
+                document.getElementById('overlay').classList.add('hidden');
+                document.body.style.overflow = 'auto';
+            }
+        }
+
+        function cancelEdit() {
+            document.getElementById('overlay').classList.add('hidden');
+            document.body.style.overflow = 'auto';
+            document.getElementById("edit-form").classList.add("hidden");
+        }
+
         const API_URL = "http://localhost:5000/api/users";
 
         // Toggle formulaire ajout
@@ -144,43 +289,58 @@
                 if (!res.ok) throw new Error("Erreur lors de la récupération des utilisateurs");
                 const users = await res.json();
 
-                const list = document.getElementById("site-list");
-                list.innerHTML = "";
+                const container = document.getElementById("users-container");
+                container.innerHTML = "";
 
                 users
-                    .filter(user => user.username.toLowerCase().includes(filter.toLowerCase()))
+                    .filter(user => 
+                        user.username.toLowerCase().includes(filter.toLowerCase()) ||
+                        user.prenom.toLowerCase().includes(filter.toLowerCase()) ||
+                        user.email.toLowerCase().includes(filter.toLowerCase()) ||
+                        user.poste.toLowerCase().includes(filter.toLowerCase())
+                    )
                     .forEach(user => {
-                        const container = document.createElement("div");
-                        container.className = "bg-white rounded shadow p-4";
+                        const card = document.createElement("div");
+                        card.className = "user-card";
 
-                        container.innerHTML = `
-                            <div class="flex justify-between items-center flex-wrap">
-                                <h2 class="text-lg font-bold flex-1">${user.username} ${user.prenom} </h2>
-
-                                <div class="flex items-center gap-2 w-full sm:w-auto">
-
-                                    <button onclick="editUser(${user.id})" class="flex items-center gap-1 text-green-600 ">
-                                        <i data-lucide="pencil"></i>
-                                    </button>
-                                    <button onclick="deleteUser(${user.id})" class="text-red-500  gap-1 hover:text-red-700"><i data-lucide="trash-2"></i></button>
-
-                                <button type="button" onclick="toggleDetails(this)" class="flex items-center gap-2">
-                                    👁‍🗨
-                                </button>
-
-                                <br>
+                        card.innerHTML = `
+                            <div class="p-4 flex-grow">
+                                <div class="flex justify-between items-start">
+                                    <div>
+                                        <h2 class="text-lg font-bold text-gray-800">${user.username} ${user.prenom}</h2>
+                                        <p class="text-sm text-gray-600">${user.poste}</p>
+                                        <p class="text-xs text-gray-500 mt-1">${user.role}</p>
+                                    </div>
+                                    <div class="flex items-center gap-1">
+                                        <button onclick="editUser(${user.id})" class="action-btn text-blue-600 hover:text-blue-800">
+                                            <i data-lucide="pencil" class="w-4 h-4"></i>
+                                        </button>
+                                        <button onclick="deleteUser(${user.id})" class="action-btn text-red-600 hover:text-red-800">
+                                            <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                        </button>
+                                    </div>
                                 </div>
-        <div class="hidden details text-sm text-gray-700 bg-gray-100 p-3 rounded w-full sm:w-1/2">
-                                    <p><strong>Nom :</strong> ${user.username}</p>
-                                    <p><strong>Prénom :</strong> ${user.prenom}</p>
-                                    <p><strong>Email :</strong> ${user.email}</p>
-                                    <p><strong>Poste :</strong> ${user.poste}</p>
-                                    <p><strong>Téléphone :</strong> ${user.telephone}</p>
-                                    <p><strong>Role :</strong> ${user.role}</p>
-
-                                </div></div>
-                            `;
-                        list.appendChild(container);
+                                
+                                <div class="mt-3 pt-3 border-t border-gray-100">
+                                    <p class="text-sm text-gray-700 flex items-center gap-2">
+                                        <i data-lucide="mail" class="w-4 h-4"></i>
+                                        ${user.email}
+                                    </p>
+                                    <p class="text-sm text-gray-700 flex items-center gap-2 mt-1">
+                                        <i data-lucide="phone" class="w-4 h-4"></i>
+                                        ${user.telephone}
+                                    </p>
+                                </div>
+                            </div>
+                            
+                            <div class="hidden details-panel p-4 bg-gray-50 rounded-b-lg">
+                                <button onclick="toggleDetails(this)" class="text-xs text-gray-500 hover:text-gray-700 flex items-center gap-1">
+                                    <i data-lucide="chevron-up" class="w-3 h-3"></i>
+                                    <span>Moins de détails</span>
+                                </button>
+                            </div>
+                        `;
+                        container.appendChild(card);
                     });
 
                 lucide.createIcons(); 
@@ -188,18 +348,23 @@
                 console.error("Erreur lors du chargement des utilisateurs :", error);
             }
         }
+
         function toggleDetails(btn) {
-    const details = btn.parentElement.nextElementSibling; 
-    details.classList.toggle("hidden"); 
-    const icon = btn.querySelector('i');
-    if (details.classList.contains("hidden")) {
-        icon.classList.remove("fa-eye-slash");
-        icon.classList.add("fa-eye");
-    } else {
-        icon.classList.remove("fa-eye");
-        icon.classList.add("fa-eye-slash");
-    }
-}
+            const card = btn.closest('.user-card');
+            const details = card.querySelector('.details-panel');
+            const icon = btn.querySelector('i');
+            
+            details.classList.toggle('hidden');
+            
+            if (details.classList.contains('hidden')) {
+                icon.setAttribute('data-lucide', 'chevron-down');
+                btn.querySelector('span').textContent = 'Plus de détails';
+            } else {
+                icon.setAttribute('data-lucide', 'chevron-up');
+                btn.querySelector('span').textContent = 'Moins de détails';
+            }
+            lucide.createIcons();
+        }
 
         document.getElementById("add-form").addEventListener("submit", async (e) => {
             e.preventDefault();
@@ -253,28 +418,6 @@
             }
         }
 
-        async function editUser(id) {
-            try {
-                const res = await fetch(`${API_URL}/${id}`);
-                if (!res.ok) throw new Error("Erreur HTTP " + res.status);
-                const user = await res.json();
-
-                document.getElementById("edit-id").value = user.id;
-                document.getElementById("edit-username").value = user.username;
-                document.getElementById("edit-prenom").value = user.prenom;
-                document.getElementById("edit-email").value = user.email;
-                document.getElementById("edit-poste").value = user.poste;
-                document.getElementById("edit-telephone").value = user.telephone;
-                document.getElementById("edit-role").value = user.role;
-                document.getElementById("edit-password").value = user.password;
-
-
-                document.getElementById("edit-form").classList.remove("hidden");
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-            } catch (error) {
-                console.error(error);
-            }
-        }
         document.getElementById("edit-form").addEventListener("submit", async (e) => {
             e.preventDefault();
 
@@ -287,12 +430,19 @@
             const role = document.getElementById("edit-role").value;
             const password = document.getElementById("edit-password").value; 
 
-
             try {
                 const response = await fetch(`${API_URL}/${id}`, {
                     method: "PUT",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ username, prenom, email, poste, telephone, role, password }) 
+                    body: JSON.stringify({ 
+                        username, 
+                        prenom, 
+                        email, 
+                        poste, 
+                        telephone, 
+                        role, 
+                        password: password || undefined 
+                    }) 
                 });
 
                 if (!response.ok) {
@@ -302,7 +452,7 @@
                     return;
                 }
 
-                document.getElementById("edit-form").classList.add("hidden");
+                cancelEdit();
                 fetchUsers();
             } catch (err) {
                 alert("Erreur réseau lors de la mise à jour.");
@@ -310,93 +460,90 @@
             }
         });
 
-        function cancelEdit() {
-            document.getElementById("edit-form").classList.add("hidden");
-        }
-
         document.getElementById("search").addEventListener("input", (e) => {
             fetchUsers(e.target.value);
         });
-        lucide.createIcons(); 
+
+        // Initialize icons and fetch users
+        lucide.createIcons();
         fetchUsers();
     </script>
+
+    <!-- Menu script -->
     <div id="menu"></div>
     <script src="https://cdn.jsdelivr.net/npm/lucide@0.0.0/dist/lucide.min.js"></script>
-
     <script>
-          document.addEventListener('DOMContentLoaded', () => {
-  const menuDiv = document.getElementById("menu");
+        document.addEventListener('DOMContentLoaded', () => {
+            const menuDiv = document.getElementById("menu");
+            
+            fetch("/static/menu.html")
+                .then(response => response.text())
+                .then(data => {
+                    if (menuDiv) {
+                        menuDiv.innerHTML = data;
+                        attachEventListenersToNav('.desktop-nav');
+                        attachEventListenersToNav('.mobile-nav');
+                        checkAndApplyActiveStateOnLoad();
+                    }
+                })
+                .catch(error => {
+                    console.error('Erreur lors du chargement du menu :', error);
+                });
 
-  fetch("/static/menu.html")
-    .then(response => response.text())
-    .then(data => {
-      if (menuDiv) {
-        menuDiv.innerHTML = data;
-        attachEventListenersToNav('.desktop-nav');
-        attachEventListenersToNav('.mobile-nav');
-        checkAndApplyActiveStateOnLoad();
-      }
-    })
-    .catch(error => {
-      console.error('Erreur lors du chargement du menu :', error);
-    });
+            function attachEventListenersToNav(navSelector) {
+                const nav = document.querySelector(navSelector);
+                if (nav) {
+                    const navItems = nav.querySelectorAll('.nav-item, .mobile-nav-item');
+                    navItems.forEach(item => {
+                        item.addEventListener('click', function(event) {
+                            activateNavItem(this, navSelector);
+                        });
+                    });
+                }
+            }
 
-  function attachEventListenersToNav(navSelector) {
-    const nav = document.querySelector(navSelector);
-    if (nav) {
-      const navItems = nav.querySelectorAll('.nav-item, .mobile-nav-item');
-      navItems.forEach(item => {
-        item.addEventListener('click', function(event) {
-          activateNavItem(this, navSelector);
-        
+            function activateNavItem(item, navSelector) {
+                const activeItem = document.querySelector(`${navSelector} .nav-item.active, ${navSelector} .mobile-nav-item.active`);
+                if (activeItem && activeItem !== item) {
+                    activeItem.classList.remove('active');
+                }
+                item.classList.add('active');
+                localStorage.setItem('activeNavLink', item.dataset.navlink);
+            }
+
+            function checkAndApplyActiveStateOnLoad() {
+                const storedActiveNavLink = localStorage.getItem('activeNavLink');
+                const desktopNavItems = document.querySelectorAll('.desktop-nav .nav-item');
+                const mobileNavItems = document.querySelectorAll('.mobile-nav .mobile-nav-item');
+                const currentPage = window.location.pathname;
+
+                const allNavItems = [...desktopNavItems, ...mobileNavItems]; 
+
+                if (storedActiveNavLink) {
+                    allNavItems.forEach(item => {
+                        if (item.dataset.navlink === storedActiveNavLink) {
+                            item.classList.add('active');
+                        }
+                    });
+                } else {
+                    if (currentPage === '/' || currentPage === '/dashboard') {
+                        allNavItems.forEach(item => {
+                            if (item.dataset.navlink === 'accueil') {
+                                item.classList.add('active');
+                                localStorage.setItem('activeNavLink', 'accueil');
+                            }
+                        });
+                    } else {
+                        allNavItems.forEach(item => {
+                            if (item.getAttribute('href') === currentPage) {
+                                item.classList.add('active');
+                                localStorage.setItem('activeNavLink', item.dataset.navlink);
+                            }
+                        });
+                    }
+                }
+            }
         });
-      });
-    }
-  }
-
-  function activateNavItem(item, navSelector) {
-    const activeItem = document.querySelector(`${navSelector} .nav-item.active, ${navSelector} .mobile-nav-item.active`);
-    if (activeItem && activeItem !== item) {
-      activeItem.classList.remove('active');
-    }
-    item.classList.add('active');
-    localStorage.setItem('activeNavLink', item.dataset.navlink);
-  }
-
-  function checkAndApplyActiveStateOnLoad() {
-    const storedActiveNavLink = localStorage.getItem('activeNavLink');
-    const desktopNavItems = document.querySelectorAll('.desktop-nav .nav-item');
-    const mobileNavItems = document.querySelectorAll('.mobile-nav .mobile-nav-item');
-    const currentPage = window.location.pathname;
-
-    const allNavItems = [...desktopNavItems, ...mobileNavItems]; 
-
-    if (storedActiveNavLink) {
-      allNavItems.forEach(item => {
-        if (item.dataset.navlink === storedActiveNavLink) {
-          item.classList.add('active');
-        }
-      });
-    } else {
-      
-      if (currentPage === '/' || currentPage === '/dashboard') {
-        allNavItems.forEach(item => {
-          if (item.dataset.navlink === 'accueil') {
-            item.classList.add('active');
-            localStorage.setItem('activeNavLink', 'accueil');
-          }
-        });
-      } else {
-        allNavItems.forEach(item => {
-          if (item.getAttribute('href') === currentPage) {
-            item.classList.add('active');
-            localStorage.setItem('activeNavLink', item.dataset.navlink);
-          }
-        });
-      }
-    }
-  }
-});
     </script>
 </body>
 </html>

@@ -39,11 +39,11 @@
         }
 
         .form-container h2 {
-            color: #4D869C;
+            color: #e96036;
             font-weight: bold;
         }
         .form-container label{
-            color: aliceblue;
+            color: black;
         }
 
         .form-container input,
@@ -54,34 +54,40 @@
         .form-container button{
 
             padding: 12px 25px;
-            background-color: #4D869C;
+            background-color: #e96036;
             color: white;
             text-decoration: none;
-            filter: drop-shadow(0,0,10px,#4D869C);
+            filter: drop-shadow(0,0,10px,#e96036);
             border-radius: 8px;
             font-weight: bold;
             transition: background-color 0.3s ease, color 0.3s ease;
-            border: #4F959D 1px solid;
+            border: #e96036 1px solid;
         }
         .form-container button:hover{
-            background-color: white;
-            color: #4F959D;
+            background-color: #c74a24;
+            color: #97ac9d;
             transition: 1s ease-in-out;
-            border: #4F959D 1px solid;}
+            border: #e96036 1px solid;}
 
         .form-container input {
             background-color: rgba(255, 248, 248, 0.8);
-            border-color: rgba(255, 255, 255, 0.8);
+            border-color: #ffffffcc;
         }
 
         .form-container input:focus {
             outline: 2px solid rgba(255, 255, 255, 0.8);
-            border-color: #205781;
+            border-color: #e96036;
         }
 
         .form-container svg {
-            fill: #4D869C !important;
-            color: #4D869C !important;
+            fill: #e96036 !important;
+            color: #e96036 !important;
+        }
+        footer {
+            margin-top: 60px;
+            color: #aaa;
+            font-size: 14px;
+            text-align: end;
         }
     </style>
 </head>
@@ -96,15 +102,15 @@
     
     
 
-<video autoplay muted loop id="bg-video" class="absolute top-0 left-0 w-full h-full object-cover z-[-1]">
-    <source src="/static/video/background.mp4" type="video/mp4">
-    Votre navigateur ne supporte pas la vidéo HTML5.
-</video>
+<body style="background-image: url('/static/image/background.webp'); background-size: cover; background-position: center; background-repeat: no-repeat; height: 100vh; width: 100vw; margin: 0;">
+
 <div class="form-container relative rounded-xl shadow-lg w-96 max-w-sm">
 
     
 
-    <h2 class="text-2xl font-semibold text-center mb-6"> Connection</h2>
+<div class="flex justify-center mb-6">
+    <img src="/static/image/logo_22.webp" alt="Logo" class="h-16">
+</div>
     <form action="/login" method="POST">
         <div class="mb-4">
             <label for="username" class="block text-sm font-medium">Nom d'utilisateur</label>
