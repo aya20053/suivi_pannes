@@ -7,339 +7,724 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link href="https://cdn.jsdelivr.net/npm/lucide-icons@0.1.0/dist/lucide.min.css" rel="stylesheet">
   <link rel="icon" type="image/png" href="/static/image/logo.jpeg">
-  <script src="script.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/vis-network@9.1.2/dist/vis-network.min.js"></script>
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-  <style>button i {
-    font-size: 24px;
-    color: #1c3d5a; 
-  }
-  
-  .mobile-nav-item.active {
-        color: var(--primary-color);
+  <style>
+    :root {
+      --primary-color: #205781;
+      --secondary-color: #2c7cb0;
+      --accent-color: #3a9bd9;
+      --success-color: #4CAF50;
+      --danger-color: #F44336;
+      --warning-color: #FF9800;
+      --light-bg: #f8fafc;
+      --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    }
+    
+    body {
+      background-color: var(--light-bg);
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    
+    .header {
+      color: var(--primary-color);
+      border-bottom: 2px solid var(--primary-color);
+      padding-bottom: 0.5rem;
+    }
+    
+    .btn-primary {
+      background-color: var(--primary-color);
+      color: white;
+      transition: all 0.3s ease;
+    }
+    
+    .btn-primary:hover {
+      background-color: var(--secondary-color);
+      transform: translateY(-1px);
+    }
+    
+    .btn-secondary {
+      background-color: white;
+      color: var(--primary-color);
+      border: 1px solid var(--primary-color);
+    }
+    
+    .btn-secondary:hover {
+      background-color: var(--light-bg);
+    }
+    
+    .card {
+      background: white;
+      border-radius: 0.5rem;
+      box-shadow: var(--card-shadow);
+      transition: all 0.3s ease;
+    }
+    
+    .card:hover {
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+      transform: translateY(-2px);
+    }
+    
+    .form-input {
+      border: 1px solid #cbd5e0;
+      border-radius: 0.375rem;
+      transition: all 0.2s ease;
+    }
+    
+    .form-input:focus {
+      border-color: var(--accent-color);
+      box-shadow: 0 0 0 3px rgba(58, 155, 217, 0.2);
+    }
+    
+    .network-node {
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    
+    .network-node:hover {
+      transform: scale(1.05);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    
+    .active-view-btn {
+      background-color: var(--primary-color) !important;
+      color: white !important;
+    }
+    
+    #site-details {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease;
+    }
+    
+    #site-details.show {
+      max-height: 500px;
+      padding: 1.5rem;
+      border: 1px solid #e2e8f0;
+    }
+    
+    .status-En-ligne {
+      color: var(--success-color);
+    }
+    
+    .status-Hors-ligne {
+      color: var(--danger-color);
+    }
+    
+    .status-warning {
+      color: var(--warning-color);
+    }
+    
+    .nav-tabs {
+      border-bottom: 2px solid #e2e8f0;
+    }
+    
+    .nav-tab {
+      color: #4a5568;
+      padding: 0.5rem 1rem;
+      border-bottom: 2px solid transparent;
+      transition: all 0.2s ease;
+    }
+    
+    .nav-tab.active {
+      color: var(--primary-color);
+      border-bottom-color: var(--primary-color);
+      font-weight: 600;
+    }
+    
+    .nav-tab:hover:not(.active) {
+      color: var(--secondary-color);
+      border-bottom-color: #cbd5e0;
+    }
+    
+    .equipment-badge {
+      display: inline-block;
+      padding: 0.25rem 0.5rem;
+      border-radius: 0.25rem;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+    
+    .badge-server {
+      background-color: #ebf5ff;
+      color: #3182ce;
+    }
+    
+    .badge-router {
+      background-color: #faf5ff;
+      color: #805ad5;
+    }
+    
+    .badge-switch {
+      background-color: #fff5f5;
+      color: #e53e3e;
+    }
+    
+    .badge-network {
+      background-color: #f0fff4;
+      color: #38a169;
     }
 
-    .mobile-nav-item.active .mobile-nav-icon {
-        color: var(--primary-color);
+    .alert {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      padding: 1rem;
+      border-radius: 0.5rem;
+      box-shadow: var(--card-shadow);
+      z-index: 1000;
+      display: flex;
+      align-items: center;
     }
-
-    .mobile-nav-item.active .mobile-nav-label {
-        color: var(--active-text-color);
+    
+    .alert-success {
+      background-color: var(--success-color);
+      color: white;
+    }
+    
+    .alert-error {
+      background-color: var(--danger-color);
+      color: white;
+    }
+    
+    .alert-info {
+      background-color: var(--accent-color);
+      color: white;
     }
   </style>
 </head>
-<body class=" p-4 sm:p-10">
-  <div class="max-w-5xl mx-auto">
-    <div class="flex justify-between items-center mb-6 flex-wrap">
-      <h1 class="text-2xl sm:text-3xl font-bold w-full text-center flex justify-center items-center gap-2"style="  margin-bottom: 1rem;
-      color: #205781;">
-        <i class='bx bx-network-chart text-3xl'></i>
-        Réseaux Monitorés
-    </h1>
+<body class="p-4 sm:p-8 bg-gray-50">
+  <div class="max-w-6xl mx-auto">
+    <!-- Menu -->
+    <div id="menu"></div>
     
-    
-    
-      <button id="toggle-form-btn" class="px-4 py-2" style="background-color: #205781; color: white; border-radius: 0.375rem;">
-        ➕ Ajouter Réseau
-      </button>
+    <!-- Header -->
+    <div class="flex flex-col items-center mb-8">
+      <h1 class="text-3xl font-bold text-center mb-2 header">
+        <i class='bx bx-network-chart text-3xl align-middle mr-2'></i>
+        Monitoring Réseau
+      </h1>
+      
+      <p class="text-gray-600 mb-6 text-center max-w-2xl">
+        Visualisez et gérez l'ensemble de votre infrastructure réseau en temps réel
+      </p>
+      
+      <!-- Navigation tabs -->
+      <div class="flex nav-tabs mb-6 w-full justify-center">
+        <button id="simple-view-btn" class="nav-tab active flex items-center mr-4">
+          <i data-lucide="list" class="w-4 h-4 mr-2"></i>
+          Vue Liste
+        </button>
+        <button id="architecture-view-btn" class="nav-tab flex items-center">
+          <i data-lucide="network" class="w-4 h-4 mr-2"></i>
+          Vue Architecture
+        </button>
+      </div>
+      
+      <!-- Actions -->
+      <div class="flex gap-3 mb-6 w-full justify-between">
+        <div class="relative flex-1 max-w-md">
+          <i data-lucide="search" class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+          <input type="text" id="search" placeholder="Rechercher un réseau..." 
+                 class="w-full pl-10 pr-4 py-2 form-input focus:ring-2 focus:ring-blue-200">
+        </div>
+        <button id="add-network-btn" class="btn-primary px-4 py-2 rounded-md flex items-center">
+          <i data-lucide="plus" class="w-5 h-5 mr-2"></i>
+          Ajouter Réseau
+        </button>
+      </div>
     </div>
 
-    <form id="add-form" class="bg-blue-50 p-6 rounded-xl shadow-lg border border-blue-200 mb-6 hidden">
-      <h2 class="text-xl font-semibold text-blue-800 mb-4 flex items-center gap-2">
-        <i data-lucide="plus-circle"></i> Ajouter un nouveau réseau
+    <!-- Formulaire d'ajout/modification -->
+    <form id="site-form" class="card p-6 mb-8 hidden">
+      <h2 id="form-title" class="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+        <i data-lucide="plus-circle" class="text-blue-500 mr-2"></i>
+        <span id="form-title-text">Ajouter un nouveau site</span>
       </h2>
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <input type="text" id="name" placeholder="Nom du réseau" required
-               class="p-3 border border-blue-200 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
-        <input type="text" id="url_or_ip" placeholder="URL ou IP" required
-               class="p-3 border border-blue-200 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
+      
+      <input type="hidden" id="site-id">
+      
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+        <div>
+          <label for="name" class="block text-sm font-medium text-gray-700 mb-1">Nom du réseau</label>
+          <input type="text" id="name" placeholder="Ex: Serveur Principal" required 
+                 class="w-full p-3 form-input">
+        </div>
+        
+        <div>
+          <label for="url_or_ip" class="block text-sm font-medium text-gray-700 mb-1">Adresse IP/URL</label>
+          <input type="text" id="url_or_ip" placeholder="Ex: 192.168.1.1" required 
+                 class="w-full p-3 form-input">
+        </div>
+        
+        <div>
+          <label for="equipment_type" class="block text-sm font-medium text-gray-700 mb-1">Type d'équipement</label>
+          <select id="equipment_type" required class="w-full p-3 form-input">
+            <option value="">Sélectionnez un type</option>
+            <option value="serveur">Serveur</option>
+            <option value="réseau">Réseau</option>
+            <option value="switch">Switch</option>
+            <option value="routeur">Routeur</option>
+          </select>
+        </div>
       </div>
-      <button type="submit"
-              class="mt-5 px-4 py-2 bg-blue-100 text-blue-800 rounded-md hover:bg-blue-200 transition-all duration-200 flex items-center gap-1">
-        <i data-lucide="save"></i> Ajouter
-      </button>
+      
+      <div class="flex justify-end gap-3">
+        <button type="button" id="cancel-btn" class="btn-secondary px-4 py-2 rounded-md flex items-center">
+          <i data-lucide="x" class="w-5 h-5 mr-2"></i>
+          Annuler
+        </button>
+        <button type="submit" class="btn-primary px-4 py-2 rounded-md flex items-center">
+          <i data-lucide="save" class="w-5 h-5 mr-2"></i>
+          <span id="submit-btn-text">Enregistrer</span>
+        </button>
+      </div>
     </form>
 
+    <!-- Détails du site -->
+    <div id="site-details" class="card mb-6">
+      <!-- Contenu chargé dynamiquement -->
+    </div>
 
-    <!-- Barre de recherche -->
-    <div class="mb-4 relative w-full max-w-md mx-auto">
-      <i data-lucide="search" class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
-      <input 
-          type="text" 
-          id="search" 
-          placeholder="Rechercher un réseau..." 
-          class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 bg-white text-gray-800"
-      >
-  </div>
-  
-    
+    <!-- Vue Simple -->
+    <div id="simple-view">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="site-list">
+        <!-- Sites chargés dynamiquement -->
+      </div>
+    </div>
 
-    <div id="site-list" class="space-y-4">
-      <!-- Sites dynamiques -->
+    <!-- Vue Architecture -->
+    <div id="architecture-view" class="hidden">
+      <div class="card p-4">
+        <div id="network-diagram" class="w-full h-[600px] rounded-lg"></div>
+      </div>
     </div>
   </div>
 
-  <form id="edit-form" class="bg-blue-50 p-6 rounded-xl shadow-lg border border-blue-200 mb-6 hidden w-150">
-    <h2 class="text-xl font-semibold text-blue-800 mb-4 flex items-center gap-2">
-      <i data-lucide="pencil"></i> Modifier le site
-    </h2> 
-    <input type="hidden" id="edit-id">
-    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-      <input type="text" id="edit-name" placeholder="Nom du réseau" required
-             class="p-3 border border-blue-200 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
-      <input type="text" id="edit-url" placeholder="URL ou IP" required
-             class="p-3 border border-blue-200 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
-    </div>
-    <div class="mt-4 flex gap-2">
-      <button type="submit" class="mt-5 px-4 py-2 bg-blue-100 text-blue-800 rounded-md hover:bg-blue-200 transition-all duration-200 flex items-center gap-1">
-        <i data-lucide="save"></i> Enregistrer
-      </button>
-      <button type="button" onclick="cancelEdit()" class="mt-5 px-4 py-2 bg-blue-100 text-blue-800 rounded-md hover:bg-blue-200 transition-all duration-200 flex items-center gap-1">
-        <i data-lucide="x"></i> Annuler
-      </button>
-    </div>
-  </form>
-  
-  
-
-  
   <script>
-  const API_URL = "http://localhost:5000/api/sites";
+    const API_URL = "http://localhost:5000/api/sites";
+    let sites = [];
+    let currentView = 'simple';
+    let network = null;
+    let isEditMode = false;
 
-  // Toggle formulaire ajout
-  document.getElementById("toggle-form-btn").addEventListener("click", () => {
-    const form = document.getElementById("add-form");
-    form.classList.toggle("hidden");
-  });
-
-  async function fetchSites(filter = "") {
-    try {
-      const res = await fetch(API_URL);
-      if (!res.ok) throw new Error("Erreur lors de la récupération des sites");
-      const sites = await res.json();
-
-      const list = document.getElementById("site-list");
-      list.innerHTML = "";
-
-      sites
-        .filter(site => site.name.toLowerCase().includes(filter.toLowerCase()))
-        .forEach(site => {
-          const container = document.createElement("div");
-          container.className = "bg-white rounded shadow p-4";
-
-          container.innerHTML = `
-  <div class="flex justify-between items-center flex-wrap">
-               <h2 class="text-lg font-bold flex-1">${site.name}</h2>
-
-              <div class="flex items-center gap-2 w-full sm:w-auto">
-
-                <button onclick="editSite(${site.id})" class="flex items-center gap-1 text-green-600 ">
-                <i data-lucide="pencil"></i>
-              </button>
-                <button onclick="deleteSite(${site.id})" class="text-red-500  gap-1 hover:text-red-700"><i data-lucide="trash-2"></i></button>
-              
-            <button type="button" onclick="toggleDetails(this)" class="flex items-center gap-2">
-              👁‍🗨
-            </button>
-
-              <br>
-            </div>
-<div class="hidden details text-sm p-3 rounded w-full sm:w-1/2" style="background-color: #EEF7FF !important">
- 
-              <p><strong>Adresse :</strong> ${site.url_or_ip}</p>
-              <p><strong>Status :</strong> ${site.last_status}</p>
-              <p><strong>Dernier check :</strong> ${site.last_checked}</p>
-              <p><strong>Échecs :</strong> ${site.failed_pings_count}</p>
-              <p><strong>Alerte :</strong> ${site.alert_sent ? "✅" : "❌"}</p>
-            </div></div>
-          `;
-          list.appendChild(container);
-        });
-
-      lucide.createIcons(); // Recréer les icônes
-    } catch (error) {
-      console.error("Erreur lors du chargement des sites :", error);
-    }
-  }
-  function toggleDetails(btn) {
-  const details = btn.parentElement.nextElementSibling; // On cible le div avec les détails
-  details.classList.toggle("hidden"); // On ajoute ou enlève la classe "hidden"
-
-  // Ici on change le texte du bouton en fonction de l'état d'affichage
-  if (details.classList.contains("hidden")) {
-    btn.textContent = "👁‍🗨";  // Afficher l'icône pour "Afficher"
-  } else {
-    btn.textContent = "Masquer";  // Texte pour masquer
-  }
-}
-
-
-
-
-
-
-
-  document.getElementById("add-form").addEventListener("submit", async (e) => {
-    e.preventDefault();
-    const name = document.getElementById("name").value;
-    const url = document.getElementById("url_or_ip").value;
-
-    try {
-      await fetch(API_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, url_or_ip: url })
-      });
-
-      e.target.reset();
-      document.getElementById("add-form").classList.add("hidden");
-      fetchSites();
-    } catch (err) {
-      alert("Erreur lors de l'ajout du site.");
-      console.error(err);
-    }
-  });
-
-  async function deleteSite(id) {
-    const confirmDelete = confirm("Êtes-vous sûr de vouloir supprimer ce site ?");
-    if (!confirmDelete) return;
-
-    try {
-      await fetch(`${API_URL}/${id}`, { method: "DELETE" });
-      fetchSites();
-    } catch (err) {
-      alert("Erreur lors de la suppression.");
-      console.error(err);
-    }
-  }
-
-  async function editSite(id) {
-    try {
-      const res = await fetch(`${API_URL}/${id}`);
-      if (!res.ok) throw new Error("Erreur HTTP " + res.status);
-      const site = await res.json();
-
-      document.getElementById("edit-id").value = site.id;
-      document.getElementById("edit-name").value = site.name;
-      document.getElementById("edit-url").value = site.url_or_ip;
-
-      document.getElementById("edit-form").classList.remove("hidden");
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    } catch (error) {
-      console.error(error);
-    }
-  }
-  document.getElementById("edit-form").addEventListener("submit", async (e) => {
-  e.preventDefault();
-
-  const id = document.getElementById("edit-id").value;
-  const name = document.getElementById("edit-name").value;
-  const url_or_ip = document.getElementById("edit-url").value;
-
-  try {
-    await fetch(`${API_URL}/${id}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, url_or_ip })
+    // Initialisation
+    document.addEventListener('DOMContentLoaded', () => {
+      initApp();
     });
 
-    document.getElementById("edit-form").classList.add("hidden");
-    fetchSites();
-  } catch (err) {
-    alert("Erreur lors de la mise à jour.");
-    console.error(err);
-  }
-});
+    async function initApp() {
+      await loadMenu();
+      setupEventListeners();
+      await fetchSites();
+    }
 
-  function cancelEdit() {
-    document.getElementById("edit-form").classList.add("hidden");
-  }
-
-  document.getElementById("search").addEventListener("input", (e) => {
-    fetchSites(e.target.value);
-  });
-  lucide.createIcons(); // Ajoute ça après toute modification du DOM
-
-  // Charger les sites au démarrage
-  fetchSites();
-</script>
-<div id="menu"></div>
-<script src="https://cdn.jsdelivr.net/npm/lucide@0.0.0/dist/lucide.min.js"></script>
-
-<script>
-  document.addEventListener('DOMContentLoaded', () => {
-  const menuDiv = document.getElementById("menu");
-
-  fetch("/static/menu.html")
-    .then(response => response.text())
-    .then(data => {
-      if (menuDiv) {
-        menuDiv.innerHTML = data;
-        // Maintenant que le menu est chargé, nous pouvons attacher les événements et vérifier l'état actif pour les deux menus.
-        attachEventListenersToNav('.desktop-nav');
-        attachEventListenersToNav('.mobile-nav');
-        checkAndApplyActiveStateOnLoad();
+    async function loadMenu() {
+      try {
+        const response = await fetch("/static/menu.html");
+        if (!response.ok) throw new Error("Erreur de chargement du menu");
+        const menuHtml = await response.text();
+        document.getElementById("menu").innerHTML = menuHtml;
+      } catch (error) {
+        console.error("Erreur:", error);
+        showAlert("Impossible de charger le menu", "error");
       }
-    })
-    .catch(error => {
-      console.error('Erreur lors du chargement du menu :', error);
-    });
+    }
 
-  function attachEventListenersToNav(navSelector) {
-    const nav = document.querySelector(navSelector);
-    if (nav) {
-      const navItems = nav.querySelectorAll('.nav-item, .mobile-nav-item');
-      navItems.forEach(item => {
-        item.addEventListener('click', function(event) {
-          activateNavItem(this, navSelector);
-          // La navigation vers la nouvelle page se fera normalement grâce au lien <a>
-        });
+    function setupEventListeners() {
+      // Boutons de vue
+      document.getElementById('simple-view-btn').addEventListener('click', () => toggleView('simple'));
+      document.getElementById('architecture-view-btn').addEventListener('click', () => toggleView('architecture'));
+      
+      // Bouton d'ajout
+      document.getElementById('add-network-btn').addEventListener('click', () => {
+        openSiteForm();
+      });
+      
+      // Bouton d'annulation
+      document.getElementById('cancel-btn').addEventListener('click', () => {
+        closeSiteForm();
+      });
+      
+      // Formulaire
+      document.getElementById('site-form').addEventListener('submit', handleFormSubmit);
+      
+      // Recherche
+      document.getElementById('search').addEventListener('input', (e) => {
+        renderSiteList(e.target.value);
       });
     }
-  }
 
-  function activateNavItem(item, navSelector) {
-    const activeItem = document.querySelector(`${navSelector} .nav-item.active, ${navSelector} .mobile-nav-item.active`);
-    if (activeItem && activeItem !== item) {
-      activeItem.classList.remove('active');
+    function toggleView(view) {
+      currentView = view;
+      document.getElementById('simple-view').classList.toggle('hidden', view !== 'simple');
+      document.getElementById('architecture-view').classList.toggle('hidden', view !== 'architecture');
+      
+      // Mettre à jour les boutons actifs
+      document.getElementById('simple-view-btn').classList.toggle('active', view === 'simple');
+      document.getElementById('architecture-view-btn').classList.toggle('active', view === 'architecture');
+      
+      if (view === 'architecture') renderNetworkDiagram();
     }
-    item.classList.add('active');
-    localStorage.setItem('activeNavLink', item.dataset.navlink);
-  }
 
-  function checkAndApplyActiveStateOnLoad() {
-    const storedActiveNavLink = localStorage.getItem('activeNavLink');
-    const desktopNavItems = document.querySelectorAll('.desktop-nav .nav-item');
-    const mobileNavItems = document.querySelectorAll('.mobile-nav .mobile-nav-item');
-    const currentPage = window.location.pathname;
+    async function fetchSites() {
+      try {
+        const response = await fetch(API_URL);
+        if (!response.ok) throw new Error("Erreur réseau");
+        sites = await response.json();
+        renderSiteList();
+        if (currentView === 'architecture') renderNetworkDiagram();
+      } catch (error) {
+        console.error("Erreur:", error);
+        showAlert("Impossible de charger les sites", "error");
+      }
+    }
 
-    const allNavItems = [...desktopNavItems, ...mobileNavItems]; // Combine les deux listes
+    function renderSiteList(filter = '') {
+      const filteredSites = filter ? sites.filter(site => 
+        site.name.toLowerCase().includes(filter.toLowerCase()) || 
+        site.url_or_ip.toLowerCase().includes(filter.toLowerCase())
+      ) : sites;
 
-    if (storedActiveNavLink) {
-      allNavItems.forEach(item => {
-        if (item.dataset.navlink === storedActiveNavLink) {
-          item.classList.add('active');
+      const list = document.getElementById('site-list');
+      list.innerHTML = filteredSites.map(site => `
+        <div class="card p-4 hover:border-blue-300 border border-gray-200">
+          <div class="flex justify-between items-start">
+            <div>
+              <h3 class="font-bold text-lg text-gray-800 mb-1">${site.name}</h3>
+              <span class="equipment-badge badge-${getEquipmentClass(site.equipment_type)} mb-2">
+                ${site.equipment_type}
+              </span>
+              <p class="text-sm text-gray-600 mb-2">
+                <i data-lucide="link" class="w-4 h-4 inline mr-1"></i>
+                ${site.url_or_ip}
+              </p>
+              <p class="text-sm">
+                Statut: 
+                <span class="status-${site.last_status === 'En ligne' ? 'En-ligne' : 'Hors-ligne'} font-medium">
+                  <i data-lucide="${site.last_status === 'En ligne' ? 'check-circle' : 'x-circle'}" 
+                     class="w-4 h-4 inline mr-1"></i>
+                  ${site.last_status === 'En ligne' ? 'Opérationnel' : 'Hors ligne'}
+                </span>
+              </p>
+            </div>
+            <div class="flex gap-1">
+              <button onclick="showSiteDetails(${site.id})" 
+                      class="p-2 text-blue-500 hover:bg-blue-50 rounded-full"
+                      title="Voir détails">
+                <i data-lucide="eye" class="w-5 h-5"></i>
+              </button>
+              <button onclick="editSite(${site.id})" 
+                      class="p-2 text-yellow-500 hover:bg-yellow-50 rounded-full"
+                      title="Modifier">
+                <i data-lucide="pencil" class="w-5 h-5"></i>
+              </button>
+              <button onclick="deleteSite(${site.id})" 
+                      class="p-2 text-red-500 hover:bg-red-50 rounded-full"
+                      title="Supprimer">
+                <i data-lucide="trash-2" class="w-5 h-5"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      `).join('');
+      lucide.createIcons();
+    }
+
+    function getEquipmentClass(type) {
+      const types = {
+        'serveur': 'server',
+        'routeur': 'router',
+        'switch': 'switch',
+        'réseau': 'network'
+      };
+      return types[type] || 'server';
+    }
+
+    function openSiteForm(site = null) {
+      const form = document.getElementById('site-form');
+      const title = document.getElementById('form-title-text');
+      const submitBtn = document.getElementById('submit-btn-text');
+      
+      if (site) {
+        // Mode édition
+        isEditMode = true;
+        title.textContent = "Modifier le site";
+        submitBtn.textContent = "Mettre à jour";
+        document.getElementById('site-id').value = site.id;
+        document.getElementById('name').value = site.name;
+        document.getElementById('url_or_ip').value = site.url_or_ip;
+        document.getElementById('equipment_type').value = site.equipment_type;
+      } else {
+        // Mode ajout
+        isEditMode = false;
+        title.textContent = "Ajouter un nouveau site";
+        submitBtn.textContent = "Enregistrer";
+        document.getElementById('site-id').value = '';
+      }
+      
+      form.classList.remove('hidden');
+    }
+
+    function closeSiteForm() {
+      document.getElementById('site-form').reset();
+      document.getElementById('site-form').classList.add('hidden');
+      isEditMode = false;
+    }
+
+    async function handleFormSubmit(e) {
+      e.preventDefault();
+      
+      const formData = {
+        name: document.getElementById('name').value,
+        url_or_ip: document.getElementById('url_or_ip').value,
+        equipment_type: document.getElementById('equipment_type').value
+      };
+      
+      const siteId = document.getElementById('site-id').value;
+      const url = isEditMode ? `${API_URL}/${siteId}` : API_URL;
+      const method = isEditMode ? 'PUT' : 'POST';
+
+      try {
+        const response = await fetch(url, {
+          method,
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(formData)
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || "Erreur lors de l'opération");
+        }
+
+        closeSiteForm();
+        await fetchSites(); // Recharger les données fraîches du serveur
+        showAlert(`Site ${isEditMode ? 'modifié' : 'ajouté'} avec succès`, "success");
+        
+      } catch (error) {
+        console.error("Erreur:", error);
+        showAlert(error.message, "error");
+      }
+    }
+
+    function editSite(id) {
+      const site = sites.find(s => s.id == id);
+      if (site) {
+        openSiteForm(site);
+      }
+    }
+
+    function showSiteDetails(id) {
+      const site = sites.find(s => s.id == id);
+      if (!site) return;
+
+      const details = document.getElementById('site-details');
+      details.innerHTML = `
+        <div class="flex justify-between items-start mb-4">
+          <h3 class="text-xl font-bold text-gray-800">${site.name}</h3>
+          <span class="equipment-badge badge-${getEquipmentClass(site.equipment_type)}">
+            ${site.equipment_type}
+          </span>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+          <div class="space-y-3">
+            <div class="flex items-center">
+              <i data-lucide="link" class="text-gray-500 mr-3 w-5 h-5"></i>
+              <div>
+                <p class="text-sm text-gray-500">Adresse</p>
+                <p class="font-medium">${site.url_or_ip}</p>
+              </div>
+            </div>
+            
+            <div class="flex items-center">
+              <i data-lucide="${site.last_status === 'En ligne' ? 'check-circle' : 'x-circle'}" 
+                 class="${site.last_status === 'En ligne' ? 'text-green-500' : 'text-red-500'} mr-3 w-5 h-5"></i>
+              <div>
+                <p class="text-sm text-gray-500">Statut</p>
+                <p class="font-medium ${site.last_status === 'En ligne' ? 'text-green-500' : 'text-red-500'}">
+                  ${site.last_status === 'En ligne' ? 'En ligne' : 'Hors ligne'}
+                </p>
+              </div>
+            </div>
+          </div>
+          
+          <div class="space-y-3">
+            <div class="flex items-center">
+              <i data-lucide="clock" class="text-gray-500 mr-3 w-5 h-5"></i>
+              <div>
+                <p class="text-sm text-gray-500">Dernière vérification</p>
+                <p class="font-medium">${site.last_checked || 'N/A'}</p>
+              </div>
+            </div>
+            
+            <div class="flex items-center">
+              <i data-lucide="alert-circle" class="text-gray-500 mr-3 w-5 h-5"></i>
+              <div>
+                <p class="text-sm text-gray-500">Échecs consécutifs</p>
+                <p class="font-medium">${site.failed_pings_count || '0'}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="flex justify-end gap-3">
+          <button onclick="editSite(${site.id})" 
+                  class="btn-primary px-4 py-2 rounded-md flex items-center">
+            <i data-lucide="pencil" class="w-5 h-5 mr-2"></i>
+            Modifier
+          </button>
+          <button onclick="closeDetails()" 
+                  class="btn-secondary px-4 py-2 rounded-md flex items-center">
+            <i data-lucide="x" class="w-5 h-5 mr-2"></i>
+            Fermer
+          </button>
+        </div>
+      `;
+      details.classList.add('show');
+      lucide.createIcons();
+    }
+
+    function closeDetails() {
+      document.getElementById('site-details').classList.remove('show');
+    }
+
+    async function deleteSite(id) {
+      if (!confirm('Êtes-vous sûr de vouloir supprimer ce site ?')) return;
+      
+      try {
+        const response = await fetch(`${API_URL}/${id}`, { 
+          method: 'DELETE' 
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || "Erreur lors de la suppression");
+        }
+
+        await fetchSites(); // Recharger les données
+        closeDetails();
+        showAlert("Site supprimé avec succès", "success");
+      } catch (error) {
+        console.error("Erreur:", error);
+        showAlert(error.message, "error");
+      }
+    }
+
+    function renderNetworkDiagram() {
+      const container = document.getElementById('network-diagram');
+      container.innerHTML = '';
+      
+      // Créer les nœuds
+      const nodes = new vis.DataSet(
+        sites.map(site => ({
+          id: site.id,
+          label: site.name,
+          color: getNodeColor(site),
+          shape: 'box',
+          title: `
+            Type: ${site.equipment_type}\n
+            Adresse: ${site.url_or_ip}\n
+            Statut: ${site.last_status}
+          `
+        }))
+      );
+      
+      // Créer les connexions (exemple basique)
+      const edges = new vis.DataSet(createConnections(sites));
+      
+      const data = { nodes, edges };
+      const options = {
+        layout: {
+          randomSeed: 42,
+          improvedLayout: true
+        },
+        physics: {
+          enabled: true,
+          solver: 'forceAtlas2Based'
+        },
+        nodes: {
+          borderWidth: 2,
+          size: 30,
+          font: {
+            size: 12,
+            color: '#333'
+          }
+        },
+        edges: {
+          width: 2,
+          color: '#aaa',
+          smooth: {
+            type: 'continuous'
+          }
+        },
+        interaction: {
+          hover: true,
+          tooltipDelay: 200
+        }
+      };
+      
+      network = new vis.Network(container, data, options);
+      
+      // Gérer le clic sur un nœud
+      network.on('click', (params) => {
+        if (params.nodes.length) {
+          const siteId = params.nodes[0];
+          showSiteDetails(siteId);
         }
       });
-    } else {
-      // Logique pour activer un élément par défaut au chargement initial (si nécessaire)
-      if (currentPage === '/' || currentPage === '/dashboard') {
-        allNavItems.forEach(item => {
-          if (item.dataset.navlink === 'accueil') {
-            item.classList.add('active');
-            localStorage.setItem('activeNavLink', 'accueil');
-          }
-        });
-      } else {
-        allNavItems.forEach(item => {
-          if (item.getAttribute('href') === currentPage) {
-            item.classList.add('active');
-            localStorage.setItem('activeNavLink', item.dataset.navlink);
-          }
+    }
+
+    function createConnections(sites) {
+      // Ici vous devriez implémenter votre propre logique de connexion
+      // Ceci est un exemple basique qui connecte les éléments dans l'ordre
+      const connections = [];
+      for (let i = 0; i < sites.length - 1; i++) {
+        connections.push({
+          from: sites[i].id,
+          to: sites[i+1].id,
+          arrows: 'to'
         });
       }
+      return connections;
     }
-  }
-});
-</script>
+
+    function getNodeColor(site) {
+      if (site.last_status === 'En ligne') return '#4CAF50';
+      if (site.last_status === 'Hors ligne') return '#F44336';
+      
+      switch(site.equipment_type) {
+        case 'serveur': return '#2196F3';
+        case 'switch': return '#FF9800';
+        case 'routeur': return '#9C27B0';
+        default: return '#607D8B';
+      }
+    }
+
+    function showAlert(message, type = "info") {
+      const alertDiv = document.createElement('div');
+      alertDiv.className = `alert alert-${type}`;
+      alertDiv.innerHTML = `
+        <i data-lucide="${type === 'success' ? 'check-circle' : type === 'error' ? 'x-circle' : 'info'}" 
+           class="w-5 h-5 mr-2"></i>
+        ${message}
+      `;
+      
+      document.body.appendChild(alertDiv);
+      lucide.createIcons();
+      
+      // Supprimer l'alerte après 5 secondes
+      setTimeout(() => {
+        alertDiv.remove();
+      }, 5000);
+    }
+
+    // Exposer les fonctions globales
+    window.editSite = editSite;
+    window.deleteSite = deleteSite;
+    window.showSiteDetails = showSiteDetails;
+    window.closeDetails = closeDetails;
+  </script>
 </body>
 </html>
