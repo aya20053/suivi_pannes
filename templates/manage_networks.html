@@ -192,6 +192,42 @@
       background-color: var(--accent-color);
       color: white;
     }
+    .architecture-card {
+  transition: all 0.3s ease;
+  border: 1px solid #e2e8f0;
+}
+
+.architecture-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+.equipment-badge {
+font-size: 0.75rem;
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
+  padding-top: 0.25rem;
+  padding-bottom: 0.25rem;
+  border-radius: 9999px;
+}
+
+.connection-type {
+  font-size: 0.75rem;
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
+  padding-top: 0.25rem;
+  padding-bottom: 0.25rem;
+  border-radius: 9999px;
+}
+
+.icon-btn {
+font-size: 0.75rem;
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
+  padding-top: 0.25rem;
+  padding-bottom: 0.25rem;
+  border-radius: 9999px;
+}
   </style>
 </head>
 <body class="p-4 sm:p-8 bg-gray-50">
@@ -293,21 +329,154 @@
         <!-- Sites chargés dynamiquement -->
       </div>
     </div>
-
+<div id="architecture-loader" class="hidden fixed inset-0 bg-black bg-opacity-10 flex items-center justify-center z-50">
+    <div class="bg-white p-6 rounded-lg shadow-lg flex items-center">
+      <i data-lucide="loader" class="animate-spin w-8 h-8 text-blue-500 mr-3"></i>
+      <span>Chargement des architectures...</span>
+    </div>
+  </div>
+  
+  <!-- Conteneur principal -->
+  <div id="architectures-container" class="p-4"></div>
+</div>
     <!-- Vue Architecture -->
     <div id="architecture-view" class="hidden">
-      <div class="card p-4">
+      <div class="flex justify-end mb-4">
+        <button id="create-archi-btn" class="btn-primary px-4 py-2 rounded-md flex items-center">
+          <i data-lucide="plus" class="w-5 h-5 mr-2"></i>
+          Créer une architecture
+        </button>
+      </div>
+      
+      <div class="card p-4 mb-6">
         <div id="network-diagram" class="w-full h-[600px] rounded-lg"></div>
+      </div>
+      
+      <!-- Formulaire de création d'architecture -->
+      <div id="archi-form-container" class="hidden">
+        <div class="card p-6 mb-8">
+          <h2 class="text-xl font-semibold text-gray-800 mb-4">
+            <i data-lucide="network" class="text-blue-500 mr-2"></i>
+            Étape <span id="current-step">1</span> - Création d'architecture
+          </h2>
+          
+          <div id="step-1" class="step-content">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+              <div>
+                <label for="archi-name" class="block text-sm font-medium text-gray-700 mb-1">Nom de l'architecture</label>
+                <input type="text" id="archi-name" placeholder="Ex: Architecture principale" 
+                       class="w-full p-3 form-input" required>
+              </div>
+              
+              <div>
+                <label for="archi-description" class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                <input type="text" id="archi-description" placeholder="Description courte" 
+                       class="w-full p-3 form-input">
+              </div>
+            </div>
+            
+            <h3 class="font-medium mb-3">Sélectionnez l'équipement de départ</h3>
+            
+            <div class="mb-4">
+              <label class="block text-sm font-medium text-gray-700 mb-1">Filtrer par type :</label>
+              <select id="equipment-filter" class="w-full p-2 form-input">
+                <option value="">Tous les types</option>
+                <option value="serveur">Serveur</option>
+                <option value="routeur">Routeur</option>
+                <option value="switch">Switch</option>
+                <option value="réseau">Réseau</option>
+              </select>
+            </div>
+            
+            <div id="equipment-options" class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+              <!-- Liste des équipements de la base de données -->
+            </div>
+          </div>
+          
+          <div id="step-2" class="step-content hidden">
+            <h3 class="font-medium mb-3">Lier à d'autres équipements</h3>
+            <p class="text-sm text-gray-600 mb-4">Sélectionnez les équipements à connecter</p>
+            
+            <div class="mb-4">
+              <label class="block text-sm font-medium text-gray-700 mb-1">Équipement sélectionné :</label>
+              <div id="selected-equipment-display" class="card p-3 bg-gray-50">
+                <!-- Afficher l'équipement sélectionné -->
+              </div>
+            </div>
+
+            <div id="equipment-list" class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+              <!-- Liste des équipements disponibles pour connexion -->
+            </div>
+            
+            <div id="connections-display" class="mb-4">
+              <h4 class="font-medium mb-2">Connexions établies :</h4>
+              <div id="connections-list" class="space-y-2">
+                <!-- Liste des connexions créées -->
+              </div>
+            </div>
+          </div>
+          
+          <div class="flex justify-between">
+            <button id="prev-step-btn" class="btn-secondary px-4 py-2 rounded-md flex items-center hidden">
+              <i data-lucide="arrow-left" class="w-5 h-5 mr-2"></i>
+              Précédent
+            </button>
+            
+            <div class="flex gap-3 ml-auto">
+              <button id="cancel-archi-btn" class="btn-secondary px-4 py-2 rounded-md flex items-center">
+                <i data-lucide="x" class="w-5 h-5 mr-2"></i>
+                Annuler
+              </button>
+              <button id="next-step-btn" class="btn-primary px-4 py-2 rounded-md flex items-center">
+                <i data-lucide="arrow-right" class="w-5 h-5 mr-2"></i>
+                Suivant
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Tableau des liaisons -->
+      <div class="card p-4">
+        <h3 class="text-lg font-semibold mb-4">Détails des liaisons</h3>
+        <div class="overflow-x-auto">
+          <table class="min-w-full bg-white">
+            <thead>
+              <tr>
+                <th class="py-2 px-4 border-b">Équipement source</th>
+                <th class="py-2 px-4 border-b">Équipement cible</th>
+                <th class="py-2 px-4 border-b">Type de liaison</th>
+                <th class="py-2 px-4 border-b">Créé par</th>
+                <th class="py-2 px-4 border-b">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="connections-table">
+              <!-- Rempli dynamiquement -->
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   </div>
 
   <script>
-    const API_URL = "http://localhost:5000/api/sites";
+    // Configuration globale
+    const API_BASE_URL = "http://localhost:5000/api";
+    const SITES_URL = `${API_BASE_URL}/sites`;
+    const ARCHITECTURES_URL = `${API_BASE_URL}/architectures`;
+    
+    // Variables d'état
     let sites = [];
+    let architectures = [];
+    let connections = [];
     let currentView = 'simple';
     let network = null;
     let isEditMode = false;
+    
+    // Variables pour la création d'architecture
+    let currentStep = 1;
+    let selectedEquipment = null;
+    let tempConnections = [];
 
     // Initialisation
     document.addEventListener('DOMContentLoaded', () => {
@@ -318,6 +487,7 @@
       await loadMenu();
       setupEventListeners();
       await fetchSites();
+      await fetchArchitectures();
     }
 
     async function loadMenu() {
@@ -354,33 +524,204 @@
       document.getElementById('search').addEventListener('input', (e) => {
         renderSiteList(e.target.value);
       });
+      
+      // Bouton pour créer une architecture
+      document.getElementById('create-archi-btn').addEventListener('click', () => {
+        document.getElementById('archi-form-container').classList.remove('hidden');
+        resetArchitectureForm();
+        loadEquipmentOptions();
+      });
+      
+      // Bouton d'annulation architecture
+      document.getElementById('cancel-archi-btn').addEventListener('click', () => {
+        document.getElementById('archi-form-container').classList.add('hidden');
+        resetArchitectureForm();
+      });
+      
+      // Boutons suivant/précédent
+      document.getElementById('next-step-btn').addEventListener('click', goToNextStep);
+      document.getElementById('prev-step-btn').addEventListener('click', goToPrevStep);
+      
+      // Filtre des équipements
+      document.getElementById('equipment-filter').addEventListener('change', function() {
+        loadEquipmentOptions(this.value);
+      });
     }
 
     function toggleView(view) {
-      currentView = view;
-      document.getElementById('simple-view').classList.toggle('hidden', view !== 'simple');
-      document.getElementById('architecture-view').classList.toggle('hidden', view !== 'architecture');
-      
-      // Mettre à jour les boutons actifs
-      document.getElementById('simple-view-btn').classList.toggle('active', view === 'simple');
-      document.getElementById('architecture-view-btn').classList.toggle('active', view === 'architecture');
-      
-      if (view === 'architecture') renderNetworkDiagram();
+  currentView = view;
+  
+  // Masquer/afficher les vues
+  document.getElementById('simple-view').classList.toggle('hidden', view !== 'simple');
+  document.getElementById('architecture-view').classList.toggle('hidden', view !== 'architecture');
+  
+  // Mettre à jour les boutons actifs
+  document.getElementById('simple-view-btn').classList.toggle('active', view === 'simple');
+  document.getElementById('architecture-view-btn').classList.toggle('active', view === 'architecture');
+  
+  // Charger automatiquement les architectures en vue architecture
+  if (view === 'architecture') {
+    loadAndDisplayArchitectures();
+  }
+}
+async function loadAndDisplayArchitectures() {
+  const container = document.getElementById('architectures-container');
+  if (!container) return;
+
+  try {
+    // Afficher le loader
+    toggleLoader(true);
+    
+    const response = await fetch(`${API_BASE_URL}/architectures-with-details`);
+    
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => null);
+      throw new Error(
+        errorData?.details || 
+        errorData?.message || 
+        `Erreur HTTP: ${response.status}`
+      );
+    }
+    
+    const { status, data: architectures, message } = await response.json();
+    
+    if (status !== 'success') {
+      throw new Error(message || 'Réponse invalide du serveur');
     }
 
+    displayArchitectures(architectures);
+    
+  } catch (error) {
+    console.error("Erreur complète:", error);
+    container.innerHTML = createErrorState(error);
+  } finally {
+    toggleLoader(false);
+    lucide.createIcons();
+  }
+}
+
+function toggleLoader(show) {
+  const loader = document.getElementById('architecture-loader');
+  if (loader) loader.style.display = show ? 'flex' : 'none';
+}
+
+function showTechnicalDetails(error) {
+  const details = `
+    Erreur complète : ${error}
+    URL : ${API_BASE_URL}/architectures-with-details
+    Heure : ${new Date().toLocaleString()}
+  `;
+  
+  alert(details);
+  // Ou affichez dans une modal plus élégante
+}
+function createEmptyState() {
+  return `
+    <div class="empty-state text-center py-12">
+      <i data-lucide="network" class="mx-auto text-gray-400 w-16 h-16"></i>
+      <h3 class="text-gray-500 text-lg mt-4">Aucune architecture disponible</h3>
+      <button onclick="document.getElementById('create-archi-btn').click()"
+              class="btn-primary mt-4 inline-flex items-center">
+        <i data-lucide="plus" class="mr-2"></i>
+        Créer une première architecture
+      </button>
+    </div>
+  `;
+}
+
+function createErrorState(error) {
+  return `
+    <div class="text-center p-8">
+      <i data-lucide="alert-triangle" class="mx-auto text-red-500 w-12 h-12"></i>
+      <h3 class="text-lg font-medium text-red-500 mt-4">Échec du chargement</h3>
+      <p class="text-gray-600 mt-2">${error.message}</p>
+      <div class="mt-6">
+        <button onclick="loadAndDisplayArchitectures()" 
+                class="btn-primary inline-flex items-center">
+          <i data-lucide="refresh-cw" class="mr-2"></i>
+          Réessayer
+        </button>
+      </div>
+      <div class="mt-4 text-sm text-gray-500">
+        <button onclick="showTechnicalDetails('${error.message.replace(/'/g, "\\'")}')"
+                class="text-blue-500 hover:underline">
+          Détails techniques
+        </button>
+      </div>
+    </div>
+  `;
+}
+
+function createArchitectureCard(architecture) {
+  if (!architecture) return null;
+  
+  const card = document.createElement('div');
+  card.className = 'architecture-card';
+  card.innerHTML =  `
+    <div class="flex justify-between items-start mb-4">
+      <div>
+        <h3 class="text-xl font-bold text-gray-800">${architecture.name}</h3>
+        ${architecture.description ? `<p class="text-gray-600 mt-1">${architecture.description}</p>` : ''}
+      </div>
+      <div class="flex gap-2">
+        <button onclick="editArchitecture(${architecture.id})" class="icon-btn">
+          <i data-lucide="edit" class="w-5 h-5 text-blue-500"></i>
+        </button>
+        <button onclick="deleteArchitecture(${architecture.id})" class="icon-btn">
+          <i data-lucide="trash-2" class="w-5 h-5 text-red-500"></i>
+        </button>
+      </div>
+    </div>
+    <div class="connections-section">
+      <h4 class="font-semibold text-gray-700 mb-3 flex items-center">
+        <i data-lucide="link-2" class="w-4 h-4 mr-2"></i>
+        Connexions (${architecture.connections.length})
+      </h4>
+      ${renderConnectionsList(architecture.connections)}
+    </div>
+  `;
+  return card;
+}
+
+function renderConnectionsList(connections) {
+  if (connections.length === 0) {
+    return `<p class="text-gray-400 text-sm">Aucune connexion définie</p>`;
+  }
+
+  return `
+    <ul class="space-y-3">
+      ${connections.map(conn => `
+        <li class="connection-item bg-gray-50 p-3 rounded flex items-center justify-between">
+          <div class="flex items-center">
+            <span class="equipment-badge ${getEquipmentBadgeClass(conn.source.type)} mr-2">
+              ${conn.source.name}
+            </span>
+            <i data-lucide="arrow-right" class="mx-2 text-gray-400"></i>
+            <span class="equipment-badge ${getEquipmentBadgeClass(conn.target.type)}">
+              ${conn.target.name}
+            </span>
+          </div>
+          <span class="connection-type ${getConnectionTypeClass(conn.type)}">
+            ${conn.type}
+          </span>
+        </li>
+      `).join('')}
+    </ul>
+  `;
+}
     async function fetchSites() {
       try {
-        const response = await fetch(API_URL);
+        const response = await fetch(SITES_URL);
         if (!response.ok) throw new Error("Erreur réseau");
         sites = await response.json();
         renderSiteList();
-        if (currentView === 'architecture') renderNetworkDiagram();
       } catch (error) {
         console.error("Erreur:", error);
         showAlert("Impossible de charger les sites", "error");
       }
     }
 
+  fetchArchitectures()
     function renderSiteList(filter = '') {
       const filteredSites = filter ? sites.filter(site => 
         site.name.toLowerCase().includes(filter.toLowerCase()) || 
@@ -432,6 +773,149 @@
       lucide.createIcons();
     }
 
+    function renderNetworkDiagram() {
+      const container = document.getElementById('network-diagram');
+      container.innerHTML = '';
+      
+      if (sites.length === 0) {
+        container.innerHTML = `
+          <div class="flex items-center justify-center h-full text-gray-500">
+            Aucun équipement à afficher
+          </div>
+        `;
+        return;
+      }
+      
+      // Créer les nœuds
+      const nodes = new vis.DataSet(
+        sites.map(site => ({
+          id: site.id,
+          label: site.name,
+          color: getNodeColor(site),
+          shape: 'box',
+          title: `
+            Type: ${site.equipment_type}\n
+            Adresse: ${site.url_or_ip}\n
+            Statut: ${site.last_status}
+          `
+        }))
+      );
+      
+      // Créer les connexions
+      const edges = new vis.DataSet(
+        connections.map(conn => ({
+          from: conn.from_id,
+          to: conn.to_id,
+          arrows: 'to',
+          label: conn.connection_type,
+          title: `Créé par: ${conn.created_by || 'Admin'}`
+        }))
+      );
+      
+      const data = { nodes, edges };
+      const options = {
+        layout: {
+          randomSeed: 42,
+          improvedLayout: true
+        },
+        physics: {
+          enabled: true,
+          solver: 'forceAtlas2Based'
+        },
+        nodes: {
+          borderWidth: 2,
+          size: 30,
+          font: {
+            size: 12,
+            color: '#333'
+          }
+        },
+        edges: {
+          width: 2,
+          color: '#aaa',
+          smooth: {
+            type: 'continuous'
+          }
+        },
+        interaction: {
+          hover: true,
+          tooltipDelay: 200
+        }
+      };
+      
+      network = new vis.Network(container, data, options);
+      
+      // Gérer le clic sur un nœud
+      network.on('click', (params) => {
+        if (params.nodes.length) {
+          const siteId = params.nodes[0];
+          showSiteDetails(siteId);
+        }
+      });
+    }
+
+    async function fetchArchitectures() {
+  try {
+        const API_BASE_URL = "http://localhost:5000/api";
+
+    const response = await fetch(`${API_BASE_URL}/architectures-with-details`);
+    if (!response.ok) {
+      throw new Error(`HTTP error: ${response.status}`);
+    }
+    const result = await response.json();
+    if (result.status !== 'success') {
+      throw new Error(result.message || "Réponse serveur invalide");
+    }
+    displayArchitectures(result.data);
+  } catch (error) {
+    console.error("Erreur réseau ou API:", error);
+    throw new Error("Erreur réseau");
+  }
+}
+
+    function updateConnectionsTable() {
+      const tableBody = document.getElementById('connections-table');
+      tableBody.innerHTML = '';
+      
+      if (connections.length === 0) {
+        tableBody.innerHTML = `
+          <tr>
+            <td colspan="5" class="py-4 text-center text-gray-500">
+              Aucune connexion enregistrée
+            </td>
+          </tr>
+        `;
+        return;
+      }
+      
+      connections.forEach(conn => {
+        const fromEquipment = sites.find(s => s.id == conn.from_id);
+        const toEquipment = sites.find(s => s.id == conn.to_id);
+        
+        tableBody.innerHTML += `
+          <tr>
+            <td class="py-2 px-4 border-b">${fromEquipment ? fromEquipment.name : `Équipement ${conn.from_id}`}</td>
+            <td class="py-2 px-4 border-b">${toEquipment ? toEquipment.name : `Équipement ${conn.to_id}`}</td>
+            <td class="py-2 px-4 border-b">${conn.connection_type}</td>
+            <td class="py-2 px-4 border-b">${conn.created_by || 'Admin'}</td>
+            <td class="py-2 px-4 border-b">
+              <button class="text-blue-500 hover:text-blue-700 mr-2" 
+                      onclick="editConnection(${conn.id})">
+                <i data-lucide="edit" class="w-4 h-4"></i>
+              </button>
+              <button class="text-red-500 hover:text-red-700" 
+                      onclick="deleteConnection(${conn.id})">
+                <i data-lucide="trash-2" class="w-4 h-4"></i>
+              </button>
+            </td>
+          </tr>
+        `;
+      });
+      
+      lucide.createIcons();
+    }
+
+    // Fonctions pour la gestion des sites
     function getEquipmentClass(type) {
       const types = {
         'serveur': 'server',
@@ -483,7 +967,7 @@
       };
       
       const siteId = document.getElementById('site-id').value;
-      const url = isEditMode ? `${API_URL}/${siteId}` : API_URL;
+      const url = isEditMode ? `${SITES_URL}/${siteId}` : SITES_URL;
       const method = isEditMode ? 'PUT' : 'POST';
 
       try {
@@ -499,7 +983,7 @@
         }
 
         closeSiteForm();
-        await fetchSites(); // Recharger les données fraîches du serveur
+        await fetchSites();
         showAlert(`Site ${isEditMode ? 'modifié' : 'ajouté'} avec succès`, "success");
         
       } catch (error) {
@@ -594,7 +1078,7 @@
       if (!confirm('Êtes-vous sûr de vouloir supprimer ce site ?')) return;
       
       try {
-        const response = await fetch(`${API_URL}/${id}`, { 
+        const response = await fetch(`${SITES_URL}/${id}`, { 
           method: 'DELETE' 
         });
 
@@ -603,91 +1087,13 @@
           throw new Error(errorData.error || "Erreur lors de la suppression");
         }
 
-        await fetchSites(); // Recharger les données
+        await fetchSites();
         closeDetails();
         showAlert("Site supprimé avec succès", "success");
       } catch (error) {
         console.error("Erreur:", error);
         showAlert(error.message, "error");
       }
-    }
-
-    function renderNetworkDiagram() {
-      const container = document.getElementById('network-diagram');
-      container.innerHTML = '';
-      
-      // Créer les nœuds
-      const nodes = new vis.DataSet(
-        sites.map(site => ({
-          id: site.id,
-          label: site.name,
-          color: getNodeColor(site),
-          shape: 'box',
-          title: `
-            Type: ${site.equipment_type}\n
-            Adresse: ${site.url_or_ip}\n
-            Statut: ${site.last_status}
-          `
-        }))
-      );
-      
-      // Créer les connexions (exemple basique)
-      const edges = new vis.DataSet(createConnections(sites));
-      
-      const data = { nodes, edges };
-      const options = {
-        layout: {
-          randomSeed: 42,
-          improvedLayout: true
-        },
-        physics: {
-          enabled: true,
-          solver: 'forceAtlas2Based'
-        },
-        nodes: {
-          borderWidth: 2,
-          size: 30,
-          font: {
-            size: 12,
-            color: '#333'
-          }
-        },
-        edges: {
-          width: 2,
-          color: '#aaa',
-          smooth: {
-            type: 'continuous'
-          }
-        },
-        interaction: {
-          hover: true,
-          tooltipDelay: 200
-        }
-      };
-      
-      network = new vis.Network(container, data, options);
-      
-      // Gérer le clic sur un nœud
-      network.on('click', (params) => {
-        if (params.nodes.length) {
-          const siteId = params.nodes[0];
-          showSiteDetails(siteId);
-        }
-      });
-    }
-
-    function createConnections(sites) {
-      // Ici vous devriez implémenter votre propre logique de connexion
-      // Ceci est un exemple basique qui connecte les éléments dans l'ordre
-      const connections = [];
-      for (let i = 0; i < sites.length - 1; i++) {
-        connections.push({
-          from: sites[i].id,
-          to: sites[i+1].id,
-          arrows: 'to'
-        });
-      }
-      return connections;
     }
 
     function getNodeColor(site) {
@@ -702,6 +1108,495 @@
       }
     }
 
+    // Fonctions pour la création d'architecture
+    function resetArchitectureForm() {
+      currentStep = 1;
+      selectedEquipment = null;
+      tempConnections = [];
+      document.getElementById('current-step').textContent = currentStep;
+      document.getElementById('step-1').classList.remove('hidden');
+      document.getElementById('step-2').classList.add('hidden');
+      document.getElementById('prev-step-btn').classList.add('hidden');
+      document.getElementById('next-step-btn').textContent = 'Suivant';
+      document.getElementById('archi-name').value = '';
+      document.getElementById('archi-description').value = '';
+    }
+
+    function loadEquipmentOptions(filterType = '') {
+      const container = document.getElementById('equipment-options');
+      container.innerHTML = '';
+      
+      const filteredEquipment = filterType 
+        ? sites.filter(s => s.equipment_type === filterType)
+        : sites;
+      
+      if (filteredEquipment.length === 0) {
+        container.innerHTML = `
+          <div class="col-span-2 text-center py-4 text-gray-500">
+            Aucun équipement trouvé
+          </div>
+        `;
+        return;
+      }
+      
+      filteredEquipment.forEach(equipment => {
+        container.innerHTML += `
+          <div class="equipment-option" data-id="${equipment.id}">
+            <div class="card p-4 cursor-pointer hover:border-blue-300">
+              <div class="flex items-center">
+                <i data-lucide="${getEquipmentIcon(equipment.equipment_type)}" 
+                   class="w-5 h-5 mr-3 ${getEquipmentColor(equipment.equipment_type)}"></i>
+                <div>
+                  <p class="font-medium">${equipment.name}</p>
+                  <p class="text-sm text-gray-600">${equipment.equipment_type}</p>
+                  <p class="text-xs text-gray-500 mt-1">${equipment.url_or_ip}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      });
+      
+      // Ajouter les écouteurs d'événements
+      document.querySelectorAll('.equipment-option').forEach(option => {
+        option.addEventListener('click', function() {
+          selectEquipment(parseInt(this.dataset.id));
+        });
+      });
+      
+      lucide.createIcons();
+    }
+
+    function selectEquipment(siteId) {
+      selectedEquipment = sites.find(s => s.id == siteId);
+      
+      // Mettre en surbrillance la sélection
+      document.querySelectorAll('.equipment-option').forEach(option => {
+        option.querySelector('.card').classList.remove('border-blue-500', 'border-2');
+      });
+      
+      event.currentTarget.querySelector('.card').classList.add('border-blue-500', 'border-2');
+      
+      // Mettre à jour l'affichage de l'équipement sélectionné
+      const selectedDisplay = document.getElementById('selected-equipment-display');
+      selectedDisplay.innerHTML = `
+        <div class="flex items-center">
+          <i data-lucide="${getEquipmentIcon(selectedEquipment.equipment_type)}" 
+             class="w-5 h-5 mr-2 ${getEquipmentColor(selectedEquipment.equipment_type)}"></i>
+          <div>
+            <p class="font-medium">${selectedEquipment.name}</p>
+            <p class="text-sm text-gray-600">${selectedEquipment.equipment_type}</p>
+          </div>
+        </div>
+      `;
+      lucide.createIcons();
+    }
+
+    function goToNextStep() {
+      if (currentStep === 1) {
+        // Valider l'étape 1
+        const archiName = document.getElementById('archi-name').value;
+        if (!archiName || !selectedEquipment) {
+          showAlert("Veuillez remplir tous les champs et sélectionner un équipement", "error");
+          return;
+        }
+        
+        // Préparer l'étape 2
+        prepareStep2();
+        currentStep = 2;
+        document.getElementById('current-step').textContent = currentStep;
+        document.getElementById('step-1').classList.add('hidden');
+        document.getElementById('step-2').classList.remove('hidden');
+        document.getElementById('prev-step-btn').classList.remove('hidden');
+        document.getElementById('next-step-btn').textContent = 'Terminer';
+      } else {
+        // Terminer et sauvegarder
+        saveArchitecture();
+      }
+    }
+
+    function goToPrevStep() {
+      if (currentStep === 2) {
+        currentStep = 1;
+        document.getElementById('current-step').textContent = currentStep;
+        document.getElementById('step-1').classList.remove('hidden');
+        document.getElementById('step-2').classList.add('hidden');
+        document.getElementById('prev-step-btn').classList.add('hidden');
+        document.getElementById('next-step-btn').textContent = 'Suivant';
+      }
+    }
+
+    function prepareStep2() {
+      const equipmentList = document.getElementById('equipment-list');
+      equipmentList.innerHTML = '';
+      
+      // Filtrer les équipements disponibles (exclure celui sélectionné et ceux déjà connectés)
+      const connectedIds = tempConnections.map(c => c.to.id);
+      const availableEquipment = sites.filter(site => 
+        site.id != selectedEquipment.id && 
+        !connectedIds.includes(site.id)
+      );
+
+      if (availableEquipment.length === 0) {
+        equipmentList.innerHTML = `
+          <div class="col-span-2 text-center py-4 text-gray-500">
+            Aucun autre équipement disponible pour connexion
+          </div>
+        `;
+        return;
+      }
+
+      availableEquipment.forEach(equipment => {
+        equipmentList.innerHTML += `
+          <div class="equipment-to-connect" data-id="${equipment.id}">
+            <div class="card p-4 cursor-pointer hover:border-blue-300">
+              <div class="flex items-center">
+                <i data-lucide="${getEquipmentIcon(equipment.equipment_type)}" 
+                   class="w-5 h-5 mr-2 ${getEquipmentColor(equipment.equipment_type)}"></i>
+                <div>
+                  <p class="font-medium">${equipment.name}</p>
+                  <p class="text-sm text-gray-600">${equipment.equipment_type}</p>
+                </div>
+              </div>
+              <button class="connect-btn mt-3 w-full btn-primary px-3 py-1 rounded text-sm">
+                Connecter
+              </button>
+            </div>
+          </div>
+        `;
+      });
+
+      // Ajouter les écouteurs d'événements
+      document.querySelectorAll('.connect-btn').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+          e.stopPropagation();
+          const equipmentId = parseInt(this.closest('.equipment-to-connect').dataset.id);
+          const equipment = sites.find(s => s.id == equipmentId);
+          addConnection(selectedEquipment, equipment);
+        });
+      });
+
+      lucide.createIcons();
+    }
+
+    function addConnection(fromEquipment, toEquipment) {
+      // Vérifier si la connexion existe déjà
+      const exists = tempConnections.some(conn => 
+        (conn.from.id === fromEquipment.id && conn.to.id === toEquipment.id) || 
+        (conn.from.id === toEquipment.id && conn.to.id === fromEquipment.id)
+      );
+      
+      if (!exists) {
+        tempConnections.push({
+          from: fromEquipment,
+          to: toEquipment,
+          type: 'standard',
+          created_by: 'Utilisateur' // À remplacer par l'utilisateur réel
+        });
+        
+        updateConnectionsDisplay();
+        prepareStep2(); // Recharger la liste des équipements disponibles
+      }
+    }
+
+    function updateConnectionsDisplay() {
+      const connectionsList = document.getElementById('connections-list');
+      connectionsList.innerHTML = '';
+      
+      tempConnections.forEach(conn => {
+        connectionsList.innerHTML += `
+          <div class="flex items-center justify-between p-3 bg-gray-50 rounded">
+            <div class="flex items-center">
+              <div class="flex items-center mr-4">
+                <i data-lucide="${getEquipmentIcon(conn.from.equipment_type)}" 
+                   class="w-4 h-4 mr-2 ${getEquipmentColor(conn.from.equipment_type)}"></i>
+                <span>${conn.from.name}</span>
+              </div>
+              <i data-lucide="arrow-right" class="w-4 h-4 mx-2 text-gray-400"></i>
+              <div class="flex items-center">
+                <i data-lucide="${getEquipmentIcon(conn.to.equipment_type)}" 
+                   class="w-4 h-4 mr-2 ${getEquipmentColor(conn.to.equipment_type)}"></i>
+                <span>${conn.to.name}</span>
+              </div>
+            </div>
+            <button class="text-red-500 hover:text-red-700" 
+                    onclick="removeConnection(${conn.from.id}, ${conn.to.id})">
+              <i data-lucide="trash-2" class="w-4 h-4"></i>
+            </button>
+          </div>
+        `;
+      });
+      
+      lucide.createIcons();
+    }
+
+    function removeConnection(fromId, toId) {
+      tempConnections = tempConnections.filter(conn => 
+        !(conn.from.id === fromId && conn.to.id === toId)
+      );
+      updateConnectionsDisplay();
+      prepareStep2();
+    }
+
+ // Sauvegarder l'architecture
+async function saveArchitecture() {
+  try {
+    console.log("Tentative d'envoi des données...");
+        const API_BASE_URL = "http://localhost:5000/api";
+
+    const response = await fetch(`${API_BASE_URL}/architectures`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
+      body: JSON.stringify({
+        name: document.getElementById('archi-name').value,
+        description: document.getElementById('archi-description').value,
+        connections: tempConnections.map(conn => ({
+          source_id: conn.from.id,
+          target_id: conn.to.id,
+          type: conn.type || 'standard'
+        }))
+      }),
+      credentials: 'same-origin' // Important pour les cookies/sessions
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || "Erreur inconnue du serveur");
+    }
+
+    const result = await response.json();
+    console.log("Réponse du serveur:", result);
+    showAlert("Architecture enregistrée avec succès !", "success");
+    
+  } catch (error) {
+    console.error("Erreur détaillée:", error);
+    showAlert(`Échec de l'enregistrement: ${error.message}`, "error");
+    
+    // Envoyez l'erreur à votre système de suivi
+    fetch('/api/log-error', {
+      method: 'POST',
+      body: JSON.stringify({ error: error.message })
+    });
+  }
+}
+
+// Fonction séparée pour le logging
+async function logError(error) {
+  try {
+    await fetch('/api/log-error', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ error: error.message })
+    });
+  } catch (loggingError) {
+    console.error("Échec du logging:", loggingError);
+  }
+}
+    function editConnection(connectionId) {
+      // Implémentez la logique d'édition ici
+      alert(`Modification de la connexion ${connectionId}`);
+    }
+
+    async function deleteConnection(connectionId) {
+      if (!confirm("Supprimer cette connexion ?")) return;
+      
+      try {
+        const response = await fetch(`${ARCHITECTURES_URL}/connections/${connectionId}`, {
+          method: 'DELETE'
+        });
+        
+        if (!response.ok) throw new Error("Erreur lors de la suppression");
+        
+        showAlert("Connexion supprimée avec succès", "success");
+        await fetchArchitectures();
+      } catch (error) {
+        console.error(error);
+        showAlert(error.message, "error");
+      }
+    }
+
+    // Fonctions utilitaires
+    async function displayArchitectures() {
+  try {
+    // Afficher un indicateur de chargement
+    const loader = document.getElementById('loading-indicator');
+    if (loader) loader.style.display = 'block';
+
+    // Récupérer les architectures depuis l'API
+    const response = await fetch(`${API_BASE_URL}/architectures-with-details`);
+    
+    if (!response.ok) {
+      throw new Error(`Erreur HTTP: ${response.status}`);
+    }
+
+    const result = await response.json();
+    
+    if (result.status !== 'success') {
+      throw new Error(result.message || 'Réponse invalide du serveur');
+    }
+
+    const architectures = result.data;
+    console.log('Architectures chargées:', architectures);
+
+    // Sélectionner le conteneur d'affichage
+    const container = document.getElementById('architectures-container');
+    if (!container) {
+      throw new Error('Element container introuvable');
+    }
+
+    // Vider le conteneur avant affichage
+    container.innerHTML = '';
+
+    if (architectures.length === 0) {
+      container.innerHTML = `
+        <div class="empty-state">
+          <i data-lucide="network" class="text-gray-400 w-12 h-12 mx-auto"></i>
+          <p class="text-center text-gray-500 mt-4">
+            Aucune architecture disponible. <br>
+            <button onclick="document.getElementById('create-archi-btn').click()" 
+                    class="text-blue-500 hover:underline">
+              Créer une nouvelle architecture
+            </button>
+          </p>
+        </div>
+      `;
+      lucide.createIcons();
+      return;
+    }
+
+    // Afficher chaque architecture
+    architectures.forEach(arch => {
+      const archElement = document.createElement('div');
+      archElement.className = 'architecture-card mb-6 p-4 border rounded-lg';
+      
+      archElement.innerHTML = `
+        <div class="flex justify-between items-start mb-3">
+          <h3 class="text-xl font-semibold">${arch.name}</h3>
+          <div class="flex gap-2">
+            <button onclick="editArchitecture(${arch.id})" 
+                    class="p-1 text-blue-500 hover:bg-blue-50 rounded">
+              <i data-lucide="edit" class="w-4 h-4"></i>
+            </button>
+            <button onclick="deleteArchitecture(${arch.id})" 
+                    class="p-1 text-red-500 hover:bg-red-50 rounded">
+              <i data-lucide="trash-2" class="w-4 h-4"></i>
+            </button>
+          </div>
+        </div>
+        ${arch.description ? `<p class="text-gray-600 mb-4">${arch.description}</p>` : ''}
+        <div class="connections-container mt-4">
+          <h4 class="font-medium mb-2 flex items-center">
+            <i data-lucide="link" class="w-4 h-4 mr-2"></i>
+            Connexions (${arch.connections.length})
+          </h4>
+          ${renderConnections(arch.connections)}
+        </div>
+      `;
+      
+      container.appendChild(archElement);
+    });
+
+    // Initialiser les icônes Lucide
+    lucide.createIcons();
+
+  } catch (error) {
+    console.error('Erreur lors du chargement:', error);
+    showAlert(`Échec du chargement des architectures: ${error.message}`, 'error');
+    
+    // Afficher un état d'erreur dans l'interface
+    const container = document.getElementById('architectures-container');
+    if (container) {
+      container.innerHTML = `
+        <div class="error-state text-center py-8">
+          <i data-lucide="alert-triangle" class="text-red-500 w-12 h-12 mx-auto"></i>
+          <p class="text-red-500 mt-4">Impossible de charger les architectures</p>
+          <button onclick="displayArchitectures()" 
+                  class="mt-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded">
+            <i data-lucide="refresh-cw" class="w-4 h-4 mr-2 inline"></i>
+            Réessayer
+          </button>
+        </div>
+      `;
+      lucide.createIcons();
+    }
+  } finally {
+    // Masquer l'indicateur de chargement
+    const loader = document.getElementById('loading-indicator');
+    if (loader) loader.style.display = 'none';
+  }
+}
+
+// Fonction helper pour afficher les connexions
+function renderConnections(connections) {
+  if (connections.length === 0) {
+    return `<p class="text-gray-400 text-sm">Aucune connexion définie</p>`;
+  }
+
+  return `
+    <ul class="space-y-3">
+      ${connections.map(conn => `
+        <li class="connection-item p-3 bg-gray-50 rounded flex justify-between items-center">
+          <div class="flex items-center">
+            <span class="flex items-center">
+              <i data-lucide="${getEquipmentIcon(conn.source.type)}" 
+                 class="${getEquipmentColor(conn.source.type)} w-4 h-4 mr-2"></i>
+              ${conn.source.name}
+            </span>
+            <i data-lucide="arrow-right" class="mx-2 text-gray-400 w-4 h-4"></i>
+            <span class="flex items-center">
+              <i data-lucide="${getEquipmentIcon(conn.target.type)}" 
+                 class="${getEquipmentColor(conn.target.type)} w-4 h-4 mr-2"></i>
+              ${conn.target.name}
+            </span>
+          </div>
+          <div class="flex gap-2">
+            <span class="connection-type-badge ${getConnectionBadgeClass(conn.type)}">
+              ${conn.type}
+            </span>
+            <button onclick="deleteConnection(${conn.id})" 
+                    class="text-red-500 hover:text-red-700">
+              <i data-lucide="trash-2" class="w-4 h-4"></i>
+            </button>
+          </div>
+        </li>
+      `).join('')}
+    </ul>
+  `;
+}
+
+// Fonctions utilitaires
+function getEquipmentIcon(type) {
+  const icons = {
+    'serveur': 'server',
+    'routeur': 'router',
+    'switch': 'switch',
+    'réseau': 'globe'
+  };
+  return icons[type.toLowerCase()] || 'server';
+}
+
+function getEquipmentColor(type) {
+  const colors = {
+    'serveur': 'text-blue-500',
+    'routeur': 'text-purple-500',
+    'switch': 'text-red-500',
+    'réseau': 'text-green-500'
+  };
+  return colors[type.toLowerCase()] || 'text-gray-500';
+}
+
+function getConnectionBadgeClass(type) {
+  const classes = {
+    'standard': 'bg-blue-100 text-blue-800',
+    'backup': 'bg-yellow-100 text-yellow-800',
+    'ha': 'bg-green-100 text-green-800',
+    'physical': 'bg-gray-100 text-gray-800'
+  };
+  return classes[type.toLowerCase()] || 'bg-gray-100 text-gray-800';
+}
     function showAlert(message, type = "info") {
       const alertDiv = document.createElement('div');
       alertDiv.className = `alert alert-${type}`;
@@ -725,6 +1620,9 @@
     window.deleteSite = deleteSite;
     window.showSiteDetails = showSiteDetails;
     window.closeDetails = closeDetails;
+    window.removeConnection = removeConnection;
+    window.editConnection = editConnection;
+    window.deleteConnection = deleteConnection;
   </script>
 </body>
 </html>
