@@ -1,230 +1,286 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" type="image/png" href="/static/image/logo.jpeg">
     <title>Alertes</title>
-   
-    
+    <link rel="icon" type="image/png" href="/static/image/logo.jpeg">
     <link href="https://cdn.jsdelivr.net/npm/lucide-icons@0.1.0/dist/lucide.min.css" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
-    
     <style>
-       h2  , i ,.pa{
-      color: #205781;
-    }
+        :root {
+            --primary-color: #205781;
+            --secondary-color: #1c3d5a;
+            --accent-color: #4f81bd;
+            --alert-color: #dc2626;
+            --alert-bg: #fef2f2;
+        }
+        
+        body {
+            background-color: #f8fafc;
+        }
+        
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary:hover {
+            background-color: var(--secondary-color);
+            transform: translateY(-1px);
+        }
+        
+        .btn-danger {
+            background-color: var(--alert-color);
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background-color: #b91c1c;
+        }
+        
+        .alert-card {
+            background-color: var(--alert-bg);
+            border-left: 4px solid var(--alert-color);
+            transition: all 0.3s ease;
+        }
+        
+        .alert-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .text-primary {
+            color: var(--primary-color);
+        }
+        
+        .alerts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1rem;
+        }
+        
+        @media (max-width: 640px) {
+            .alerts-grid {
+                grid-template-columns: 1fr;
+            }
+        }
     </style>
 </head>
-<body >
-
+<body class="p-4 sm:p-6">
     <div id="menu"></div>
 
-    <div class="max-w-3xl mx-auto  overflow-hidden">
-      <div class="text-primary text-center py-6">
-        <h2 class="text-2xl font-semibold flex items-center justify-center gap-2">
-          <i data-lucide="alert-triangle" class="w-6 h-6 text-primary"></i>
-          Alertes Système
-        </h2>
-        
-        
-      
-        <div class="flex justify-end mb-4">
-          <button onclick="deleteAllAlerts()"
-              class="flex items-center gap-2 px-4 py-2 bg-red-700 text-white rounded hover:bg-red-800">
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2"
-                  viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                  <path stroke-linecap="round" stroke-linejoin="round"
-                      d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6M9 7h6m2 0a2 2 0 00-2-2H9a2 2 0 00-2 2m10 0H5">
-                  </path>
-              </svg>
-              Supprimer toutes les alertes
-          </button>
+    <div class="max-w-7xl mx-auto">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+            <div class="flex items-center gap-3">
+                <h1 class="text-2xl sm:text-3xl font-bold text-gray-800 flex items-center gap-2">
+                    <i data-lucide="alert-triangle" class="text-primary"></i>
+                    Alertes Système
+                </h1>
+            </div>
+            <button onclick="deleteAllAlerts()" class="btn-danger flex items-center gap-2">
+                <i data-lucide="trash-2"></i>
+                <span>Supprimer toutes les alertes</span>
+            </button>
         </div>
-        
-        <script src="https://unpkg.com/lucide@latest"></script>
-        <script>
-          lucide.createIcons();
-        </script>
-        
-        <div id="alerts-container" class="p-6 space-y-4">
+
+        <div id="alerts-container" class="alerts-grid">
             <p class="text-gray-500">Chargement des alertes...</p>
         </div>
     </div>
-   
-  
+
+    <script src="https://unpkg.com/lucide@latest"></script>
     <script>
-      document.addEventListener('DOMContentLoaded', () => {
-  const menuDiv = document.getElementById("menu");
+        lucide.createIcons();
 
-  fetch("/static/menu.html")
-    .then(response => response.text())
-    .then(data => {
-      if (menuDiv) {
-        menuDiv.innerHTML = data;
-        attachEventListenersToNav('.desktop-nav');
-        attachEventListenersToNav('.mobile-nav');
-        checkAndApplyActiveStateOnLoad();
-      }
-    })
-    .catch(error => {
-      console.error('Erreur lors du chargement du menu :', error);
-    });
+        document.addEventListener('DOMContentLoaded', () => {
+            const menuDiv = document.getElementById("menu");
 
-  function attachEventListenersToNav(navSelector) {
-    const nav = document.querySelector(navSelector);
-    if (nav) {
-      const navItems = nav.querySelectorAll('.nav-item, .mobile-nav-item');
-      navItems.forEach(item => {
-        item.addEventListener('click', function(event) {
-          activateNavItem(this, navSelector);
+            fetch("/static/menu.html")
+                .then(response => response.text())
+                .then(data => {
+                    if (menuDiv) {
+                        menuDiv.innerHTML = data;
+                        attachEventListenersToNav('.desktop-nav');
+                        attachEventListenersToNav('.mobile-nav');
+                        checkAndApplyActiveStateOnLoad();
+                    }
+                })
+                .catch(error => {
+                    console.error('Erreur lors du chargement du menu :', error);
+                });
+
+            function attachEventListenersToNav(navSelector) {
+                const nav = document.querySelector(navSelector);
+                if (nav) {
+                    const navItems = nav.querySelectorAll('.nav-item, .mobile-nav-item');
+                    navItems.forEach(item => {
+                        item.addEventListener('click', function(event) {
+                            activateNavItem(this, navSelector);
+                        });
+                    });
+                }
+            }
+
+            function activateNavItem(item, navSelector) {
+                const activeItem = document.querySelector(`${navSelector} .nav-item.active, ${navSelector} .mobile-nav-item.active`);
+                if (activeItem && activeItem !== item) {
+                    activeItem.classList.remove('active');
+                }
+                item.classList.add('active');
+                localStorage.setItem('activeNavLink', item.dataset.navlink);
+            }
+
+            function checkAndApplyActiveStateOnLoad() {
+                const storedActiveNavLink = localStorage.getItem('activeNavLink');
+                const desktopNavItems = document.querySelectorAll('.desktop-nav .nav-item');
+                const mobileNavItems = document.querySelectorAll('.mobile-nav .mobile-nav-item');
+                const currentPage = window.location.pathname;
+
+                const allNavItems = [...desktopNavItems, ...mobileNavItems]; 
+                if (storedActiveNavLink) {
+                    allNavItems.forEach(item => {
+                        if (item.dataset.navlink === storedActiveNavLink) {
+                            item.classList.add('active');
+                        }
+                    });
+                } else {
+                    if (currentPage === '/' || currentPage === '/dashboard') {
+                        allNavItems.forEach(item => {
+                            if (item.dataset.navlink === 'accueil') {
+                                item.classList.add('active');
+                                localStorage.setItem('activeNavLink', 'accueil');
+                            }
+                        });
+                    } else {
+                        allNavItems.forEach(item => {
+                            if (item.getAttribute('href') === currentPage) {
+                                item.classList.add('active');
+                                localStorage.setItem('activeNavLink', item.dataset.navlink);
+                            }
+                        });
+                    }
+                }
+            }
         });
-      });
-    }
-  }
 
-  function activateNavItem(item, navSelector) {
-    const activeItem = document.querySelector(`${navSelector} .nav-item.active, ${navSelector} .mobile-nav-item.active`);
-    if (activeItem && activeItem !== item) {
-      activeItem.classList.remove('active');
-    }
-    item.classList.add('active');
-    localStorage.setItem('activeNavLink', item.dataset.navlink);
-  }
-
-  function checkAndApplyActiveStateOnLoad() {
-    const storedActiveNavLink = localStorage.getItem('activeNavLink');
-    const desktopNavItems = document.querySelectorAll('.desktop-nav .nav-item');
-    const mobileNavItems = document.querySelectorAll('.mobile-nav .mobile-nav-item');
-    const currentPage = window.location.pathname;
-
-    const allNavItems = [...desktopNavItems, ...mobileNavItems]; 
-    if (storedActiveNavLink) {
-      allNavItems.forEach(item => {
-        if (item.dataset.navlink === storedActiveNavLink) {
-          item.classList.add('active');
-        }
-      });
-    } else {
-      if (currentPage === '/' || currentPage === '/dashboard') {
-        allNavItems.forEach(item => {
-          if (item.dataset.navlink === 'accueil') {
-            item.classList.add('active');
-            localStorage.setItem('activeNavLink', 'accueil');
-          }
-        });
-      } else {
-        allNavItems.forEach(item => {
-          if (item.getAttribute('href') === currentPage) {
-            item.classList.add('active');
-            localStorage.setItem('activeNavLink', item.dataset.navlink);
-          }
-        });
-      }
-    }
-  }
-});
         const alertsContainer = document.getElementById("alerts-container");
 
         async function fetchAndDisplayAlerts() {
             try {
                 const response = await fetch("/api/alerts");
                 if (!response.ok) {
-                    console.error("Erreur lors de la récupération des alertes:", response.status);
-                    alertsContainer.innerHTML = "<p class='text-red-500'>Erreur lors du chargement des alertes.</p>";
-                    return;
+                    throw new Error(`Erreur HTTP ${response.status}`);
                 }
                 const alerts = await response.json();
                 displayAlerts(alerts);
             } catch (error) {
-                console.error("Erreur réseau lors de la récupération des alertes:", error);
-                alertsContainer.innerHTML = "<p class='text-red-500'>Erreur réseau lors du chargement des alertes.</p>";
+                console.error("Erreur lors de la récupération des alertes:", error);
+                alertsContainer.innerHTML = `
+                    <div class="alert-card p-4 rounded-md col-span-full">
+                        <p class="text-red-600 font-medium">Erreur lors du chargement des alertes.</p>
+                    </div>
+                `;
             }
         }
 
         function displayAlerts(alerts) {
-    if (alertsContainer) {
-        alertsContainer.innerHTML = "";
-        if (alerts.length === 0) {
-            alertsContainer.innerHTML = "<p class='text-gray-500'>Aucune alerte pour le moment.</p>";
-            return;
-        }
-        alerts.forEach(alert => {
-            const alertDiv = document.createElement("div");
-            alertDiv.className = "flex items-start gap-4 bg-red-50 border-l-4 border-red-500 text-red-700 px-4 py-4 rounded-md shadow-sm justify-between";
-
-            alertDiv.innerHTML = `
+            alertsContainer.innerHTML = "";
             
+            if (alerts.length === 0) {
+                alertsContainer.innerHTML = `
+                    <div class="bg-blue-50 border border-blue-200 text-blue-800 p-4 rounded-md col-span-full">
+                        <p>Aucune alerte pour le moment.</p>
+                    </div>
+                `;
+                return;
+            }
 
-    <div class="pt-1">
-     
+            alerts.forEach(alert => {
+                const alertDiv = document.createElement("div");
+                alertDiv.className = "alert-card p-4 rounded-md flex flex-col h-full";
 
-        <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" stroke-width="2"
-            viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-            <path stroke-linecap="round" stroke-linejoin="round"
-                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.054 0 1.635-1.14 1.054-2.053L13.054 4.947c-.526-.81-1.582-.81-2.108 0L3.028 16.947C2.447 17.86 3.028 19 4.082 19z">
-            </path>
-        </svg>
-    </div>
-    <div class="flex-1">
-        <p><strong class="font-bold">Alerte :</strong> ${alert.site_name} (${alert.url_or_ip}) est hors ligne.</p>
-        <p><strong>Raison :</strong> ${alert.reason}</p>
-        <p class="text-sm text-gray-600"><strong>Date :</strong> ${new Date(alert.timestamp).toLocaleString()}</p>
-    </div>
-    <button onclick="deleteAlert(${alert.id})"
-        class="ml-4 px-3 py-1 bg-red-600 text-white text-sm rounded hover:bg-red-700">
-        Supprimer
-    </button>
-`;
+                alertDiv.innerHTML = `
+                    <div class="flex items-start gap-3 flex-grow">
+                        <div class="text-red-600 pt-1">
+                            <i data-lucide="alert-triangle" class="w-5 h-5"></i>
+                        </div>
+                        <div class="flex-1">
+                            <p class="font-medium text-gray-800">${alert.site_name}</p>
+                            <p class="text-xs text-gray-500 mb-2">${alert.url_or_ip}</p>
+                            <p class="text-sm text-gray-700"><span class="font-medium">Raison :</span> ${alert.reason}</p>
+                        </div>
+                    </div>
+                    <div class="mt-3 pt-2 border-t border-gray-200 flex justify-between items-center">
+                        <p class="text-xs text-gray-500">
+                            <i data-lucide="clock" class="w-3 h-3 inline mr-1"></i>
+                            ${new Date(alert.timestamp).toLocaleString()}
+                        </p>
+                        <button onclick="deleteAlert(${alert.id})" 
+                                class="text-red-600 hover:text-red-800 p-1 rounded-full">
+                            <i data-lucide="x" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                `;
 
-            alertsContainer.appendChild(alertDiv);
-        });
-    }
-}
-
-      
-async function deleteAllAlerts() {
-    if (!confirm("Êtes-vous sûr de vouloir supprimer toutes les alertes ?")) return;
-
-    try {
-        const response = await fetch("/api/alerts", {
-            method: "DELETE"
-        });
-
-        if (!response.ok) {
-            throw new Error(`Erreur HTTP ${response.status}`);
+                alertsContainer.appendChild(alertDiv);
+            });
+            
+            lucide.createIcons();
         }
 
-        // Recharger les alertes
-        fetchAndDisplayAlerts();
-    } catch (error) {
-        console.error("Erreur lors de la suppression de toutes les alertes :", error);
-        alertsContainer.innerHTML = `<p class='text-red-500'>Erreur lors de la suppression de toutes les alertes.</p>`;
-    }
-}
+        async function deleteAllAlerts() {
+            if (!confirm("Êtes-vous sûr de vouloir supprimer toutes les alertes ?")) return;
 
-async function deleteAlert(id) {
-    if (!confirm("Voulez-vous vraiment supprimer cette alerte ?")) return;
-    try {
-        const response = await fetch(`/api/alerts/${id}`, {
-            method: "DELETE",
-        });
+            try {
+                const response = await fetch("/api/alerts", {
+                    method: "DELETE"
+                });
 
-        if (!response.ok) {
-            throw new Error(`Erreur HTTP ${response.status}`);
+                if (!response.ok) {
+                    throw new Error(`Erreur HTTP ${response.status}`);
+                }
+
+                fetchAndDisplayAlerts();
+            } catch (error) {
+                console.error("Erreur lors de la suppression des alertes:", error);
+                alertsContainer.innerHTML = `
+                    <div class="alert-card p-4 rounded-md col-span-full">
+                        <p class="text-red-600 font-medium">Erreur lors de la suppression des alertes.</p>
+                    </div>
+                `;
+            }
         }
 
-        fetchAndDisplayAlerts();
-    } catch (error) {
-        console.error("Erreur lors de la suppression de l'alerte:", error);
-        alertsContainer.innerHTML = `<p class='text-red-500'>Erreur lors de la suppression de l'alerte.</p>`;
-    }
-}
+        async function deleteAlert(id) {
+            if (!confirm("Voulez-vous vraiment supprimer cette alerte ?")) return;
+            
+            try {
+                const response = await fetch(`/api/alerts/${id}`, {
+                    method: "DELETE",
+                });
 
+                if (!response.ok) {
+                    throw new Error(`Erreur HTTP ${response.status}`);
+                }
 
+                fetchAndDisplayAlerts();
+            } catch (error) {
+                console.error("Erreur lors de la suppression de l'alerte:", error);
+                alertsContainer.innerHTML = `
+                    <div class="alert-card p-4 rounded-md col-span-full">
+                        <p class="text-red-600 font-medium">Erreur lors de la suppression de l'alerte.</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Initial fetch and refresh every 10 seconds
         fetchAndDisplayAlerts();
         setInterval(fetchAndDisplayAlerts, 10000);
     </script>
-
 </body>
 </html>

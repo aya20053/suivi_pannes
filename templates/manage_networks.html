@@ -9,7 +9,54 @@
   <link rel="icon" type="image/png" href="/static/image/logo.jpeg">
   <script src="https://cdn.jsdelivr.net/npm/vis-network@9.1.2/dist/vis-network.min.js"></script>
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/vis/4.21.0/vis.min.css" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/vis/4.21.0/vis.min.js"></script>
+<!-- Vis.js -->
+<link href="https://unpkg.com/vis-network/styles/vis-network.css" rel="stylesheet" />
+<script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+
+<!-- Lucide -->
+<script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+  <link href="https://unpkg.com/vis-network/styles/vis-network.css" rel="stylesheet" />
   <style>
+
+  #architectures-container {
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+    }
+    .network-card {
+      border: 1px solid #ccc;
+      padding: 1rem;
+    }
+    .network-container {
+      width: 100%;
+      height: 400px;
+      border: 1px solid #999;
+    }
+   .vis-network {
+    background-color: #f8fafc;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+  }
+  .vis-node {
+    border-width: 2px !important;
+  }
+  .node-status-ok {
+    background-color: #10b981 !important;
+    border-color: #047857 !important;
+  }
+  .node-status-warning {
+    background-color: #f59e0b !important;
+    border-color: #d97706 !important;
+  }
+  .node-status-critical {
+    background-color: #ef4444 !important;
+    border-color: #b91c1c !important;
+  }
+
+
     :root {
       --primary-color: #205781;
       --secondary-color: #2c7cb0;
@@ -271,6 +318,7 @@ font-size: 0.75rem;
         </button>
       </div>
     </div>
+<div id="architectures-container" class="mt-6"></div>
 
     <!-- Formulaire d'ajout/modification -->
     <form id="site-form" class="card p-6 mb-8 hidden">
@@ -773,86 +821,7 @@ function renderConnectionsList(connections) {
       lucide.createIcons();
     }
 
-    function renderNetworkDiagram() {
-      const container = document.getElementById('network-diagram');
-      container.innerHTML = '';
-      
-      if (sites.length === 0) {
-        container.innerHTML = `
-          <div class="flex items-center justify-center h-full text-gray-500">
-            Aucun équipement à afficher
-          </div>
-        `;
-        return;
-      }
-      
-      // Créer les nœuds
-      const nodes = new vis.DataSet(
-        sites.map(site => ({
-          id: site.id,
-          label: site.name,
-          color: getNodeColor(site),
-          shape: 'box',
-          title: `
-            Type: ${site.equipment_type}\n
-            Adresse: ${site.url_or_ip}\n
-            Statut: ${site.last_status}
-          `
-        }))
-      );
-      
-      // Créer les connexions
-      const edges = new vis.DataSet(
-        connections.map(conn => ({
-          from: conn.from_id,
-          to: conn.to_id,
-          arrows: 'to',
-          label: conn.connection_type,
-          title: `Créé par: ${conn.created_by || 'Admin'}`
-        }))
-      );
-      
-      const data = { nodes, edges };
-      const options = {
-        layout: {
-          randomSeed: 42,
-          improvedLayout: true
-        },
-        physics: {
-          enabled: true,
-          solver: 'forceAtlas2Based'
-        },
-        nodes: {
-          borderWidth: 2,
-          size: 30,
-          font: {
-            size: 12,
-            color: '#333'
-          }
-        },
-        edges: {
-          width: 2,
-          color: '#aaa',
-          smooth: {
-            type: 'continuous'
-          }
-        },
-        interaction: {
-          hover: true,
-          tooltipDelay: 200
-        }
-      };
-      
-      network = new vis.Network(container, data, options);
-      
-      // Gérer le clic sur un nœud
-      network.on('click', (params) => {
-        if (params.nodes.length) {
-          const siteId = params.nodes[0];
-          showSiteDetails(siteId);
-        }
-      });
-    }
+    
 
     async function fetchArchitectures() {
   try {
@@ -1418,117 +1387,250 @@ async function logError(error) {
       }
     }
 
-    // Fonctions utilitaires
-    async function displayArchitectures() {
-  try {
-    // Afficher un indicateur de chargement
-    const loader = document.getElementById('loading-indicator');
-    if (loader) loader.style.display = 'block';
+async function displayArchitectures(architectures) {
+  const container = document.getElementById('architectures-container');
+  if (!container) return;
 
-    // Récupérer les architectures depuis l'API
-    const response = await fetch(`${API_BASE_URL}/architectures-with-details`);
-    
-    if (!response.ok) {
-      throw new Error(`Erreur HTTP: ${response.status}`);
-    }
+  container.innerHTML = '';
 
-    const result = await response.json();
-    
-    if (result.status !== 'success') {
-      throw new Error(result.message || 'Réponse invalide du serveur');
-    }
+  if (!architectures || architectures.length === 0) {
+    container.innerHTML = `
+      <div class="empty-state">
+        <i data-lucide="network" class="text-gray-400 w-12 h-12 mx-auto"></i>
+        <p class="text-center text-gray-500 mt-4">
+          Aucune architecture disponible. <br>
+          <button onclick="document.getElementById('create-archi-btn').click()" 
+                  class="text-blue-500 hover:underline">
+            Créer une nouvelle architecture
+          </button>
+        </p>
+      </div>
+    `;
+    lucide.createIcons();
+    return;
+  }
 
-    const architectures = result.data;
-    console.log('Architectures chargées:', architectures);
-
-    // Sélectionner le conteneur d'affichage
-    const container = document.getElementById('architectures-container');
-    if (!container) {
-      throw new Error('Element container introuvable');
-    }
-
-    // Vider le conteneur avant affichage
-    container.innerHTML = '';
-
-    if (architectures.length === 0) {
-      container.innerHTML = `
-        <div class="empty-state">
-          <i data-lucide="network" class="text-gray-400 w-12 h-12 mx-auto"></i>
-          <p class="text-center text-gray-500 mt-4">
-            Aucune architecture disponible. <br>
-            <button onclick="document.getElementById('create-archi-btn').click()" 
-                    class="text-blue-500 hover:underline">
-              Créer une nouvelle architecture
-            </button>
-          </p>
+  architectures.forEach(arch => {
+    const archElement = document.createElement('div');
+    archElement.className = 'architecture-card mb-6 p-4 border rounded-lg bg-white shadow-sm';
+    archElement.innerHTML = `
+      <div class="flex justify-between items-start mb-3">
+        <h3 class="text-xl font-semibold">${arch.name}</h3>
+        <div class="flex gap-2">
+          <button onclick="editArchitecture(${arch.id})" 
+                  class="p-1 text-blue-500 hover:bg-blue-50 rounded">
+            <i data-lucide="edit" class="w-4 h-4"></i>
+          </button>
+          <button onclick="deleteArchitecture(${arch.id})" 
+                  class="p-1 text-red-500 hover:bg-red-50 rounded">
+            <i data-lucide="trash-2" class="w-4 h-4"></i>
+          </button>
         </div>
-      `;
-      lucide.createIcons();
+      </div>
+      ${arch.description ? `<p class="text-gray-600 mb-4">${arch.description}</p>` : ''}
+      <div class="network-diagram mt-4">
+        <h4 class="font-medium mb-2 flex items-center">
+          <i data-lucide="network" class="w-4 h-4 mr-2"></i>
+          Schéma de monitoring
+        </h4>
+        <div class="network-graph bg-gray-50 p-4 rounded" style="height: 500px" id="network-graph-${arch.id}"></div>
+      </div>
+    `;
+    container.appendChild(archElement);
+    
+    // Générer le schéma réseau avec vis.js
+    renderNetworkDiagram(arch, `network-graph-${arch.id}`);
+  });
+
+  lucide.createIcons();
+}
+
+function renderNetworkDiagram(architecture, containerId) {
+  console.log("Début de renderNetworkDiagram");
+  
+  const container = document.getElementById(containerId);
+  if (!container) {
+    console.error("Conteneur non trouvé");
+    return;
+  }
+  container.innerHTML = ""; // Nettoyage
+
+  // Vérification des données
+  if (!architecture?.connections?.length) {
+    container.innerHTML = "<p>Aucune connexion réseau à afficher</p>";
+    return;
+  }
+
+  // 1. Création des noeuds
+  const nodes = new vis.DataSet();
+  const edges = new vis.DataSet();
+  const nodeMap = {};
+
+  // Fonction pour générer les icônes SVG
+  // Nouvelle fonction pour charger des icônes réalistes
+const getNodeIcon = (type) => {
+  const t = type.toLowerCase();
+
+  // Icônes provenant de collections reconnues (FontAwesome, Material Icons, etc.)
+  if (t.includes("routeur"))
+    return "https://img.icons8.com/ios/100/000000/router--v1.png"; // Routeur sans fond
+  
+if (t.includes("switch")) {
+    return "data:image/svg+xml," + encodeURIComponent(`
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+            <rect x="20" y="30" width="60" height="40" fill="#555" rx="5"/>
+            <circle cx="35" cy="50" r="5" fill="#0f0"/>
+            <circle cx="50" cy="50" r="5" fill="#0f0"/>
+            <circle cx="65" cy="50" r="5" fill="#0f0"/>
+        </svg>
+    `);
+}
+    if (t.includes("serveur") || t.includes("server"))
+    return "https://img.icons8.com/ios/100/000000/server.png"; // Serveur sans fond
+  
+  if (t.includes("réseau")) {
+    return "data:image/svg+xml," + encodeURIComponent(`
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+            <!-- Noeuds -->
+            <circle cx="30" cy="30" r="6" fill="#1A73E8">
+                <animate attributeName="r" values="6;9;6" dur="2.5s" repeatCount="indefinite"/>
+            </circle>
+            <circle cx="70" cy="30" r="6" fill="#1A73E8" />
+            <circle cx="50" cy="70" r="6" fill="#1A73E8">
+                <animate attributeName="fill-opacity" values="1;0.4;1" dur="3s" repeatCount="indefinite"/>
+            </circle>
+
+            <!-- Connexions -->
+            <line x1="30" y1="30" x2="70" y2="30" stroke="#1A73E8" stroke-width="2" />
+            <line x1="30" y1="30" x2="50" y2="70" stroke="#1A73E8" stroke-width="2" />
+            <line x1="70" y1="30" x2="50" y2="70" stroke="#1A73E8" stroke-width="2" />
+        </svg>
+    `);
+}
+// Icône réseau stylisée
+
+
+  return "https://img.icons8.com/ios/100/000000/computer.png"; // Par défaut
+};
+  
+  
+
+
+
+
+  // Construction des noeuds et liens
+  architecture.connections.forEach(conn => {
+    if (!conn.source || !conn.target) {
+      console.warn("Connexion invalide:", conn);
       return;
     }
 
-    // Afficher chaque architecture
-    architectures.forEach(arch => {
-      const archElement = document.createElement('div');
-      archElement.className = 'architecture-card mb-6 p-4 border rounded-lg';
-      
-      archElement.innerHTML = `
-        <div class="flex justify-between items-start mb-3">
-          <h3 class="text-xl font-semibold">${arch.name}</h3>
-          <div class="flex gap-2">
-            <button onclick="editArchitecture(${arch.id})" 
-                    class="p-1 text-blue-500 hover:bg-blue-50 rounded">
-              <i data-lucide="edit" class="w-4 h-4"></i>
-            </button>
-            <button onclick="deleteArchitecture(${arch.id})" 
-                    class="p-1 text-red-500 hover:bg-red-50 rounded">
-              <i data-lucide="trash-2" class="w-4 h-4"></i>
-            </button>
-          </div>
-        </div>
-        ${arch.description ? `<p class="text-gray-600 mb-4">${arch.description}</p>` : ''}
-        <div class="connections-container mt-4">
-          <h4 class="font-medium mb-2 flex items-center">
-            <i data-lucide="link" class="w-4 h-4 mr-2"></i>
-            Connexions (${arch.connections.length})
-          </h4>
-          ${renderConnections(arch.connections)}
-        </div>
-      `;
-      
-      container.appendChild(archElement);
-    });
-
-    // Initialiser les icônes Lucide
-    lucide.createIcons();
-
-  } catch (error) {
-    console.error('Erreur lors du chargement:', error);
-    showAlert(`Échec du chargement des architectures: ${error.message}`, 'error');
-    
-    // Afficher un état d'erreur dans l'interface
-    const container = document.getElementById('architectures-container');
-    if (container) {
-      container.innerHTML = `
-        <div class="error-state text-center py-8">
-          <i data-lucide="alert-triangle" class="text-red-500 w-12 h-12 mx-auto"></i>
-          <p class="text-red-500 mt-4">Impossible de charger les architectures</p>
-          <button onclick="displayArchitectures()" 
-                  class="mt-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded">
-            <i data-lucide="refresh-cw" class="w-4 h-4 mr-2 inline"></i>
-            Réessayer
-          </button>
-        </div>
-      `;
-      lucide.createIcons();
+    // Noeud source
+    if (!nodeMap[conn.source.id]) {
+      nodes.add({
+        id: conn.source.id,
+        label: conn.source.name,
+        shape: 'image',
+        image: getNodeIcon(conn.source.type, conn.source.last_status),
+        size: 25,
+        font: { size: 12, align: 'center' },
+        borderWidth: 2,
+        color: { border: getNagiosStatusColor(conn.source.last_status) }
+      });
+      nodeMap[conn.source.id] = true;
     }
-  } finally {
-    // Masquer l'indicateur de chargement
-    const loader = document.getElementById('loading-indicator');
-    if (loader) loader.style.display = 'none';
+
+    // Noeud target
+    if (!nodeMap[conn.target.id]) {
+      nodes.add({
+        id: conn.target.id,
+        label: conn.target.name,
+        shape: 'image',
+        image: getNodeIcon(conn.target.type, conn.target.last_status),
+        size: 25,
+        font: { size: 12, align: 'center' },
+        borderWidth: 2,
+        color: { border: getNagiosStatusColor(conn.target.last_status) }
+      });
+      nodeMap[conn.target.id] = true;
+    }
+
+    // Lien
+    edges.add({
+      from: conn.source.id,
+      to: conn.target.id,
+      
+      arrows: { to: { enabled: false } },
+      width: 1,
+      smooth: { type: 'continuous' }
+    });
+  });
+
+  // Options du réseau
+  const options = {
+    nodes: {
+      font: { size: 12, align: 'center' },
+      margin: 10,
+      shapeProperties: { useBorderWithImage: true }
+    },
+    edges: {
+      arrows: { to: { enabled: false } },
+      width: 1
+    },
+    physics: {
+      enabled: true,
+      solver: 'barnesHut',
+      barnesHut: { gravitationalConstant: -2000 }
+    },
+    
+  };
+
+  // Création du réseau
+  try {
+    new vis.Network(container, { nodes, edges }, options);
+    console.log("Réseau créé avec succès");
+  } catch (e) {
+    console.error("Erreur lors de la création du réseau:", e);
+    container.innerHTML = `<p>Erreur: ${e.message}</p>`;
   }
 }
 
+// Fonction utilitaire
+function getNagiosStatusColor(status) {
+  return status === 'En ligne' ? '#4CAF50' : '#F44336';
+}
+// Utilitaires pour icônes et couleurs Nagios-like
+function getNagiosIcon(type, status) {
+  // Utilise des icônes SVG ou PNG selon le type et le statut
+  // Tu peux remplacer les URLs par tes propres images si besoin
+  if (type === 'serveur') return status === 'En ligne' ? '/static/icons/server-green.png' : '/static/icons/server-red.png';
+  if (type === 'switch') return status === 'En ligne' ? '/static/icons/switch-green.png' : '/static/icons/switch-red.png';
+  if (type === 'routeur') return status === 'En ligne' ? '/static/icons/router-green.png' : '/static/icons/router-red.png';
+  if (type === 'réseau') return status === 'En ligne' ? '/static/icons/network-green.png' : '/static/icons/network-red.png';
+  return '/static/icons/unknown.png';
+}
+document.addEventListener("DOMContentLoaded", () => {
+  const architectures = [
+    {
+      id: 1,
+      name: "Architecture Test",
+      description: "Ceci est une architecture de test.",
+      connections: [
+        { type: "router", name: "Routeur A", protocol: "TCP", status: "ok" },
+        { type: "switch", name: "Switch B", protocol: "TCP", status: "warning" },
+        { type: "server", name: "Serveur C", protocol: "HTTP", status: "critical" }
+      ]
+    }
+  ];
+
+  displayArchitectures(architectures);
+});
+
+function getNagiosStatusColor(status) {
+  if (status === 'En ligne') return '#4CAF50'; // vert
+  if (status === 'Hors ligne') return '#F44336'; // rouge
+  return '#FF9800'; // orange pour inconnu/avertissement
+}
 // Fonction helper pour afficher les connexions
 function renderConnections(connections) {
   if (connections.length === 0) {
@@ -1538,7 +1640,7 @@ function renderConnections(connections) {
   return `
     <ul class="space-y-3">
       ${connections.map(conn => `
-        <li class="connection-item p-3 bg-gray-50 rounded flex justify-between items-center">
+        <li class="connection-item p-3  rounded flex justify-between items-center">
           <div class="flex items-center">
             <span class="flex items-center">
               <i data-lucide="${getEquipmentIcon(conn.source.type)}" 
@@ -1615,14 +1717,167 @@ function getConnectionBadgeClass(type) {
       }, 5000);
     }
 
-    // Exposer les fonctions globales
-    window.editSite = editSite;
-    window.deleteSite = deleteSite;
-    window.showSiteDetails = showSiteDetails;
-    window.closeDetails = closeDetails;
-    window.removeConnection = removeConnection;
-    window.editConnection = editConnection;
-    window.deleteConnection = deleteConnection;
+   
   </script>
+  <script>
+  const nodes = new vis.DataSet([
+    {
+      id: 1,
+      label: "Routeur",
+      image: "https://img.icons8.com/fluency/48/router.png",
+      shape: "image",
+      size: 40,
+      font: { size: 16, color: "#000", vadjust: 50 } // label en dessous
+    },
+    {
+      id: 2,
+      label: "Switch",
+      image: "https://img.icons8.com/fluency/48/switch.png",
+      shape: "image",
+      size: 40,
+      font: { size: 16, color: "#000", vadjust: 50 }
+    },
+    {
+      id: 3,
+      label: "PC 1",
+      image: "https://img.icons8.com/fluency/48/computer.png",
+      shape: "image",
+      size: 40,
+      font: { size: 16, color: "#000", vadjust: 50 }
+    },
+    {
+      id: 4,
+      label: "PC 2",
+      image: "https://img.icons8.com/fluency/48/computer.png",
+      shape: "image",
+      size: 40,
+      font: { size: 16, color: "#000", vadjust: 50 }
+    },
+    {
+      id: 5,
+      label: "Serveur",
+      image: "https://img.icons8.com/fluency/48/server.png",
+      shape: "image",
+      size: 40,
+      font: { size: 16, color: "#000", vadjust: 50 }
+    }
+  ]);
+
+  const edges = new vis.DataSet([
+    { from: 1, to: 2, arrows: '' }, // pas de flèches
+    { from: 2, to: 3, arrows: '' },
+    { from: 2, to: 4, arrows: '' },
+    { from: 1, to: 5, arrows: '' }
+  ]);
+
+  const container = document.getElementById("network");
+
+  const data = {
+    nodes: nodes,
+    edges: edges
+  };
+
+  const options = {
+    layout: {
+      hierarchical: false
+    },
+    physics: {
+      enabled: true
+    },
+    edges: {
+      arrows: {
+        to: { enabled: false },
+        from: { enabled: false }
+      },
+      smooth: {
+        enabled: false
+      },
+      color: {
+        color: '#333',
+        highlight: '#555'
+      }
+    },
+    nodes: {
+      shape: "image"
+    }
+  };
+
+  const demoNetwork = new vis.Network(container, data, options);
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/lucide@0.0.0/dist/lucide.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const menuDiv = document.getElementById("menu");
+            
+            fetch("/static/menu.html")
+                .then(response => response.text())
+                .then(data => {
+                    if (menuDiv) {
+                        menuDiv.innerHTML = data;
+                        attachEventListenersToNav('.desktop-nav');
+                        attachEventListenersToNav('.mobile-nav');
+                        checkAndApplyActiveStateOnLoad();
+                    }
+                })
+                .catch(error => {
+                    console.error('Erreur lors du chargement du menu :', error);
+                });
+
+            function attachEventListenersToNav(navSelector) {
+                const nav = document.querySelector(navSelector);
+                if (nav) {
+                    const navItems = nav.querySelectorAll('.nav-item, .mobile-nav-item');
+                    navItems.forEach(item => {
+                        item.addEventListener('click', function(event) {
+                            activateNavItem(this, navSelector);
+                        });
+                    });
+                }
+            }
+
+            function activateNavItem(item, navSelector) {
+                const activeItem = document.querySelector(`${navSelector} .nav-item.active, ${navSelector} .mobile-nav-item.active`);
+                if (activeItem && activeItem !== item) {
+                    activeItem.classList.remove('active');
+                }
+                item.classList.add('active');
+                localStorage.setItem('activeNavLink', item.dataset.navlink);
+            }
+
+            function checkAndApplyActiveStateOnLoad() {
+                const storedActiveNavLink = localStorage.getItem('activeNavLink');
+                const desktopNavItems = document.querySelectorAll('.desktop-nav .nav-item');
+                const mobileNavItems = document.querySelectorAll('.mobile-nav .mobile-nav-item');
+                const currentPage = window.location.pathname;
+
+                const allNavItems = [...desktopNavItems, ...mobileNavItems]; 
+
+                if (storedActiveNavLink) {
+                    allNavItems.forEach(item => {
+                        if (item.dataset.navlink === storedActiveNavLink) {
+                            item.classList.add('active');
+                        }
+                    });
+                } else {
+                    if (currentPage === '/' || currentPage === '/dashboard') {
+                        allNavItems.forEach(item => {
+                            if (item.dataset.navlink === 'accueil') {
+                                item.classList.add('active');
+                                localStorage.setItem('activeNavLink', 'accueil');
+                            }
+                        });
+                    } else {
+                        allNavItems.forEach(item => {
+                            if (item.getAttribute('href') === currentPage) {
+                                item.classList.add('active');
+                                localStorage.setItem('activeNavLink', item.dataset.navlink);
+                            }
+                        });
+                    }
+                }
+            }
+        });
+    </script>
 </body>
 </html>

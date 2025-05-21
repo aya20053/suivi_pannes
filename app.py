@@ -8,9 +8,12 @@ import json
 import logging  # For better logging
 import threading
 from tasks import run_monitoring_loop
-
+from werkzeug.exceptions import BadRequest
+import mysql.connector
+from flask_cors import CORS
 app = Flask(__name__)
-CORS(app)
+
+CORS(app, supports_credentials=True, origins=["http://127.0.0.1:5000", "http://localhost:5000"])
 
 # --- Logging Configuration ---
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -28,7 +31,7 @@ def get_db_connection():
             user=DB_USER,
             password=DB_PASSWORD,
             database=DB_NAME,
-            cursorclass=pymysql.cursors.DictCursor
+            cursorclass=pymysql.cursors.DictCursor  # Ici uniquement
         )
         return conn
     except pymysql.MySQLError as e:
@@ -38,9 +41,98 @@ def get_db_connection():
 # --- Authentication ---
 app.secret_key = 'your_secret_key'  # Important for session management
 
+
+
 @app.route('/')
 def index():
-    return render_template('login.html')
+   
+    conn = get_db_connection()
+    if not conn:
+        return "Database connection failed", 500
+
+    try:
+        with conn.cursor() as cursor:
+            cursor.execute("SELECT COUNT(*) AS count FROM monitored_sites WHERE last_status = 'En ligne'")
+            total_online = cursor.fetchone()['count']
+
+            cursor.execute("SELECT COUNT(*) AS count FROM monitored_sites WHERE last_status = 'Hors ligne'")
+            total_offline = cursor.fetchone()['count']
+
+            cursor.execute("SELECT COUNT(*) AS count FROM monitored_sites")
+            total_sites = cursor.fetchone()['count']
+
+            cursor.execute("SELECT MAX(last_checked) AS last_check FROM monitored_sites")
+            result = cursor.fetchone()
+            last_check = result['last_check'] if result and result['last_check'] else None
+
+            twenty_four_hours_ago = datetime.now() - timedelta(hours=24)
+
+            cursor.execute("SELECT id, name, url_or_ip,equipment_type, last_status, last_checked FROM monitored_sites")
+            sites = cursor.fetchall()
+
+            sites_data = []
+
+            for site in sites:
+                with conn.cursor() as cursor2:
+                    cursor2.execute("""
+                        SELECT timestamp, status FROM monitoring_events
+                        WHERE site_id = %s AND timestamp >= %s ORDER BY timestamp
+                    """, (site['id'], twenty_four_hours_ago))
+                    events = cursor2.fetchall()
+
+                online_count = sum(1 for e in events if e['status'] == 'En ligne')
+                offline_count = len(events) - online_count
+                availability = (online_count / len(events) * 100) if events else 0
+
+                secondly_data = {}
+                for e in events:
+                    second = e['timestamp'].strftime('%H:%M:%S')
+                    if second not in secondly_data:
+                        secondly_data[second] = {'count': 0, 'sum': 0}
+                    secondly_data[second]['count'] += 1
+                    secondly_data[second]['sum'] += (1 if e['status'] == 'En ligne' else 0)
+
+                seconds = sorted(secondly_data.keys())
+                secondly_ratios = [
+                    (secondly_data[s]['sum'] / secondly_data[s]['count']) * 100 for s in seconds
+                ]
+
+                sites_data.append({
+                    'id': site['id'],
+                    'name': site['name'],
+                    'url_or_ip': site['url_or_ip'],
+                    'equipment_type': site['equipment_type'],
+
+                    'current_status': site['last_status'],
+                    'last_checked': site['last_checked'].strftime('%Y-%m-%d %H:%M:%S') if site['last_checked'] else 'N/A',
+                    'availability': round(availability, 2),
+                    'online_count': online_count,
+                    'offline_count': offline_count,
+                    'hourly_labels': seconds,
+                    'hourly_ratios': secondly_ratios,
+                    'events_json': json.dumps([
+                        {'timestamp': e['timestamp'].strftime('%Y-%m-%d %H:%M:%S'), 'status': e['status']}
+                        for e in events
+                    ])
+                })
+
+            user_role = session.get('role')
+            return render_template('graphes.html',
+                                total_online=total_online,
+                                total_offline=total_offline,
+                                total_sites=total_sites,
+                                last_check=last_check,
+                                sites_data=sites_data,
+                                now=datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+                                user_role=user_role,
+                                role=user_role)
+
+    except Exception as e:
+        logging.error(f"Erreur dashboard: {e}")
+        return "Erreur serveur", 500
+    finally:
+        if conn:
+            conn.close()
 
 @app.route('/login', methods=['POST'])
 def login():
@@ -62,6 +154,15 @@ def login():
     finally:
         if conn:
             conn.close()
+
+
+@app.route('/login', methods=['GET'])
+def login_form():
+    return render_template('login.html')
+
+
+
+
 
 @app.route('/logout')
 def logout():
@@ -109,7 +210,7 @@ def dashboard():
             twenty_four_hours_ago = datetime.now() - timedelta(hours=24)
 
             # Récupérer tous les sites
-            cursor.execute("SELECT id, name, url_or_ip, last_status, last_checked FROM monitored_sites")
+            cursor.execute("SELECT id, name, url_or_ip,equipment_type, last_status, last_checked FROM monitored_sites")
             sites = cursor.fetchall()
 
             sites_data = []
@@ -141,6 +242,7 @@ def dashboard():
                     'id': site['id'],
                     'name': site['name'],
                     'url_or_ip': site['url_or_ip'],
+                    'equipment_type': site['equipment_type'],
                     'current_status': site['last_status'],
                     'last_checked': site['last_checked'].strftime('%Y-%m-%d %H:%M:%S') if site['last_checked'] else 'N/A',
                     'availability': round(availability, 2),
@@ -236,7 +338,7 @@ def get_logged_in_user_data(conn):
                     "telephone": user['telephone'],
                     "photo_profile": user['photo_profile'],
                     "role": user['role'],
-                    "password": user['password'] # Include password
+                    "password": user['password'] 
                 }
             return None
     except pymysql.MySQLError as e:
@@ -246,112 +348,474 @@ def get_logged_in_user_data(conn):
 # --- API Routes ---
 @app.route("/api/sites", methods=["GET"])
 def api_get_sites():
+    """Get all monitored sites"""
     conn = get_db_connection()
     if not conn:
         return jsonify({"error": "Database connection failed"}), 500
+    
     try:
-        with conn.cursor() as cursor:
+        with conn.cursor(pymysql.cursors.DictCursor) as cursor:
             cursor.execute("SELECT * FROM monitored_sites")
-            return jsonify(cursor.fetchall())
+            sites = cursor.fetchall()
+            # Convert datetime objects to strings
+            for site in sites:
+                if site.get('last_checked'):
+                    site['last_checked'] = site['last_checked'].isoformat()
+            return jsonify(sites), 200
     except pymysql.MySQLError as e:
-        logging.error(f"Error getting sites: {e}")
-        return jsonify({"error": f"Database error: {e}"}), 500
+        logging.error(f"Error getting sites: {str(e)}")
+        return jsonify({"error": "Database operation failed"}), 500
     finally:
         if conn:
             conn.close()
 
 @app.route("/api/sites", methods=["POST"])
 def api_add_site():
-    data = request.json
+    """Add a new monitored site"""
+    data = request.get_json()
+    if not data:
+        return jsonify({"error": "No data provided"}), 400
+    
+    required_fields = ['name', 'url_or_ip', 'equipment_type']
+    missing_fields = [field for field in required_fields if field not in data]
+    if missing_fields:
+        return jsonify({"error": f"Missing required fields: {', '.join(missing_fields)}"}), 400
+
     conn = get_db_connection()
     if not conn:
         return jsonify({"error": "Database connection failed"}), 500
+    
     try:
         with conn.cursor() as cursor:
+            # Check for duplicates
             cursor.execute(
-                "INSERT INTO monitored_sites (name, url_or_ip) VALUES (%s, %s)",
+                "SELECT id FROM monitored_sites WHERE name = %s OR url_or_ip = %s",
                 (data["name"], data["url_or_ip"])
             )
+            if cursor.fetchone():
+                return jsonify({"error": "Site with this name or URL already exists"}), 409
+
+            cursor.execute(
+                "INSERT INTO monitored_sites (name, url_or_ip, equipment_type) VALUES (%s, %s, %s)",
+                (data["name"], data["url_or_ip"], data["equipment_type"])
+            )
+            site_id = cursor.lastrowid
             conn.commit()
-        return jsonify({"message": "Site added"}), 201
+            
+            # Return the newly created site
+            cursor.execute("SELECT * FROM monitored_sites WHERE id = %s", (site_id,))
+            new_site = cursor.fetchone()
+            if new_site.get('last_checked'):
+                new_site['last_checked'] = new_site['last_checked'].isoformat()
+            
+            return jsonify({
+                "message": "Site added successfully",
+                "site": new_site
+            }), 201
     except pymysql.MySQLError as e:
-        logging.error(f"Error adding site: {e}")
+        logging.error(f"Error adding site: {str(e)}")
         conn.rollback()
-        return jsonify({"error": f"Database error: {e}"}), 500
+        return jsonify({"error": "Database operation failed"}), 500
     finally:
         if conn:
             conn.close()
 
 @app.route("/api/sites/<int:id>", methods=["DELETE"])
 def api_delete_site(id):
+    """Delete a monitored site"""
     conn = get_db_connection()
     if not conn:
         return jsonify({"error": "Database connection failed"}), 500
+    
     try:
         with conn.cursor() as cursor:
+            # Check if site exists
+            cursor.execute("SELECT id FROM monitored_sites WHERE id = %s", (id,))
+            if not cursor.fetchone():
+                return jsonify({"error": "Site not found"}), 404
+            
             cursor.execute("DELETE FROM monitored_sites WHERE id = %s", (id,))
             conn.commit()
-        return jsonify({"message": "Site deleted"})
+            return jsonify({"message": "Site deleted successfully"}), 200
     except pymysql.MySQLError as e:
-        logging.error(f"Error deleting site: {e}")
+        logging.error(f"Error deleting site {id}: {str(e)}")
         conn.rollback()
-        return jsonify({"error": f"Database error: {e}"}), 500
+        return jsonify({"error": "Database operation failed"}), 500
     finally:
         if conn:
             conn.close()
 
 @app.route("/api/sites/<int:id>", methods=["GET"])
 def get_site(id):
+    """Get details of a specific site"""
     conn = get_db_connection()
     if not conn:
         return jsonify({"error": "Database connection failed"}), 500
+    
     try:
-        with conn.cursor() as cursor:
+        with conn.cursor(pymysql.cursors.DictCursor) as cursor:
             cursor.execute("SELECT * FROM monitored_sites WHERE id = %s", (id,))
             site = cursor.fetchone()
-            if site:
-                return jsonify(site), 200
-            else:
+            if not site:
                 return jsonify({"error": "Site not found"}), 404
+            
+            # Convert datetime to string
+            if site.get('last_checked'):
+                site['last_checked'] = site['last_checked'].isoformat()
+            
+            return jsonify(site), 200
     except pymysql.MySQLError as e:
-        logging.error(f"Error getting site details: {e}")
-        return jsonify({"error": f"Database error: {e}"}), 500
+        logging.error(f"Error getting site {id}: {str(e)}")
+        return jsonify({"error": "Database operation failed"}), 500
     finally:
         if conn:
             conn.close()
 
 @app.route("/api/sites/<int:id>", methods=["PUT"])
 def update_site(id):
-    data = request.get_json()
-    name = data.get("name")
-    url_or_ip = data.get("url_or_ip")
+    """Update a monitored site"""
+    try:
+        # Debug: Log the incoming request
+        logging.debug(f"Update request for site {id}. Headers: {request.headers}, Data: {request.data}")
+        
+        if not request.is_json:
+            return jsonify({"error": "Request must be JSON"}), 400
 
-    if not name or not url_or_ip:
-        return jsonify({"error": "Missing fields"}), 400
+        data = request.get_json()
+        if not data:
+            return jsonify({"error": "No data provided"}), 400
+
+        # Validate required fields
+        required_fields = ['name', 'url_or_ip', 'equipment_type']
+        missing_fields = [field for field in required_fields if field not in data]
+        if missing_fields:
+            return jsonify({
+                "error": "Missing required fields",
+                "missing": missing_fields
+            }), 400
+
+        conn = get_db_connection()
+        if not conn:
+            return jsonify({"error": "Database connection failed"}), 500
+
+        try:
+            with conn.cursor(pymysql.cursors.DictCursor) as cursor:
+                # Check if site exists
+                cursor.execute("SELECT id FROM monitored_sites WHERE id = %s", (id,))
+                if not cursor.fetchone():
+                    return jsonify({"error": "Site not found"}), 404
+
+                # Check for duplicates
+                cursor.execute("""
+                    SELECT id FROM monitored_sites 
+                    WHERE (name = %s OR url_or_ip = %s) 
+                    AND id != %s
+                    LIMIT 1
+                """, (data['name'], data['url_or_ip'], id))
+                
+                if duplicate := cursor.fetchone():
+                    return jsonify({
+                        "error": "Site with this name or URL already exists",
+                        "duplicate_id": duplicate['id']
+                    }), 409
+
+                # Update site
+                cursor.execute("""
+                    UPDATE monitored_sites
+                    SET name = %s, url_or_ip = %s, equipment_type = %s
+                    WHERE id = %s
+                """, (data['name'], data['url_or_ip'], data['equipment_type'], id))
+
+                # Get updated site
+                cursor.execute("""
+                    SELECT id, name, url_or_ip, equipment_type, 
+                           last_status, last_checked, failed_pings_count
+                    FROM monitored_sites
+                    WHERE id = %s
+                """, (id,))
+                
+                site = cursor.fetchone()
+                conn.commit()
+
+                # Safely format dates
+                if site['last_checked']:
+                    try:
+                        site['last_checked'] = site['last_checked'].isoformat()
+                    except AttributeError:
+                        site['last_checked'] = None
+
+                return jsonify({
+                    "message": "Site updated successfully",
+                    "site": site
+                }), 200
+
+        except pymysql.MySQLError as e:
+            logging.error(f"Database error in update_site: {str(e)}", exc_info=True)
+            conn.rollback()
+            return jsonify({
+                "error": "Database operation failed",
+                "details": str(e)
+            }), 500
+        finally:
+            if conn:
+                conn.close()
+
+    except Exception as e:
+        logging.error(f"Unexpected error in update_site: {str(e)}", exc_info=True)
+        return jsonify({
+            "error": "Internal server error",
+            "details": str(e)
+        }), 500
+
+
+
+
+
+       # Route pour créer une architecture
+
+@app.route('/api/architectures', methods=['POST', 'OPTIONS'])
+def create_architecture():
+    if request.method == 'OPTIONS':
+        return _build_cors_preflight_response()
+    
+    conn = None
+    try:
+        data = request.get_json()
+        if not data or 'name' not in data:
+            return jsonify({"status": "error", "message": "Nom manquant"}), 400
+
+        conn = get_db_connection()
+        cursor = conn.cursor()  # simple, sans argument
+
+        # 1. Insertion de l'architecture
+        cursor.execute("""
+            INSERT INTO network_architectures (name, description)
+            VALUES (%s, %s)
+        """, (data['name'], data.get('description', '')))
+        arch_id = cursor.lastrowid
+
+        # 2. Insertion des connexions
+        if 'connections' in data:
+            for conn_data in data['connections']:
+                cursor.execute("""
+                    INSERT INTO site_connections 
+                    (architecture_id, source_site_id, target_site_id, connection_type, bandwidth)
+                    VALUES (%s, %s, %s, %s, %s)
+                """, (
+                    arch_id,
+                    conn_data['source_id'],
+                    conn_data['target_id'],
+                    conn_data.get('type', 'standard'),
+                    conn_data.get('bandwidth', 0)
+                ))
+
+        conn.commit()
+        return _corsify(jsonify({
+            "status": "success",
+            "id": arch_id,
+            "message": "Architecture créée"
+        })), 201
+
+    except Exception as e:
+        if conn: conn.rollback()
+        return _corsify(jsonify({
+            "status": "error",
+            "message": str(e)
+        })), 500
+    finally:
+        if conn: conn.close()
+
+# Utilitaires CORS
+def _build_cors_preflight_response():
+    response = jsonify({"status": "ok"})
+    response.headers.add("Access-Control-Allow-Origin", "*")
+    response.headers.add("Access-Control-Allow-Headers", "*")
+    response.headers.add("Access-Control-Allow-Methods", "*")
+    return response
+
+def _corsify(response):
+    response.headers.add("Access-Control-Allow-Origin", "*")
+    return response
+@app.route('/api/architectures', methods=['POST'])
+def save_architecture():
+    data = request.get_json()
+    name = data.get('name')
+    description = data.get('description')
+    connections = data.get('connections', [])
 
     conn = get_db_connection()
     if not conn:
-        return jsonify({"error": "Database connection failed"}), 500
+        return jsonify({"message": "Database connection error"}), 500
+
     try:
-        with conn.cursor() as cursor:
-            cursor.execute("SELECT id FROM monitored_sites WHERE id = %s", (id,))
-            if not cursor.fetchone():
-                return jsonify({"error": "Site not found"}), 404
+        cursor = conn.cursor()  # Sans argument ici
+        sql = "INSERT INTO architectures (name, description) VALUES (%s, %s)"
+        cursor.execute(sql, (name, description))
+        architecture_id = cursor.lastrowid
 
-            cursor.execute("""
-                UPDATE monitored_sites
-                SET name = %s, url_or_ip = %s
-                WHERE id = %s
-            """, (name, url_or_ip, id))
-            conn.commit()
+        for c in connections:
+            sql_conn = """INSERT INTO connections (architecture_id, source_id, target_id, type, bandwidth)
+                          VALUES (%s, %s, %s, %s, %s)"""
+            cursor.execute(sql_conn, (
+                architecture_id,
+                c.get('source_id'),
+                c.get('target_id'),
+                c.get('type', 'standard'),
+                c.get('bandwidth', 0)
+            ))
 
-        return jsonify({"message": "Site updated successfully"}), 200
-    except pymysql.MySQLError as e:
-        logging.error(f"Error updating site: {e}")
-        conn.rollback()
-        return jsonify({"error": f"Database error: {e}"}), 500
+        conn.commit()
+        return jsonify({"message": "Architecture saved", "id": architecture_id}), 201
+    except Exception as e:
+        logging.error(f"Erreur lors de la sauvegarde : {e}")
+        return jsonify({"message": "Server error"}), 500
     finally:
-        if conn:
+        cursor.close()
+        conn.close()
+
+            
+@app.route('/api/architectures', methods=['GET'])
+def debug_architectures():
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()    
+        cur.execute("""
+            SELECT a.*, 
+                   COUNT(c.id) as connections_count
+            FROM network_architectures a
+            LEFT JOIN site_connections c ON a.id = c.architecture_id
+            GROUP BY a.id
+        """)
+        results = cur.fetchall()
+        return jsonify({
+            "status": "success",
+            "count": len(results),
+            "data": results
+        })
+    except Exception as e:
+        return jsonify({
+            "status": "error",
+            "message": str(e)
+        }), 500
+
+# Route pour récupérer une architecture avec ses connexions
+@app.route('/api/architectures/<int:arch_id>', methods=['GET'])
+def get_architecture(arch_id):
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        
+        # 1. Récupérer l'architecture de base
+        cursor.execute("""
+            SELECT * FROM network_architectures WHERE id = %s
+        """, (arch_id,))
+        arch = cursor.fetchone()
+        
+        if not arch:
+            return jsonify({'error': 'Architecture non trouvée'}), 404
+        
+        # 2. Récupérer les connexions avec les détails des sites
+        cursor.execute("""
+            SELECT 
+                sc.*,
+                src.name as source_name, src.equipment_type as source_type,
+                tgt.name as target_name, tgt.equipment_type as target_type
+            FROM site_connections sc
+            JOIN monitored_sites src ON sc.source_site_id = src.id
+            JOIN monitored_sites tgt ON sc.target_site_id = tgt.id
+            WHERE sc.architecture_id = %s
+        """, (arch_id,))
+        
+        connections = cursor.fetchall()
+        
+        return jsonify({
+            **arch,
+            'connections': connections
+        })
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+    finally:
+        cursor.close()
+
+
+@app.route('/api/architectures-with-details', methods=['GET'])
+def get_architectures_with_details():
+    try:
+        conn = get_db_connection()  # Utilisez votre méthode de connexion
+        cur = conn.cursor()
+        
+        # Requête débogage
+        print("Tentative d'exécution de la requête SQL...")
+        
+        cur.execute("""
+            SELECT 
+                a.id as arch_id,
+                a.name as arch_name,
+                a.description,
+                c.id as connection_id,
+                c.connection_type,
+                c.bandwidth,
+                src.id as source_id,
+                src.name as source_name,
+                src.equipment_type as source_type,
+                tgt.id as target_id,
+                tgt.name as target_name,
+                tgt.equipment_type as target_type
+            FROM network_architectures a
+            LEFT JOIN site_connections c ON a.id = c.architecture_id
+            LEFT JOIN monitored_sites src ON c.source_site_id = src.id
+            LEFT JOIN monitored_sites tgt ON c.target_site_id = tgt.id
+            ORDER BY a.id, c.id
+        """)
+        
+        rows = cur.fetchall()
+        print(f"Nombre de lignes récupérées : {len(rows)}")  # Debug
+        
+        # Structuration des données
+        architectures = {}
+        for row in rows:
+            arch_id = row['arch_id']
+            
+            if arch_id not in architectures:
+                architectures[arch_id] = {
+                    'id': arch_id,
+                    'name': row['arch_name'],
+                    'description': row['description'],
+                    'connections': []
+                }
+            
+            if row['connection_id']:
+                architectures[arch_id]['connections'].append({
+                    'id': row['connection_id'],
+                    'type': row['connection_type'],
+                    'bandwidth': row['bandwidth'],
+                    'source': {
+                        'id': row['source_id'],
+                        'name': row['source_name'],
+                        'type': row['source_type']
+                    },
+                    'target': {
+                        'id': row['target_id'],
+                        'name': row['target_name'],
+                        'type': row['target_type']
+                    }
+                })
+        
+        return jsonify({
+            "status": "success",
+            "data": list(architectures.values())
+        })
+        
+    except Exception as e:
+        print(f"ERREUR SERVEUR: {str(e)}")  # Log détaillé
+        return jsonify({
+            "status": "error",
+            "message": f"Erreur serveur: {str(e)}",
+            "details": str(e)  # Retourne l'erreur au frontend pour débogage
+        }), 500
+    finally:
+        if 'conn' in locals():
             conn.close()
 
 # --- User Management API ---
@@ -372,7 +836,7 @@ def api_get_users():
         return jsonify({"error": "Database connection failed"}), 500
     try:
         with conn.cursor() as cursor:
-            cursor.execute("SELECT id, username, prenom, email, poste, telephone, photo_profile, role, password FROM users") # Include password
+            cursor.execute("SELECT id, username, prenom, email, poste, telephone, photo_profile, role, password FROM users")
             users = cursor.fetchall()
             return jsonify(users)
     except pymysql.MySQLError as e:
@@ -566,7 +1030,6 @@ def start_monitoring():
     thread.daemon = True  # Permet au thread de s'arrêter lorsque l'application Flask s'arrête
     thread.start()
 
-
 @app.route('/alerts')
 def alerts():
     """Route pour afficher la page des alertes."""
@@ -600,7 +1063,7 @@ def delete_all_alerts():
     try:
         connection= get_db_connection()
         cursor = connection.cursor()
-        cursor.execute("DELETE FROM alerts")
+        cursor.execute("TRUNCATE TABLE alerts")
         connection.commit()
         return jsonify({'message': 'Toutes les alertes ont été supprimées'}), 200
     except Exception as e:
@@ -629,15 +1092,146 @@ def delete_alert(alert_id):
             connection.close()
 
 
+@app.route('/generer')
+def generer():
+    if 'username' not in session:
+        return redirect(url_for('index'))
+
+   
+    return render_template('generer_arch.html', active_page='generer')
+
+
+# Gestion des équipements
+@app.route('/api/network/devices', methods=['GET', 'POST'])
+def handle_devices():
+    conn = get_db_connection()
+    if not conn:
+        return jsonify({"error": "Database connection failed"}), 500
+    
+    try:
+        if request.method == 'GET':
+            # Récupérer tous les équipements
+            with conn.cursor() as cursor:
+                cursor.execute("SELECT * FROM network_devices")
+                devices = cursor.fetchall()
+                return jsonify(devices)
+        
+        elif request.method == 'POST':
+            # Ajouter un nouvel équipement
+            data = request.json
+            required_fields = ['name', 'device_type']
+            if not all(field in data for field in required_fields):
+                return jsonify({"error": "Missing required fields"}), 400
+            
+            with conn.cursor() as cursor:
+                cursor.execute(
+                    "INSERT INTO network_devices (name, ip_address, device_type, position_x, position_y) VALUES (%s, %s, %s, %s, %s)",
+                    (data['name'], 
+                     data.get('ip_address'), 
+                     data['device_type'], 
+                     data.get('position_x', 0), 
+                     data.get('position_y', 0))
+                )
+                conn.commit()
+                return jsonify({"message": "Device added", "id": cursor.lastrowid}), 201
+    
+    except pymysql.MySQLError as e:
+        conn.rollback()
+        return jsonify({"error": f"Database error: {e}"}), 500
+    finally:
+        if conn:
+            conn.close()
+@app.route('/api/network/device-types', methods=['GET'])
+def get_device_types():
+    conn = get_db_connection()
+    if not conn:
+        return jsonify({"error": "Database connection failed"}), 500
+    
+    try:
+        with conn.cursor() as cursor:
+            cursor.execute("SELECT DISTINCT device_type FROM network_devices")
+            types = [item['device_type'] for item in cursor.fetchall()]
+            return jsonify(types)
+    except pymysql.MySQLError as e:
+        return jsonify({"error": f"Database error: {e}"}), 500
+    finally:
+        if conn:
+            conn.close()
+
+            
+# Gestion des connexions
+@app.route('/api/network/connections', methods=['GET', 'POST'])
+def handle_connections():
+    conn = get_db_connection()
+    if not conn:
+        return jsonify({"error": "Database connection failed"}), 500
+    
+    try:
+        if request.method == 'GET':
+            # Récupérer toutes les connexions
+            with conn.cursor() as cursor:
+                cursor.execute("""
+                    SELECT c.*, 
+                           s.name as source_name, 
+                           t.name as target_name 
+                    FROM network_connections c
+                    JOIN network_devices s ON c.source_device_id = s.id
+                    JOIN network_devices t ON c.target_device_id = t.id
+                """)
+                connections = cursor.fetchall()
+                return jsonify(connections)
+        
+        elif request.method == 'POST':
+            # Ajouter une nouvelle connexion
+            data = request.json
+            required_fields = ['source_device_id', 'target_device_id']
+            if not all(field in data for field in required_fields):
+                return jsonify({"error": "Missing required fields"}), 400
+            
+            # Vérifier que les devices existent
+            with conn.cursor() as cursor:
+                cursor.execute("SELECT id FROM network_devices WHERE id IN (%s, %s)", 
+                             (data['source_device_id'], data['target_device_id']))
+                devices = cursor.fetchall()
+                if len(devices) != 2:
+                    return jsonify({"error": "One or both devices not found"}), 404
+                
+                # Vérifier que la connexion n'existe pas déjà
+                cursor.execute("""
+                    SELECT id FROM network_connections 
+                    WHERE (source_device_id = %s AND target_device_id = %s)
+                    OR (source_device_id = %s AND target_device_id = %s)
+                """, (data['source_device_id'], data['target_device_id'],
+                     data['target_device_id'], data['source_device_id']))
+                if cursor.fetchone():
+                    return jsonify({"error": "Connection already exists"}), 400
+                
+                # Créer la connexion
+                cursor.execute(
+                    "INSERT INTO network_connections (source_device_id, target_device_id, connection_type) VALUES (%s, %s, %s)",
+                    (data['source_device_id'], 
+                     data['target_device_id'], 
+                     data.get('connection_type', 'ethernet'))
+                )
+                conn.commit()
+                return jsonify({"message": "Connection added", "id": cursor.lastrowid}), 201
+    
+    except pymysql.MySQLError as e:
+        conn.rollback()
+        return jsonify({"error": f"Database error: {e}"}), 500
+    finally:
+        if conn:
+            conn.close()
+
 if __name__ == '__main__':
     from tasks import run_monitoring_loop
     import threading
 
     def start_monitoring():
-        """Démarre la boucle de monitoring dans un thread séparé."""
+       
         thread = threading.Thread(target=run_monitoring_loop)
         thread.daemon = True
         thread.start()
 
-    #start_monitoring()
+    start_monitoring()
     app.run(debug=True)

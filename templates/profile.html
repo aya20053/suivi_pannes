@@ -7,347 +7,407 @@
     <title>Profil</title>
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
     <link href="https://cdn.jsdelivr.net/npm/lucide-icons@0.1.0/dist/lucide.min.css" rel="stylesheet">
-
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <style>
+        :root {
+            --primary-color: #3b82f6;
+            --primary-hover: #2563eb;
+            --secondary-color: #f8fafc;
+            --text-color: #1e293b;
+            --light-text: #64748b;
+            --border-color: #e2e8f0;
+            --success-color: #10b981;
+        }
+
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: #f8fafc;
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
             margin: 0;
+            color: var(--text-color);
+            line-height: 1.6;
         }
 
         .profil-container {
-            border-radius: 12px;
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
-            padding: 40px;
-            width: 80%;
-            max-width: 600px;
-            display: flex;
-            flex-direction: column;
-            align-items: stretch;
-            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 10px 10px -5px rgba(0, 0, 0, 0.02);
+            padding: 2.5rem;
+            width: 90%;
+            max-width: 700px;
+            background: white;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .profil-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 8px;
+            background: linear-gradient(90deg, var(--primary-color), #8b5cf6);
         }
 
         .profil-header {
-            display: flex;
-            flex-direction: row;
-            align-items: center;
-            margin-bottom: 30px;
+            margin-bottom: 2rem;
+            text-align: center;
         }
 
         .profil-header h2 {
-            color: #333;
-            font-size: 2.2em;
-            margin-bottom: 10px;
-            text-align: left;
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--text-color);
+            margin-bottom: 1.5rem;
+            position: relative;
+            display: inline-block;
+        }
+
+        .profil-header h2::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 50px;
+            height: 3px;
+            background: var(--primary-color);
+            border-radius: 3px;
         }
 
         .profil-info {
-            text-align: left;
-            margin-bottom: 30px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
         }
 
-        .profil-info p {
-            color: #555;
-            line-height: 1.6;
-            margin-bottom: 8px;
-            font-size: 1em;
+        .info-item {
+            display: flex;
+            align-items: flex-start;
+            padding: 1rem;
+            background-color: var(--secondary-color);
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .info-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        }
+
+        .info-item i {
+            font-size: 1.25rem;
+            color: var(--primary-color);
+            margin-right: 1rem;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        .info-content {
+            flex-grow: 1;
+        }
+
+        .info-label {
+            font-size: 0.875rem;
+            color: var(--light-text);
+            font-weight: 500;
+            margin-bottom: 0.25rem;
+        }
+
+        .info-value {
+            font-weight: 600;
+            color: var(--text-color);
+            word-break: break-word;
+        }
+
+        .action-buttons {
+            display: flex;
+            justify-content: center;
+            margin-top: 2rem;
+            gap: 1rem;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            text-decoration: none;
+            border: none;
+            outline: none;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.3);
+        }
+
+        .btn-secondary {
+            background-color: white;
+            color: var(--primary-color);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-secondary:hover {
+            background-color: var(--secondary-color);
+            border-color: var(--primary-color);
+        }
+
+        .btn i {
+            margin-right: 0.5rem;
+        }
+
+        /* Edit Form Styles */
+        .edit-form {
+            background-color: var(--secondary-color);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-top: 2rem;
+            border: 1px solid var(--border-color);
+        }
+
+        .edit-form h2 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-color);
+            margin-bottom: 1.5rem;
             display: flex;
             align-items: center;
+            gap: 0.5rem;
         }
 
-        .profil-info i {
-            margin-right: 8px;
-            color: #4F959D;
-            font-size: 1.2em;
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.25rem;
         }
 
-        .profil-info strong {
-            font-weight: bold;
-            color: #143D60;
-            margin-right: 8px;
+        .form-group {
+            margin-bottom: 1rem;
         }
 
-        @media (max-width: 768px) {
+        .form-label {
+            display: block;
+            font-size: 0.875rem;
+            color: var(--light-text);
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background-color: white;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+        }
+
+        .form-input:disabled {
+            background-color: #f1f5f9;
+            cursor: not-allowed;
+        }
+
+        .form-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 640px) {
             .profil-container {
-                padding: 20px;
+                padding: 1.5rem;
                 width: 95%;
             }
 
-            .profil-header {
+            .profil-info {
+                grid-template-columns: 1fr;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .action-buttons {
                 flex-direction: column;
-                align-items: flex-start;
-                text-align: left;
             }
 
-            .profil-info p {
-                flex-wrap: wrap;
-                justify-content: flex-start;
-            }
-
-            .profil-info i {
-                margin-right: 4px;
+            .btn {
+                width: 100%;
             }
         }
 
-        .edit-button {
-            display: inline-block;
-            margin-top: 40px;
-            padding: 12px 25px;
-            background-color: #4F959D;
-            color: white;
-            text-decoration: none;
-            filter: drop-shadow(0,0,10px,#4F959D);
-            border-radius: 8px;
-            font-weight: bold;
-            transition: background-color 0.3s ease, color 0.3s ease; /* Transition pour la couleur du texte et le fond */
-            border: #4F959D 1px solid;
+        /* Animation */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
-        .edit-button:hover {
-            background-color: white; /* Couleur de fond au survol */
-    color: #4F959D; /* Couleur de texte au survol */
-    transition: 1s ease-in-out;
-    border: #4F959D 1px solid;
-    
+        .animate-fade {
+            animation: fadeIn 0.3s ease-out forwards;
         }
 
+        /* Hidden utility */
         .hidden {
             display: none;
-        }
-
-        .mt-6 {
-            margin-top: 1.5rem; /* Equivalent de Tailwind CSS */
-        }
-
-        .p-6 {
-            padding: 1.5rem; /* Equivalent de Tailwind CSS */
-        }
-
-        .bg-blue-50 {
-            background-color: #eff6ff; /* Equivalent de Tailwind CSS */
-        }
-
-        .rounded-xl {
-            border-radius: 0.75rem; /* Equivalent de Tailwind CSS */
-        }
-
-        .shadow-lg {
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); /* Equivalent de Tailwind CSS */
-        }
-
-        .border {
-            border-width: 1px; /* Equivalent de Tailwind CSS */
-        }
-
-        .border-blue-200 {
-            border-color: #93c5fd; /* Equivalent de Tailwind CSS */
-        }
-
-        .text-xl {
-            font-size: 1.25rem; /* Equivalent de Tailwind CSS */
-        }
-
-        .font-semibold {
-            font-weight: 600; /* Equivalent de Tailwind CSS */
-        }
-
-        .text-blue-800 {
-            color: #2563eb; /* Equivalent de Tailwind CSS */
-        }
-
-        .mb-4 {
-            margin-bottom: 1rem; /* Equivalent de Tailwind CSS */
-        }
-
-        .flex {
-            display: flex; /* Equivalent de Tailwind CSS */
-        }
-
-        .items-center {
-            align-items: center; /* Equivalent de Tailwind CSS */
-        }
-
-        .gap-2 {
-            gap: 0.5rem; /* Equivalent de Tailwind CSS */
-        }
-
-        .grid {
-            display: grid; /* Equivalent de Tailwind CSS */
-        }
-
-        .grid-cols-1 {
-            grid-template-columns: repeat(1, minmax(0, 1fr)); /* Equivalent de Tailwind CSS */
-        }
-
-        .sm\:grid-cols-2 {
-            @media (min-width: 640px) {
-                grid-template-columns: repeat(2, minmax(0, 1fr)); /* Equivalent de Tailwind CSS */
-            }
-        }
-
-        .block {
-            display: block; /* Equivalent de Tailwind CSS */
-        }
-
-        .text-gray-700 {
-            color: #4b5563; /* Equivalent de Tailwind CSS */
-        }
-
-        .text-sm {
-            font-size: 0.875rem; /* Equivalent de Tailwind CSS */
-        }
-
-        .font-bold {
-            font-weight: 700; /* Equivalent de Tailwind CSS */
-        }
-
-        .mb-2 {
-            margin-bottom: 0.5rem; /* Equivalent de Tailwind CSS */
-        }
-
-        .shadow-inner {
-            box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.06); /* Equivalent de Tailwind CSS */
-        }
-
-        .leading-tight {
-            line-height: 1.25; /* Equivalent de Tailwind CSS */
-        }
-
-        .focus\:outline-none:focus {
-            outline: 2px solid transparent;
-            outline-offset: 2px; /* Equivalent de Tailwind CSS */
-        }
-
-        .focus\:shadow-outline:focus {
-            box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.5); /* Equivalent de Tailwind CSS */
-        }
-
-        .bg-green-500 {
-            background-color: #48bb78; /* Equivalent de Tailwind CSS */
-        }
-
-        .text-white {
-            color: #fff; /* Equivalent de Tailwind CSS */
-        }
-
-        .hover\:bg-green-700:hover {
-            background-color: #2f855a; /* Equivalent de Tailwind CSS */
-        }
-
-        .transition-all {
-            transition-property: all; /* Equivalent de Tailwind CSS */
-        }
-
-        .duration-200 {
-            transition-duration: 0.2s; /* Equivalent de Tailwind CSS */
-        }
-
-        .bg-gray-300 {
-            background-color: #e2e8f0; /* Equivalent de Tailwind CSS */
-        }
-
-        .text-gray-700 {
-            color: #4a5568; /* Equivalent de Tailwind CSS */
-        }
-
-        .hover\:bg-gray-400:hover {
-            background-color: #cbd5e0; /* Equivalent de Tailwind CSS */
         }
     </style>
 </head>
 
 <body>
-    <div class="profil-container">
+    <div class="profil-container animate-fade">
         <div class="profil-header">
-            <div class="profil-info">
-                <p><i class='bx bx-id-card'></i><strong>ID:</strong> {{ user['id'] }}</p>
-                <p><i class='bx bx-user'></i><strong>Username:</strong> {{ user['username'] }}</p>
-                <p><i class='bx bx-user-circle'></i><strong>Prénom:</strong> {{ user['prenom'] }}</p>
-                <p><i class='bx bx-envelope'></i><strong>Email:</strong> {{ user['email'] }}</p>
-                <p><i class='bx bx-briefcase'></i><strong>Poste:</strong> {{ user['poste'] }}</p>
-                <p><i class='bx bx-phone'></i><strong>Téléphone:</strong> {{ user['telephone'] }}</p>
-                <p><i class='bx bx-lock'></i><strong>Role:</strong> {{ user['role'] }}</p>
-            </div>
-           
+            <h2>Mon Profil</h2>
         </div>
 
-        <div style="text-align: center; margin-top: 20px;">
-            <button onclick="toggleEditForm()" class="edit-button" id="edit-button">
+        <div class="profil-info" id="profile-info">
+            <div class="info-item">
+                <i class='bx bx-id-card'></i>
+                <div class="info-content">
+                    <div class="info-label">ID</div>
+                    <div class="info-value">{{ user['id'] }}</div>
+                </div>
+            </div>
+            
+            <div class="info-item">
+                <i class='bx bx-user'></i>
+                <div class="info-content">
+                    <div class="info-label">Nom d'utilisateur</div>
+                    <div class="info-value">{{ user['username'] }}</div>
+                </div>
+            </div>
+            
+            <div class="info-item">
+                <i class='bx bx-user-circle'></i>
+                <div class="info-content">
+                    <div class="info-label">Prénom</div>
+                    <div class="info-value">{{ user['prenom'] }}</div>
+                </div>
+            </div>
+            
+            <div class="info-item">
+                <i class='bx bx-envelope'></i>
+                <div class="info-content">
+                    <div class="info-label">Email</div>
+                    <div class="info-value">{{ user['email'] }}</div>
+                </div>
+            </div>
+            
+            <div class="info-item">
+                <i class='bx bx-briefcase'></i>
+                <div class="info-content">
+                    <div class="info-label">Poste</div>
+                    <div class="info-value">{{ user['poste'] }}</div>
+                </div>
+            </div>
+            
+            <div class="info-item">
+                <i class='bx bx-phone'></i>
+                <div class="info-content">
+                    <div class="info-label">Téléphone</div>
+                    <div class="info-value">{{ user['telephone'] }}</div>
+                </div>
+            </div>
+            
+            <div class="info-item">
+                <i class='bx bx-lock'></i>
+                <div class="info-content">
+                    <div class="info-label">Rôle</div>
+                    <div class="info-value">{{ user['role'] }}</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="action-buttons">
+            <button onclick="toggleEditForm()" class="btn btn-primary" id="edit-button">
                 <i class='bx bx-edit'></i> Modifier Profil
             </button>
         </div>
 
-        <form id="edit-profile-form" class="hidden mt-6 p-6 bg-blue-50 rounded-xl shadow-lg border border-blue-200">
-            <h2 class="text-xl font-semibold text-blue-800 mb-4 flex items-center gap-2">
-                <i data-lucide="pencil"></i> Modifier Votre Profil
-            </h2>
+        <form id="edit-profile-form" class="edit-form hidden">
+            <h2><i data-lucide="settings"></i> Modifier votre profil</h2>
             <input type="hidden" id="edit-id" name="id" value="{{ user['id'] }}">
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                    <label for="edit-username" class="block text-gray-700 text-sm font-bold mb-2">Nom d'utilisateur:</label>
-                    <input type="text" id="edit-username" name="username" value="{{ user['username'] }}" required
-                           class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
-                </div>
-                <div>
-                    <label for="edit-prenom" class="block text-gray-700 text-sm font-bold mb-2">Prénom:</label>
-                    <input type="text" id="edit-prenom" name="prenom" value="{{ user['prenom'] }}" required
-                           class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
-                </div>
-                <div>
-                    <label for="edit-email" class="block text-gray-700 text-sm font-bold mb-2">Email:</label>
-                    <input type="email" id="edit-email" name="email" value="{{ user['email'] }}" required
-                           class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
-                </div>
-                <div>
-                    <label for="edit-poste" class="block text-gray-700 text-sm font-bold mb-2">Poste:</label>
-                    <input type="text" id="edit-poste" name="poste" value="{{ user['poste'] }}"
-                           class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
-                </div>
-                <div>
-                    <label for="edit-telephone" class="block text-gray-700 text-sm font-bold mb-2">Téléphone:</label>
-                    <input type="number" id="edit-telephone" name="telephone" value="{{ user['telephone'] }}"
-                           class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
-                </div>
-                <div>
-                    <label for="edit-password" class="block text-gray-700 text-sm font-bold mb-2">Nouveau Mot de passe :</label>
-                    <input type="password" id="edit-password" name="password"
-                           class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
-                </div>
-                <div>
-                    <label for="edit-role" class="block text-gray-700 text-sm font-bold mb-2">Rôle :</label>
-                    <input type="text" id="edit-role" name="role" value="{{ user['role'] }}"
-                           class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight bg-gray-100 cursor-not-allowed"
-                           readonly>
+            
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="edit-username" class="form-label">Nom d'utilisateur</label>
+                    <input type="text" id="edit-username" name="username" value="{{ user['username'] }}" required class="form-input">
                 </div>
                 
+                <div class="form-group">
+                    <label for="edit-prenom" class="form-label">Prénom</label>
+                    <input type="text" id="edit-prenom" name="prenom" value="{{ user['prenom'] }}" required class="form-input">
+                </div>
+                
+                <div class="form-group">
+                    <label for="edit-email" class="form-label">Email</label>
+                    <input type="email" id="edit-email" name="email" value="{{ user['email'] }}" required class="form-input">
+                </div>
+                
+                <div class="form-group">
+                    <label for="edit-poste" class="form-label">Poste</label>
+                    <input type="text" id="edit-poste" name="poste" value="{{ user['poste'] }}" class="form-input">
+                </div>
+                
+                <div class="form-group">
+                    <label for="edit-telephone" class="form-label">Téléphone</label>
+                    <input type="tel" id="edit-telephone" name="telephone" value="{{ user['telephone'] }}" class="form-input">
+                </div>
+                
+                <div class="form-group">
+                    <label for="edit-password" class="form-label">Nouveau mot de passe</label>
+                    <input type="password" id="edit-password" name="password" class="form-input" placeholder="Laisser vide pour ne pas changer">
+                </div>
+                
+                <div class="form-group">
+                    <label for="edit-role" class="form-label">Rôle</label>
+                    <input type="text" id="edit-role" name="role" value="{{ user['role'] }}" class="form-input" disabled>
+                </div>
             </div>
-            <div class="mt-4 flex gap-2">
-                <button type="submit"class="mt-5 px-4 py-2 bg-blue-100 text-blue-800 rounded-md hover:bg-blue-200 transition-all duration-200 flex items-center gap-1">
-                    <i data-lucide="save"></i> Enregistrer les modifications
-                </button>
-                <button type="button" onclick="toggleEditForm()" class="mt-5 px-4 py-2 bg-blue-100 text-blue-800 rounded-md hover:bg-blue-200 transition-all duration-200 flex items-center gap-1">
+            
+            <div class="form-actions">
+                <button type="button" onclick="toggleEditForm()" class="btn btn-secondary">
                     <i data-lucide="x"></i> Annuler
+                </button>
+                <button type="submit" class="btn btn-primary">
+                    <i data-lucide="save"></i> Enregistrer
                 </button>
             </div>
         </form>
-
-       
     </div>
 
     <script>
         function toggleEditForm() {
-            const profileInfo = document.querySelector('.profil-info');
+            const profileInfo = document.getElementById('profile-info');
             const editForm = document.getElementById('edit-profile-form');
-            const editbtn = document.getElementById('edit-button');
+            const editBtn = document.getElementById('edit-button');
+            
             profileInfo.classList.toggle('hidden');
             editForm.classList.toggle('hidden');
-            editbtn.classList.toggle('hidden');
-
-
+            editBtn.classList.toggle('hidden');
         }
 
         document.getElementById('edit-profile-form').addEventListener('submit', async (e) => {
@@ -359,7 +419,7 @@
             const email = document.getElementById('edit-email').value;
             const poste = document.getElementById('edit-poste').value;
             const telephone = document.getElementById('edit-telephone').value;
-            const password = document.getElementById('edit-password').value; // Peut être vide
+            const password = document.getElementById('edit-password').value;
             const role = document.getElementById('edit-role').value;
 
             const formData = {
@@ -371,7 +431,6 @@
                 role: role
             };
 
-          
             if (password) {
                 formData.password = password;
             }
@@ -395,56 +454,13 @@
                 }
             } catch (error) {
                 alert('Erreur réseau lors de la mise à jour du profil.');
-                
-                    console.error('Erreur réseau:', error);
-                }
-            });
+                console.error('Erreur réseau:', error);
+            }
+        });
 
         lucide.createIcons(); 
     </script>
     <div id="menu"></div>
-
-    <script>
-       
-        const API_URL = '/api/users'; 
-
-        async function editUser(id) {
-            try {
-                const res = await fetch(`${API_URL}/${id}`);
-                if (!res.ok) throw new Error("Erreur HTTP " + res.status);
-                const user = await res.json();
-
-               
-                const form = document.getElementById("edit-profile-form"); 
-                if (form) {
-                    form.classList.remove("hidden");
-                    document.querySelector('.profil-info').classList.add('hidden'); 
-                    document.getElementById("edit-id").value = user.id;
-                    document.getElementById("edit-username").value = user.username;
-                    document.getElementById("edit-prenom").value = user.prenom;
-                    document.getElementById("edit-email").value = user.email;
-                    document.getElementById("edit-poste").value = user.poste;
-                    document.getElementById("edit-telephone").value = user.telephone;
-                    document.getElementById("edit-role").value = user.role;
-                    document.getElementById("edit-password").value = ''; 
-
-                    window.scrollTo({ top: 0, behavior: 'smooth' });
-                } else {
-                    console.warn("Formulaire d'édition introuvable !");
-                }
-            } catch (error) {
-                console.error(error);
-            }
-        }
-
-        function cancelEdit() {
-            const form = document.getElementById("edit-profile-form");  
-            if (form) {
-                form.classList.add("hidden");
-                document.querySelector('.profil-info').classList.remove('hidden');
-            }
-        }
-    </script>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {

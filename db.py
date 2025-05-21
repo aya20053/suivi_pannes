@@ -58,7 +58,7 @@ def enregistrer_pdf(file_name, file_path):
     execute_query(query, (file_name, file_path))
 def get_db_connection():
     """Retourne la connexion à la base de données."""
-    return pymysql.connect(host='localhost', user='root', password='', database='suivi_pannes', cursorclass=pymysql.cursors.DictCursor)
+    return pymysql.connect(host='localhost', user='root', password='', database='suivi_pannes_', cursorclass=pymysql.cursors.DictCursor)
 
 def get_data_for_last_7_days(site_id):
     """Récupère les événements pour un site sur les 7 derniers jours."""
