@@ -21,6 +21,14 @@
   <link href="https://unpkg.com/vis-network/styles/vis-network.css" rel="stylesheet" />
   <style>
 
+    .node-status-badge {
+  transition: left 0.1s ease, top 0.1s ease;
+}
+
+.architecture-card {
+  position: relative;
+}
+
   #architectures-container {
       display: flex;
       flex-direction: column;
@@ -295,218 +303,234 @@ font-size: 0.75rem;
       
       <!-- Navigation tabs -->
       <div class="flex nav-tabs mb-6 w-full justify-center">
-        <button id="simple-view-btn" class="nav-tab active flex items-center mr-4">
-          <i data-lucide="list" class="w-4 h-4 mr-2"></i>
-          Vue Liste
-        </button>
-        <button id="architecture-view-btn" class="nav-tab flex items-center">
-          <i data-lucide="network" class="w-4 h-4 mr-2"></i>
-          Vue Architecture
-        </button>
-      </div>
-      
-      <!-- Actions -->
-      <div class="flex gap-3 mb-6 w-full justify-between">
-        <div class="relative flex-1 max-w-md">
-          <i data-lucide="search" class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
-          <input type="text" id="search" placeholder="Rechercher un réseau..." 
-                 class="w-full pl-10 pr-4 py-2 form-input focus:ring-2 focus:ring-blue-200">
-        </div>
-        <button id="add-network-btn" class="btn-primary px-4 py-2 rounded-md flex items-center">
-          <i data-lucide="plus" class="w-5 h-5 mr-2"></i>
-          Ajouter Réseau
-        </button>
-      </div>
-    </div>
-<div id="architectures-container" class="mt-6"></div>
+  <button id="simple-view-btn" class="nav-tab active flex items-center mr-4">
+    <i data-lucide="list" class="w-4 h-4 mr-2"></i>
+    Vue Liste
+  </button>
+  <button id="architecture-view-btn" class="nav-tab flex items-center">
+    <i data-lucide="network" class="w-4 h-4 mr-2"></i>
+    Vue Architecture
+  </button>
+</div>
 
-    <!-- Formulaire d'ajout/modification -->
-    <form id="site-form" class="card p-6 mb-8 hidden">
-      <h2 id="form-title" class="text-xl font-semibold text-gray-800 mb-4 flex items-center">
-        <i data-lucide="plus-circle" class="text-blue-500 mr-2"></i>
-        <span id="form-title-text">Ajouter un nouveau site</span>
-      </h2>
-      
-      <input type="hidden" id="site-id">
-      
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
-        <div>
-          <label for="name" class="block text-sm font-medium text-gray-700 mb-1">Nom du réseau</label>
-          <input type="text" id="name" placeholder="Ex: Serveur Principal" required 
-                 class="w-full p-3 form-input">
-        </div>
-        
-        <div>
-          <label for="url_or_ip" class="block text-sm font-medium text-gray-700 mb-1">Adresse IP/URL</label>
-          <input type="text" id="url_or_ip" placeholder="Ex: 192.168.1.1" required 
-                 class="w-full p-3 form-input">
-        </div>
-        
-        <div>
-          <label for="equipment_type" class="block text-sm font-medium text-gray-700 mb-1">Type d'équipement</label>
-          <select id="equipment_type" required class="w-full p-3 form-input">
-            <option value="">Sélectionnez un type</option>
-            <option value="serveur">Serveur</option>
-            <option value="réseau">Réseau</option>
-            <option value="switch">Switch</option>
-            <option value="routeur">Routeur</option>
-          </select>
-        </div>
-      </div>
-      
-      <div class="flex justify-end gap-3">
-        <button type="button" id="cancel-btn" class="btn-secondary px-4 py-2 rounded-md flex items-center">
-          <i data-lucide="x" class="w-5 h-5 mr-2"></i>
-          Annuler
-        </button>
-        <button type="submit" class="btn-primary px-4 py-2 rounded-md flex items-center">
-          <i data-lucide="save" class="w-5 h-5 mr-2"></i>
-          <span id="submit-btn-text">Enregistrer</span>
-        </button>
-      </div>
-    </form>
+<!-- Actions -->
+ <div id="simple-view">
+<div class="flex gap-3 mb-6 w-full justify-between">
+  <div class="relative flex-1 max-w-md">
+    <i data-lucide="search" class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+    <input
+      type="text"
+      id="search"
+      placeholder="Rechercher un réseau..."
+      class="w-full pl-10 pr-4 py-2 form-input focus:ring-2 focus:ring-blue-200"
+    />
+  </div>
+  <button id="add-network-btn" class="btn-primary px-4 py-2 rounded-md flex items-center">
+    <i data-lucide="plus" class="w-5 h-5 mr-2"></i>
+    Ajouter Réseau
+  </button>
+</div>
 
-    <!-- Détails du site -->
-    <div id="site-details" class="card mb-6">
-      <!-- Contenu chargé dynamiquement -->
-    </div>
+<!-- Vue Simple -->
 
-    <!-- Vue Simple -->
-    <div id="simple-view">
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="site-list">
-        <!-- Sites chargés dynamiquement -->
-      </div>
-    </div>
-<div id="architecture-loader" class="hidden fixed inset-0 bg-black bg-opacity-10 flex items-center justify-center z-50">
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="site-list">
+    <!-- Sites chargés dynamiquement -->
+  </div>
+</div>
+
+<!-- Vue Architecture -->
+<section id="architecture-view" class="hidden">
+  <div id="architecture-loader" class="hidden fixed inset-0 bg-black bg-opacity-10 flex items-center justify-center z-50">
     <div class="bg-white p-6 rounded-lg shadow-lg flex items-center">
       <i data-lucide="loader" class="animate-spin w-8 h-8 text-blue-500 mr-3"></i>
       <span>Chargement des architectures...</span>
     </div>
   </div>
-  
-  <!-- Conteneur principal -->
-  <div id="architectures-container" class="p-4"></div>
-</div>
-    <!-- Vue Architecture -->
-    <div id="architecture-view" class="hidden">
-      <div class="flex justify-end mb-4">
-        <button id="create-archi-btn" class="btn-primary px-4 py-2 rounded-md flex items-center">
-          <i data-lucide="plus" class="w-5 h-5 mr-2"></i>
-          Créer une architecture
-        </button>
-      </div>
-      
-      <div class="card p-4 mb-6">
-        <div id="network-diagram" class="w-full h-[600px] rounded-lg"></div>
-      </div>
-      
-      <!-- Formulaire de création d'architecture -->
-      <div id="archi-form-container" class="hidden">
-        <div class="card p-6 mb-8">
-          <h2 class="text-xl font-semibold text-gray-800 mb-4">
-            <i data-lucide="network" class="text-blue-500 mr-2"></i>
-            Étape <span id="current-step">1</span> - Création d'architecture
-          </h2>
-          
-          <div id="step-1" class="step-content">
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
-              <div>
-                <label for="archi-name" class="block text-sm font-medium text-gray-700 mb-1">Nom de l'architecture</label>
-                <input type="text" id="archi-name" placeholder="Ex: Architecture principale" 
-                       class="w-full p-3 form-input" required>
-              </div>
-              
-              <div>
-                <label for="archi-description" class="block text-sm font-medium text-gray-700 mb-1">Description</label>
-                <input type="text" id="archi-description" placeholder="Description courte" 
-                       class="w-full p-3 form-input">
-              </div>
-            </div>
-            
-            <h3 class="font-medium mb-3">Sélectionnez l'équipement de départ</h3>
-            
-            <div class="mb-4">
-              <label class="block text-sm font-medium text-gray-700 mb-1">Filtrer par type :</label>
-              <select id="equipment-filter" class="w-full p-2 form-input">
-                <option value="">Tous les types</option>
-                <option value="serveur">Serveur</option>
-                <option value="routeur">Routeur</option>
-                <option value="switch">Switch</option>
-                <option value="réseau">Réseau</option>
-              </select>
-            </div>
-            
-            <div id="equipment-options" class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
-              <!-- Liste des équipements de la base de données -->
-            </div>
-          </div>
-          
-          <div id="step-2" class="step-content hidden">
-            <h3 class="font-medium mb-3">Lier à d'autres équipements</h3>
-            <p class="text-sm text-gray-600 mb-4">Sélectionnez les équipements à connecter</p>
-            
-            <div class="mb-4">
-              <label class="block text-sm font-medium text-gray-700 mb-1">Équipement sélectionné :</label>
-              <div id="selected-equipment-display" class="card p-3 bg-gray-50">
-                <!-- Afficher l'équipement sélectionné -->
-              </div>
-            </div>
 
-            <div id="equipment-list" class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
-              <!-- Liste des équipements disponibles pour connexion -->
-            </div>
-            
-            <div id="connections-display" class="mb-4">
-              <h4 class="font-medium mb-2">Connexions établies :</h4>
-              <div id="connections-list" class="space-y-2">
-                <!-- Liste des connexions créées -->
-              </div>
-            </div>
+<div class="flex gap-3 mb-6 w-full justify-between">
+      <div class="relative flex-1 max-w-md">
+    <i data-lucide="search" class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+    <input
+    type="text"
+    id="search-architecture"
+    placeholder="Rechercher une architecture..."
+      class="w-full pl-10 pr-4 py-2 form-input focus:ring-2 focus:ring-blue-200"
+    />
+      </div>
+    <button id="create-archi-btn" class="btn-primary px-4 py-2 rounded-md flex items-center">
+      <i data-lucide="plus" class="w-5 h-5 mr-2"></i>
+      Créer une architecture
+    </button>
+  
+  </div>
+<div id="architectures-list" class="mt-4">
+  <!-- La liste des architectures s'affichera ici -->
+</div>
+  <div class="card p-4 mb-6">
+    <div id="network-diagram" class="w-full h-[600px] rounded-lg"></div>
+  </div>
+
+ 
+
+  <div id="architectures-container"></div>
+
+  <!-- Formulaire de création d'architecture -->
+  <div id="archi-form-container" class="hidden">
+    <div class="card p-6 mb-8">
+      <h2 class="text-xl font-semibold text-gray-800 mb-4">
+        <i data-lucide="network" class="text-blue-500 mr-2"></i>
+        Étape <span id="current-step">1</span> - Création d'architecture
+      </h2>
+
+      <div id="step-1" class="step-content">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+          <div>
+            <label for="archi-name" class="block text-sm font-medium text-gray-700 mb-1">Nom de l'architecture</label>
+            <input
+              type="text"
+              id="archi-name"
+              placeholder="Ex: Architecture principale"
+              class="w-full p-3 form-input"
+              required
+            />
           </div>
-          
-          <div class="flex justify-between">
-            <button id="prev-step-btn" class="btn-secondary px-4 py-2 rounded-md flex items-center hidden">
-              <i data-lucide="arrow-left" class="w-5 h-5 mr-2"></i>
-              Précédent
-            </button>
-            
-            <div class="flex gap-3 ml-auto">
-              <button id="cancel-archi-btn" class="btn-secondary px-4 py-2 rounded-md flex items-center">
-                <i data-lucide="x" class="w-5 h-5 mr-2"></i>
-                Annuler
-              </button>
-              <button id="next-step-btn" class="btn-primary px-4 py-2 rounded-md flex items-center">
-                <i data-lucide="arrow-right" class="w-5 h-5 mr-2"></i>
-                Suivant
-              </button>
-            </div>
+
+          <div>
+            <label for="archi-description" class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+            <input
+              type="text"
+              id="archi-description"
+              placeholder="Description courte"
+              class="w-full p-3 form-input"
+            />
+          </div>
+        </div>
+
+        <h3 class="font-medium mb-3">Sélectionnez l'équipement de départ</h3>
+
+        <div class="mb-4">
+          <label class="block text-sm font-medium text-gray-700 mb-1">Filtrer par type :</label>
+          <select id="equipment-filter" class="w-full p-2 form-input">
+            <option value="">Tous les types</option>
+            <option value="serveur">Serveur</option>
+            <option value="routeur">Routeur</option>
+            <option value="switch">Switch</option>
+            <option value="réseau">Réseau</option>
+          </select>
+        </div>
+
+        <div id="equipment-options" class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+          <!-- Liste des équipements de la base de données -->
+        </div>
+      </div>
+
+      <div id="step-2" class="step-content hidden">
+        <h3 class="font-medium mb-3">Lier à d'autres équipements</h3>
+        <p class="text-sm text-gray-600 mb-4">Sélectionnez les équipements à connecter</p>
+
+        <div class="mb-4">
+          <label class="block text-sm font-medium text-gray-700 mb-1">Équipement sélectionné :</label>
+          <div id="selected-equipment-display" class="card p-3 bg-gray-50">
+            <!-- Afficher l'équipement sélectionné -->
+          </div>
+        </div>
+
+        <div id="equipment-list" class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+          <!-- Liste des équipements disponibles pour connexion -->
+        </div>
+
+        <div id="connections-display" class="mb-4">
+          <h4 class="font-medium mb-2">Connexions établies :</h4>
+          <div id="connections-list" class="space-y-2">
+            <!-- Liste des connexions créées -->
           </div>
         </div>
       </div>
-      
-      <!-- Tableau des liaisons -->
-      <div class="card p-4">
-        <h3 class="text-lg font-semibold mb-4">Détails des liaisons</h3>
-        <div class="overflow-x-auto">
-          <table class="min-w-full bg-white">
-            <thead>
-              <tr>
-                <th class="py-2 px-4 border-b">Équipement source</th>
-                <th class="py-2 px-4 border-b">Équipement cible</th>
-                <th class="py-2 px-4 border-b">Type de liaison</th>
-                <th class="py-2 px-4 border-b">Créé par</th>
-                <th class="py-2 px-4 border-b">Actions</th>
-              </tr>
-            </thead>
-            <tbody id="connections-table">
-              <!-- Rempli dynamiquement -->
-            </tbody>
-          </table>
+
+      <div class="flex justify-between">
+        <button id="prev-step-btn" class="btn-secondary px-4 py-2 rounded-md flex items-center hidden">
+          <i data-lucide="arrow-left" class="w-5 h-5 mr-2"></i>
+          Précédent
+        </button>
+
+        <div class="flex gap-3 ml-auto">
+          <button id="cancel-archi-btn" class="btn-secondary px-4 py-2 rounded-md flex items-center">
+            <i data-lucide="x" class="w-5 h-5 mr-2"></i>
+            Annuler
+          </button>
+          <button id="next-step-btn" class="btn-primary px-4 py-2 rounded-md flex items-center">
+            <i data-lucide="arrow-right" class="w-5 h-5 mr-2"></i>
+            Suivant
+          </button>
         </div>
       </div>
     </div>
   </div>
+</section>
 
+<!-- Formulaire d'ajout/modification site -->
+<form id="site-form" class="card p-6 mb-8 hidden">
+  <h2 id="form-title" class="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+    <i data-lucide="plus-circle" class="text-blue-500 mr-2"></i>
+    <span id="form-title-text">Ajouter un nouveau site</span>
+  </h2>
+
+  <input type="hidden" id="site-id" />
+
+  <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+    <div>
+      <label for="name" class="block text-sm font-medium text-gray-700 mb-1">Nom du réseau</label>
+      <input
+        type="text"
+        id="name"
+        placeholder="Ex: Serveur Principal"
+        required
+        class="w-full p-3 form-input"
+      />
+    </div>
+
+    <div>
+      <label for="url_or_ip" class="block text-sm font-medium text-gray-700 mb-1">Adresse IP/URL</label>
+      <input
+        type="text"
+        id="url_or_ip"
+        placeholder="Ex: 192.168.1.1"
+        required
+        class="w-full p-3 form-input"
+      />
+    </div>
+
+    <div>
+      <label for="equipment_type" class="block text-sm font-medium text-gray-700 mb-1">Type d'équipement</label>
+      <select id="equipment_type" required class="w-full p-3 form-input">
+        <option value="">Sélectionnez un type</option>
+        <option value="serveur">Serveur</option>
+        <option value="réseau">Réseau</option>
+        <option value="switch">Switch</option>
+        <option value="routeur">Routeur</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="flex justify-end gap-3">
+    <button type="button" id="cancel-btn" class="btn-secondary px-4 py-2 rounded-md flex items-center">
+      <i data-lucide="x" class="w-5 h-5 mr-2"></i>
+      Annuler
+    </button>
+    <button type="submit" class="btn-primary px-4 py-2 rounded-md flex items-center">
+      <i data-lucide="save" class="w-5 h-5 mr-2"></i>
+      <span id="submit-btn-text">Enregistrer</span>
+    </button>
+  </div>
+</form>
+
+<!-- Détails du site -->
+<div id="site-details" class="card mb-6">
+  <!-- Contenu chargé dynamiquement -->
+</div>
+
+</div>     
+      
   <script>
     // Configuration globale
     const API_BASE_URL = "http://localhost:5000/api";
@@ -535,7 +559,7 @@ font-size: 0.75rem;
       await loadMenu();
       setupEventListeners();
       await fetchSites();
-      await fetchArchitectures();
+      
     }
 
     async function loadMenu() {
@@ -596,7 +620,7 @@ font-size: 0.75rem;
       });
     }
 
-    function toggleView(view) {
+   function toggleView(view) {
   currentView = view;
   
   // Masquer/afficher les vues
@@ -607,11 +631,31 @@ font-size: 0.75rem;
   document.getElementById('simple-view-btn').classList.toggle('active', view === 'simple');
   document.getElementById('architecture-view-btn').classList.toggle('active', view === 'architecture');
   
-  // Charger automatiquement les architectures en vue architecture
-  if (view === 'architecture') {
+  // Charger les données appropriées
+  if (view === 'simple') {
+    fetchSites();
+  } if (view === 'architecture') {
     loadAndDisplayArchitectures();
   }
 }
+
+// Dans la fonction setupEventListeners()
+
+
+document.getElementById('search-architecture').addEventListener('input', (e) => {
+  filterArchitectures(e.target.value);
+});
+
+// Nouvelle fonction pour filtrer les architectures
+function filterArchitectures(filterText) {
+  const filtered = architectures.filter(arch => 
+    arch.name.toLowerCase().includes(filterText.toLowerCase()) || 
+    (arch.description && arch.description.toLowerCase().includes(filterText.toLowerCase()))
+  );
+  displayArchitectures(filtered);
+}
+
+
 async function loadAndDisplayArchitectures() {
   const container = document.getElementById('architectures-container');
   if (!container) return;
@@ -700,8 +744,7 @@ function createErrorState(error) {
   `;
 }
 
-function createArchitectureCard(architecture) {
-  if (!architecture) return null;
+function createArchitectureCard(architecture) {  if (!architecture) return null;
   
   const card = document.createElement('div');
   card.className = 'architecture-card';
@@ -770,6 +813,8 @@ function renderConnectionsList(connections) {
     }
 
   fetchArchitectures()
+
+
     function renderSiteList(filter = '') {
       const filteredSites = filter ? sites.filter(site => 
         site.name.toLowerCase().includes(filter.toLowerCase()) || 
@@ -842,48 +887,7 @@ function renderConnectionsList(connections) {
   }
 }
 
-    function updateConnectionsTable() {
-      const tableBody = document.getElementById('connections-table');
-      tableBody.innerHTML = '';
-      
-      if (connections.length === 0) {
-        tableBody.innerHTML = `
-          <tr>
-            <td colspan="5" class="py-4 text-center text-gray-500">
-              Aucune connexion enregistrée
-            </td>
-          </tr>
-        `;
-        return;
-      }
-      
-      connections.forEach(conn => {
-        const fromEquipment = sites.find(s => s.id == conn.from_id);
-        const toEquipment = sites.find(s => s.id == conn.to_id);
-        
-        tableBody.innerHTML += `
-          <tr>
-            <td class="py-2 px-4 border-b">${fromEquipment ? fromEquipment.name : `Équipement ${conn.from_id}`}</td>
-            <td class="py-2 px-4 border-b">${toEquipment ? toEquipment.name : `Équipement ${conn.to_id}`}</td>
-            <td class="py-2 px-4 border-b">${conn.connection_type}</td>
-            <td class="py-2 px-4 border-b">${conn.created_by || 'Admin'}</td>
-            <td class="py-2 px-4 border-b">
-              <button class="text-blue-500 hover:text-blue-700 mr-2" 
-                      onclick="editConnection(${conn.id})">
-                <i data-lucide="edit" class="w-4 h-4"></i>
-              </button>
-              <button class="text-red-500 hover:text-red-700" 
-                      onclick="deleteConnection(${conn.id})">
-                <i data-lucide="trash-2" class="w-4 h-4"></i>
-              </button>
-            </td>
-          </tr>
-        `;
-      });
-      
-      lucide.createIcons();
-    }
-
+    
     // Fonctions pour la gestion des sites
     function getEquipmentClass(type) {
       const types = {
@@ -1398,7 +1402,7 @@ async function displayArchitectures(architectures) {
       <div class="empty-state">
         <i data-lucide="network" class="text-gray-400 w-12 h-12 mx-auto"></i>
         <p class="text-center text-gray-500 mt-4">
-          Aucune architecture disponible. <br>
+          Aucune architecture disponible.<br>
           <button onclick="document.getElementById('create-archi-btn').click()" 
                   class="text-blue-500 hover:underline">
             Créer une nouvelle architecture
@@ -1410,9 +1414,10 @@ async function displayArchitectures(architectures) {
     return;
   }
 
-  architectures.forEach(arch => {
+  for (const arch of architectures) {
     const archElement = document.createElement('div');
     archElement.className = 'architecture-card mb-6 p-4 border rounded-lg bg-white shadow-sm';
+
     archElement.innerHTML = `
       <div class="flex justify-between items-start mb-3">
         <h3 class="text-xl font-semibold">${arch.name}</h3>
@@ -1436,195 +1441,287 @@ async function displayArchitectures(architectures) {
         <div class="network-graph bg-gray-50 p-4 rounded" style="height: 500px" id="network-graph-${arch.id}"></div>
       </div>
     `;
-    container.appendChild(archElement);
     
-    // Générer le schéma réseau avec vis.js
-    renderNetworkDiagram(arch, `network-graph-${arch.id}`);
-  });
+    container.appendChild(archElement);
 
+    try {
+      const monitoredSites = await fetchMonitoredSites(arch.id);
+      renderNetworkDiagram(arch, monitoredSites, `network-graph-${arch.id}`);
+    } catch (error) {
+      document.getElementById(`network-graph-${arch.id}`).innerHTML = `<p class="text-red-500">Erreur de chargement du schéma.</p>`;
+    }
+  }
+container.style.position = 'relative';
   lucide.createIcons();
 }
-
-function renderNetworkDiagram(architecture, containerId) {
-  console.log("Début de renderNetworkDiagram");
-  
+function renderNetworkDiagram(architecture, monitoredSites, containerId) {
   const container = document.getElementById(containerId);
   if (!container) {
-    console.error("Conteneur non trouvé");
+    console.warn(`Élément avec l'ID "${containerId}" introuvable dans le DOM.`);
     return;
   }
-  container.innerHTML = ""; // Nettoyage
 
-  // Vérification des données
+  container.innerHTML = '';
+  container.style.position = 'relative'; // Important pour le positionnement absolu des badges
+
   if (!architecture?.connections?.length) {
     container.innerHTML = "<p>Aucune connexion réseau à afficher</p>";
     return;
   }
 
-  // 1. Création des noeuds
   const nodes = new vis.DataSet();
   const edges = new vis.DataSet();
   const nodeMap = {};
 
-  // Fonction pour générer les icônes SVG
-  // Nouvelle fonction pour charger des icônes réalistes
-const getNodeIcon = (type) => {
-  const t = type.toLowerCase();
+  const findStatus = (nodeId) => {
+    const site = monitoredSites.find(site => site.id === nodeId);
+    return site ? site.last_status : null;
+  };
 
-  // Icônes provenant de collections reconnues (FontAwesome, Material Icons, etc.)
-  if (t.includes("routeur"))
-    return "https://img.icons8.com/ios/100/000000/router--v1.png"; // Routeur sans fond
-  
-if (t.includes("switch")) {
-    return "data:image/svg+xml," + encodeURIComponent(`
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
-            <rect x="20" y="30" width="60" height="40" fill="#555" rx="5"/>
-            <circle cx="35" cy="50" r="5" fill="#0f0"/>
-            <circle cx="50" cy="50" r="5" fill="#0f0"/>
-            <circle cx="65" cy="50" r="5" fill="#0f0"/>
-        </svg>
-    `);
-}
-    if (t.includes("serveur") || t.includes("server"))
-    return "https://img.icons8.com/ios/100/000000/server.png"; // Serveur sans fond
-  
-  if (t.includes("réseau")) {
-    return "data:image/svg+xml," + encodeURIComponent(`
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
-            <!-- Noeuds -->
-            <circle cx="30" cy="30" r="6" fill="#1A73E8">
-                <animate attributeName="r" values="6;9;6" dur="2.5s" repeatCount="indefinite"/>
-            </circle>
-            <circle cx="70" cy="30" r="6" fill="#1A73E8" />
-            <circle cx="50" cy="70" r="6" fill="#1A73E8">
-                <animate attributeName="fill-opacity" values="1;0.4;1" dur="3s" repeatCount="indefinite"/>
-            </circle>
+  const getNodeIcon = (type) => {
+    const t = (type || '').toLowerCase();
+    if (t.includes("routeur")) return "static/image/cloud.svg";
+    if (t.includes("switch")) return "static/image/workgroup-switch.svg";
+    if (t.includes("serveur")) return "static/image/file-server.svg";
+    if (t.includes("réseau")) return "static/image/pc.svg";
+    return "static/image/default.svg";
+  };
 
-            <!-- Connexions -->
-            <line x1="30" y1="30" x2="70" y2="30" stroke="#1A73E8" stroke-width="2" />
-            <line x1="30" y1="30" x2="50" y2="70" stroke="#1A73E8" stroke-width="2" />
-            <line x1="70" y1="30" x2="50" y2="70" stroke="#1A73E8" stroke-width="2" />
-        </svg>
-    `);
-}
-// Icône réseau stylisée
+  const getNodeColorByStatus = (status) => {
+    if (!status) return '#f97316'; // orange
+    const s = status.toLowerCase();
+    if (s === 'en ligne') return '#22c55e'; // vert
+    if (s === 'hors ligne') return '#ef4444'; // rouge
+    return '#f97316'; // orange
+  };
 
+  const getStatusLabel = (status) => {
+    if (!status) return 'État inconnu';
+    const s = status.toLowerCase();
+    if (s === 'en ligne') return 'En ligne';
+    if (s === 'hors ligne') return 'Hors ligne';
+    return 'État inconnu';
+  };
 
-  return "https://img.icons8.com/ios/100/000000/computer.png"; // Par défaut
-};
-  
-  
+  // Création des nœuds et connexions
+  for (const conn of architecture.connections) {
+    if (!conn.source || !conn.target) continue;
 
-
-
-
-  // Construction des noeuds et liens
-  architecture.connections.forEach(conn => {
-    if (!conn.source || !conn.target) {
-      console.warn("Connexion invalide:", conn);
-      return;
+    for (const endpoint of [conn.source, conn.target]) {
+      if (!nodeMap[endpoint.id]) {
+        const status = findStatus(endpoint.id);
+        const statusColor = getNodeColorByStatus(status);
+        
+        nodes.add({
+          id: endpoint.id,
+          label: endpoint.name,
+          shape: 'image',
+          image: getNodeIcon(endpoint.type),
+          size: 25,
+          font: { 
+            size: 12,
+            align: 'center'
+          },
+          color: {
+            background: '#ffffff',
+            border: '#cccccc',
+            highlight: {
+              border: '#2B7CE9',
+              background: '#D2E5FF'
+            },
+            hover: {
+              border: '#2B7CE9',
+              background: '#D2E5FF'
+            }
+          },
+          borderWidth: 1,
+          shadow: false,
+          shapeProperties: {
+            useBorderWithImage: false
+          }
+        });
+        
+        nodeMap[endpoint.id] = { 
+          statusColor: statusColor,
+          badge: null // Référence au badge DOM
+        };
+      }
     }
 
-    // Noeud source
-    if (!nodeMap[conn.source.id]) {
-      nodes.add({
-        id: conn.source.id,
-        label: conn.source.name,
-        shape: 'image',
-        image: getNodeIcon(conn.source.type, conn.source.last_status),
-        size: 25,
-        font: { size: 12, align: 'center' },
-        borderWidth: 2,
-        color: { border: getNagiosStatusColor(conn.source.last_status) }
-      });
-      nodeMap[conn.source.id] = true;
-    }
-
-    // Noeud target
-    if (!nodeMap[conn.target.id]) {
-      nodes.add({
-        id: conn.target.id,
-        label: conn.target.name,
-        shape: 'image',
-        image: getNodeIcon(conn.target.type, conn.target.last_status),
-        size: 25,
-        font: { size: 12, align: 'center' },
-        borderWidth: 2,
-        color: { border: getNagiosStatusColor(conn.target.last_status) }
-      });
-      nodeMap[conn.target.id] = true;
-    }
-
-    // Lien
     edges.add({
       from: conn.source.id,
       to: conn.target.id,
-      
       arrows: { to: { enabled: false } },
       width: 1,
-      smooth: { type: 'continuous' }
+      smooth: { type: 'continuous' },
+      color: { color: '#1d4ed8', inherit: false }
     });
-  });
+  }
 
-  // Options du réseau
   const options = {
     nodes: {
-      font: { size: 12, align: 'center' },
-      margin: 10,
-      shapeProperties: { useBorderWithImage: true }
+      font: { 
+        size: 12,
+        align: 'center'
+      },
+      shapeProperties: { 
+        useBorderWithImage: false
+      },
+      borderWidth: 1
     },
     edges: {
       arrows: { to: { enabled: false } },
-      width: 1
+      width: 1,
+      smooth: { type: 'continuous' }
     },
     physics: {
       enabled: true,
       solver: 'barnesHut',
-      barnesHut: { gravitationalConstant: -2000 }
-    },
-    
+      barnesHut: { 
+        gravitationalConstant: -2000,
+        centralGravity: 0.3,
+        springLength: 95,
+        springConstant: 0.04,
+        damping: 0.09
+      }
+    }
   };
 
-  // Création du réseau
   try {
-    new vis.Network(container, { nodes, edges }, options);
-    console.log("Réseau créé avec succès");
+    const network = new vis.Network(container, { nodes, edges }, options);
+    
+    // Fonction pour créer/mettre à jour les badges de statut
+    const updateStatusBadges = () => {
+      const canvasBounds = container.getBoundingClientRect();
+      const transform = network.getViewPosition();
+      const scale = network.getScale();
+      
+      nodes.getIds().forEach(nodeId => {
+        const nodePos = network.getPositions([nodeId])[nodeId];
+        const nodeData = nodeMap[nodeId];
+        
+        if (nodePos) {
+          // Convertir les coordonnées du nœud en coordonnées DOM
+          const x = (nodePos.x - transform.x) * scale + canvasBounds.width/2;
+          const y = (nodePos.y - transform.y) * scale + canvasBounds.height/2;
+          
+          // Position du badge (devant le nœud, légèrement à gauche)
+          const badgeX = x - 20;
+          const badgeY = y;
+          
+          // Créer ou mettre à jour le badge
+          let badge = nodeData.badge;
+          if (!badge) {
+            badge = document.createElement('div');
+            badge.className = 'node-status-badge';
+            Object.assign(badge.style, {
+              position: 'absolute',
+              width: '12px',
+              height: '12px',
+              borderRadius: '50%',
+              backgroundColor: nodeData.statusColor,
+              border: '2px solid white',
+              zIndex: '1000',
+              pointerEvents: 'none',
+              boxShadow: '0 0 3px rgba(0,0,0,0.3)'
+            });
+            badge.title = getStatusLabel(findStatus(nodeId));
+            container.appendChild(badge);
+            nodeData.badge = badge;
+          }
+          
+          badge.style.left = `${badgeX}px`;
+          badge.style.top = `${badgeY}px`;
+          badge.style.backgroundColor = nodeData.statusColor;
+        }
+      });
+    };
+
+    // Initialisation des badges
+    network.once("afterDrawing", () => {
+      updateStatusBadges();
+    });
+
+    // Mise à jour lors des interactions
+    network.on("dragEnd", updateStatusBadges);
+    network.on("zoom", updateStatusBadges);
+    
+    // Redimensionnement de la fenêtre
+    window.addEventListener('resize', updateStatusBadges);
+
   } catch (e) {
-    console.error("Erreur lors de la création du réseau:", e);
-    container.innerHTML = `<p>Erreur: ${e.message}</p>`;
+    console.error("Erreur lors de la création du réseau :", e);
+    container.innerHTML = `<p class="text-red-500">Erreur : ${e.message}</p>`;
   }
 }
 
-// Fonction utilitaire
-function getNagiosStatusColor(status) {
-  return status === 'En ligne' ? '#4CAF50' : '#F44336';
-}
-// Utilitaires pour icônes et couleurs Nagios-like
-function getNagiosIcon(type, status) {
-  // Utilise des icônes SVG ou PNG selon le type et le statut
-  // Tu peux remplacer les URLs par tes propres images si besoin
-  if (type === 'serveur') return status === 'En ligne' ? '/static/icons/server-green.png' : '/static/icons/server-red.png';
-  if (type === 'switch') return status === 'En ligne' ? '/static/icons/switch-green.png' : '/static/icons/switch-red.png';
-  if (type === 'routeur') return status === 'En ligne' ? '/static/icons/router-green.png' : '/static/icons/router-red.png';
-  if (type === 'réseau') return status === 'En ligne' ? '/static/icons/network-green.png' : '/static/icons/network-red.png';
-  return '/static/icons/unknown.png';
-}
-document.addEventListener("DOMContentLoaded", () => {
-  const architectures = [
-    {
-      id: 1,
-      name: "Architecture Test",
-      description: "Ceci est une architecture de test.",
-      connections: [
-        { type: "router", name: "Routeur A", protocol: "TCP", status: "ok" },
-        { type: "switch", name: "Switch B", protocol: "TCP", status: "warning" },
-        { type: "server", name: "Serveur C", protocol: "HTTP", status: "critical" }
-      ]
-    }
-  ];
+async function fetchMonitoredSites(architectureId) {
+  try {
+    const response = await fetch(`http://localhost:5000/api/monitored-sites?architectureId=${architectureId}`);
 
-  displayArchitectures(architectures);
+    if (!response.ok) {
+      throw new Error('Erreur HTTP ' + response.status);
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error("Erreur lors de la récupération des sites monitorés :", error);
+    return []; // retourne tableau vide si erreur
+  }
+}
+
+
+function deleteArchitecture(id) {
+  if (!confirm("Voulez-vous vraiment supprimer cette architecture ?")) {
+    return; // Annule si l'utilisateur clique sur "Annuler"
+  }
+
+  fetch(`/api/architectures/${id}`, { // URL à adapter selon ton backend
+    method: 'DELETE', // méthode HTTP pour supprimer
+    headers: {
+      'Content-Type': 'application/json',
+      // Si tu as besoin d'un token d'authentification, ajoute-le ici :
+      // 'Authorization': 'Bearer ton_token_ici'
+    }
+  })
+  .then(response => {
+    if (!response.ok) {
+      throw new Error("Erreur lors de la suppression");
+    }
+    return response.json(); // ou response.text() si besoin
+  })
+  .then(data => {
+    alert("Architecture supprimée avec succès !");
+    // Optionnel : retirer l'élément du DOM, recharger la page, etc.
+    location.reload(); // recharge la page pour voir les changements
+  })
+  .catch(error => {
+    alert("Erreur: " + error.message);
+  });
+}
+
+// Fonction utilitaire
+
+document.getElementById('search-architecture').addEventListener('input', function () {
+  const search = this.value;
+
+  fetch(`/api/architectures?search=${encodeURIComponent(search)}`)
+    .then(res => res.json())
+    .then(data => {
+      if (data.status === 'success') {
+        displayArchitectures(data.data); // Réutilise ton affichage normal
+      } else {
+        const container = document.getElementById('architectures-container');
+        container.innerHTML = `<p class="text-red-500">Erreur: ${data.message}</p>`;
+      }
+    })
+    .catch(err => {
+      const container = document.getElementById('architectures-container');
+      container.innerHTML = `<p class="text-red-500">Erreur réseau: ${err.message}</p>`;
+    });
 });
+
 
 function getNagiosStatusColor(status) {
   if (status === 'En ligne') return '#4CAF50'; // vert

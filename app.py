@@ -672,31 +672,55 @@ def save_architecture():
     finally:
         cursor.close()
         conn.close()
-
-            
 @app.route('/api/architectures', methods=['GET'])
-def debug_architectures():
+def get_architectures():
+    search = request.args.get('search', '').strip()
     try:
         conn = get_db_connection()
-        cur = conn.cursor()    
-        cur.execute("""
-            SELECT a.*, 
-                   COUNT(c.id) as connections_count
+        cur = conn.cursor(pymysql.cursors.DictCursor)
+
+        sql = """
+            SELECT a.*, COUNT(c.id) AS connections_count
             FROM network_architectures a
             LEFT JOIN site_connections c ON a.id = c.architecture_id
-            GROUP BY a.id
-        """)
-        results = cur.fetchall()
+        """
+        params = ()
+
+        if search:
+            sql += " WHERE a.name LIKE %s"
+            params = (f"%{search}%",)
+
+        sql += " GROUP BY a.id ORDER BY a.id DESC"
+
+        cur.execute(sql, params)
+        architectures = cur.fetchall()
+
+        # Ajouter les données de schéma à chaque architecture
+        for arch in architectures:
+            arch_id = arch['id']
+            # Charger les nœuds
+            cur.execute("SELECT * FROM network_architectures WHERE id = %s", (arch_id,))
+            arch['nodes'] = cur.fetchall()
+            # Charger les connexions
+            cur.execute("SELECT * FROM network_links WHERE architecture_id = %s", (arch_id,))
+            arch['links'] = cur.fetchall()
+
         return jsonify({
             "status": "success",
-            "count": len(results),
-            "data": results
+            "count": len(architectures),
+            "data": architectures
         })
+
     except Exception as e:
         return jsonify({
             "status": "error",
             "message": str(e)
         }), 500
+
+    finally:
+        if conn:
+            conn.close()
+
 
 # Route pour récupérer une architecture avec ses connexions
 @app.route('/api/architectures/<int:arch_id>', methods=['GET'])
@@ -817,6 +841,80 @@ def get_architectures_with_details():
     finally:
         if 'conn' in locals():
             conn.close()
+
+@app.route('/api/monitored-sites', methods=['GET'])
+def get_all_monitored_sites():
+    connection =get_db_connection()
+    try:
+        with connection.cursor() as cursor:
+            sql = "SELECT * FROM monitored_sites"
+            cursor.execute(sql)
+            rows = cursor.fetchall()
+
+            # Convertir last_checked en isoformat (JSON friendly)
+            for row in rows:
+                if row['last_checked']:
+                    row['last_checked'] = row['last_checked'].isoformat()
+
+            return jsonify(rows)
+    finally:
+        connection.close()
+
+@app.route('/api/monitored-sites/<int:site_id>', methods=['GET'])
+def get_monitored_site(site_id):
+    connection =get_db_connection()
+    try:
+        with connection.cursor() as cursor:
+            sql = "SELECT * FROM monitored_sites WHERE id=%s"
+            cursor.execute(sql, (site_id,))
+            row = cursor.fetchone()
+            if not row:
+                return jsonify({"error": "Site non trouvé"}), 404
+
+            if row['last_checked']:
+                row['last_checked'] = row['last_checked'].isoformat()
+
+            return jsonify(row)
+    finally:
+        connection.close()
+
+
+
+@app.route('/api/architectures/<int:id>', methods=['DELETE'])
+def delete_architecture(id):
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        
+        # Vérifier si l'architecture existe
+        cur.execute("SELECT * FROM network_architectures WHERE id = %s", (id,))
+        architecture = cur.fetchone()
+        if not architecture:
+            return jsonify({
+                "status": "error",
+                "message": "Architecture non trouvée"
+            }), 404
+        
+        # Supprimer les connexions associées (si nécessaire)
+        cur.execute("DELETE FROM site_connections WHERE architecture_id = %s", (id,))
+        
+        # Supprimer l'architecture
+        cur.execute("DELETE FROM network_architectures WHERE id = %s", (id,))
+        
+        conn.commit()
+        cur.close()
+        conn.close()
+        
+        return jsonify({
+            "status": "success",
+            "message": "Architecture supprimée avec succès"
+        })
+    except Exception as e:
+        return jsonify({
+            "status": "error",
+            "message": str(e)
+        }), 500
+
 
 # --- User Management API ---
 @app.route('/manage_users')
