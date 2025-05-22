@@ -1,5 +1,5 @@
 import os
-from flask import Flask, g, jsonify, render_template, request, redirect, url_for, session
+from flask import Flask, g, jsonify, render_template, request, redirect, url_for, session, flash
 from flask_cors import CORS
 from werkzeug.utils import secure_filename
 from datetime import datetime, timedelta
@@ -1222,6 +1222,118 @@ def handle_connections():
     finally:
         if conn:
             conn.close()
+@app.route('/settings')
+def settings():
+    conn = None
+    cursor = None
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        
+        # Récupère tous les utilisateurs
+        cursor.execute("SELECT id, email FROM users")
+        users = cursor.fetchall()
+        
+        # Récupère les emails de destination
+        cursor.execute("SELECT id, email FROM destination_email")
+        destinataires = cursor.fetchall()
+        
+        return render_template('settings.html', 
+                           users=users, 
+                           destinataires=destinataires)
+        
+    except Exception as e:
+        flash(f"Erreur de base de données: {str(e)}", 'error')
+        return render_template('settings.html', users=[], destinataires=[])
+    finally:
+        if cursor:
+            cursor.close()
+            conn.close()
+@app.route('/employe/<email>')
+def gestion_employe(email):
+    # Exemple : récupérer l'employé par email depuis la base MySQL
+    conn = get_db_connection()
+    if not conn:
+        return "Database connection failed", 500
+    try:
+        with conn.cursor() as cursor:
+            cursor.execute("SELECT * FROM users WHERE email = %s", (email,))
+            employe = cursor.fetchone()
+            if not employe:
+                return "Employé non trouvé", 404
+            return render_template("manage-users.html", email=email, employe=employe)
+    finally:
+        if conn:
+            conn.close()
+
+@app.route('/save_emails', methods=['POST'])
+def save_emails():
+    conn = None
+    cursor = None
+    try:
+        selected_email = request.form.get('email_select')
+        
+        if not selected_email:
+            flash("Aucun email sélectionné", 'warning')
+            return redirect(url_for('settings'))
+        
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        
+        # Vérifier si l'email existe dans users
+        cursor.execute("SELECT id FROM users WHERE email = %s", (selected_email,))
+        if not cursor.fetchone():
+            flash("Email non trouvé dans la base des utilisateurs", 'error')
+            return redirect(url_for('settings'))
+        
+        # Insérer dans destination_email
+        cursor.execute("""
+            INSERT INTO destination_email (email) 
+            VALUES (%s)
+            ON DUPLICATE KEY UPDATE email = VALUES(email)
+        """, (selected_email,))
+        
+        conn.commit()
+        flash("Email ajouté aux destinataires avec succès!", 'success')
+        
+    except Exception as e:
+        if conn:
+            conn.rollback()
+        flash(f"Erreur lors de l'enregistrement: {str(e)}", 'error')
+    finally:
+        if cursor:
+            cursor.close()
+      
+            conn.close()
+    
+    return redirect(url_for('settings'))
+
+@app.route('/supprimer', methods=['POST'])
+def supprimer():
+    conn = None
+    cursor = None
+    try:
+        email_id = request.form.get('email_id')
+        
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        
+        cursor.execute("DELETE FROM destination_email WHERE id = %s", (email_id,))
+        conn.commit()
+        flash("Email supprimé des destinataires avec succès!", 'success')
+        
+    except Exception as e:
+        if conn:
+            conn.rollback()
+        flash(f"Erreur lors de la suppression: {str(e)}", 'error')
+    finally:
+        if cursor:
+            cursor.close()
+       
+            conn.close()
+    
+    return redirect(url_for('settings'))
+
 
 if __name__ == '__main__':
     from tasks import run_monitoring_loop
@@ -1233,5 +1345,5 @@ if __name__ == '__main__':
         thread.daemon = True
         thread.start()
 
-    start_monitoring()
+    #start_monitoring()
     app.run(debug=True)

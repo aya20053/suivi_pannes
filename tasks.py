@@ -41,13 +41,15 @@ def check_site_status(host):
         return False, "Format de l'adresse non reconnu"
 
 def send_alert(site_name, url_or_ip, reason):
-    """Enregistre une alerte dans la base de données ET envoie un email."""
+    """Enregistre une alerte dans la base de données ET envoie un email aux utilisateurs en base."""
     conn = get_db_connection()
     if not conn:
         print("Erreur : Connexion à la base de données échouée pour enregistrer l'alerte.")
         return
+
     try:
         with conn.cursor() as cursor:
+            # Enregistrement de l'alerte
             query_insert = """
                 INSERT INTO alerts (timestamp, site_name, url_or_ip, reason, is_acknowledged)
                 VALUES (%s, %s, %s, %s, %s)
@@ -57,24 +59,23 @@ def send_alert(site_name, url_or_ip, reason):
             conn.commit()
             print(f"Alerte enregistrée dans la base de données pour {site_name}: {reason}")
 
-            # Envoi de l'email (comme vous le faisiez déjà)
+            # Envoi de l'email (on laisse get_active_recipients() gérer la récupération)
             subject = f"ALERTE: Site/IP '{site_name}' ({url_or_ip}) est hors ligne"
-            body = f"Le reseau: '{site_name}' ({url_or_ip}) est actuellement hors ligne.\n\n\nDernière vérification : {timestamp} (UTC).\n\nRaison : {reason}"
+            body = f"Le réseau: '{site_name}' ({url_or_ip}) est actuellement hors ligne.\n\nDernière vérification : {timestamp} (UTC).\n\nRaison : {reason}"
 
             if EMAIL_CONFIG['enabled']:
-                try: # Ajout d'un try...except autour de l'envoi d'email
-                    send_email(subject, body, EMAIL_CONFIG['recipients'], EMAIL_CONFIG)
-                    print(f"Email envoyé pour {site_name}")
+                try:
+                    send_email(subject, body, config=EMAIL_CONFIG)  # On ne passe pas de recipients, ils seront récupérés automatiquement
                 except Exception as e:
                     print(f"Erreur lors de l'envoi de l'email pour {site_name}: {e}")
 
             if NOTIFICATION_CONFIG['enabled']:
-                print(f"Notification (console) envoyée pour : {site_name} - {reason}") # Gardez votre logique de notification si vous l'utilisez
+                print(f"Notification (console) envoyée pour : {site_name} - {reason}")
+
     except pymysql.Error as e:
         print(f"Erreur lors de l'enregistrement de l'alerte : {e}")
     finally:
         close_db_connection(conn)
-
 def monitor_all_sites():
     """Surveille tous les sites web actifs et envoie des alertes par email et enregistre en DB."""
     print("\n--- Cycle de surveillance lancé ---")

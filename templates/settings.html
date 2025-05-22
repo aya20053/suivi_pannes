@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestion des Destinataires</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+      
+
+        .user-card {
+            background: #ffffff;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+        }
+
+        .user-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-container {
+            border: 1px solid #dee2e6;
+            border-radius: 0.5rem;
+            padding: 2rem;
+            background-color: #ffffff;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.03);
+        }
+
+        .btn-toggle {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-toggle i {
+            font-size: 1.2rem;
+        }
+    </style>
+</head>
+<body>
+<div class="container mt-5">
+
+    <!-- Affichage des messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }} alert-dismissible fade show">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="mb-0">Gestion des Destinataires</h2>
+        <button class="btn btn-primary btn-toggle" onclick="toggleForm()">
+            <i class="bi bi-plus-circle"></i> Ajouter un destinataire
+        </button>
+    </div>
+
+    <!-- Barre de recherche -->
+    <div class="mb-4">
+        <input type="text" id="searchInput" class="form-control" placeholder="Rechercher un destinataire par email...">
+    </div>
+
+    <!-- Liste des destinataires -->
+    <div class="row" id="destinatairesList">
+        {% if destinataires %}
+            {% for dest in destinataires %}
+            <div class="col-md-4 mb-4 destinataire-item">
+                <div class="card user-card p-3">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <p class="mb-1 fw-bold ">
+                                <a href="{{ url_for('gestion_employe', email=dest.email) }}" class="text-decoration-none text-dark">
+                                    <i class="bi bi-envelope me-1"></i> {{ dest.email }}
+                                </a>
+
+                            </p>
+                        </div>
+                        <form method="POST" action="{{ url_for('supprimer') }}">
+                            <input type="hidden" name="email_id" value="{{ dest.id }}">
+                            <button type="submit" class="btn p-0 text-danger" title="Supprimer">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="col-12 text-center">
+                <p class="text-muted">Aucun destinataire enregistré</p>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Formulaire d'ajout -->
+    <div id="formulaireAjout" class="form-container d-none mt-4">
+        <h4 class="mb-3">Ajouter un destinataire</h4>
+        <form method="POST" action="{{ url_for('save_emails') }}">
+            <div class="mb-3">
+                <label for="email_select" class="form-label">Sélectionner un email</label>
+                <select class="form-select" id="email_select" name="email_select" required>
+                    <option value="">-- Choisir un email --</option>
+                    {% for user in users %}
+                        <option value="{{ user.email }}">{{ user.email }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="text-end">
+                <button type="submit" class="btn btn-success">Ajouter aux destinataires</button>
+            </div>
+        </form>
+    </div>
+
+</div>
+
+<script>
+    function toggleForm() {
+        const form = document.getElementById("formulaireAjout");
+        form.classList.toggle("d-none");
+    }
+
+    document.getElementById("searchInput").addEventListener("keyup", function () {
+        const query = this.value.toLowerCase();
+        const items = document.querySelectorAll(".destinataire-item");
+
+        items.forEach(function (item) {
+            const emailText = item.querySelector("a").textContent.toLowerCase();
+            item.style.display = emailText.includes(query) ? "block" : "none";
+        });
+    });
+</script>
+ <div id="menu"></div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const menuDiv = document.getElementById("menu");
+
+            fetch("/static/menu.html")
+                .then(response => response.text())
+                .then(data => {
+                    if (menuDiv) {
+                        menuDiv.innerHTML = data;
+                        attachEventListenersToNav('.desktop-nav');
+                        attachEventListenersToNav('.mobile-nav');
+                        checkAndApplyActiveStateOnLoad();
+                    }
+                })
+                .catch(error => console.error('Erreur lors du chargement du menu :', error));
+
+            function attachEventListenersToNav(navSelector) {
+                const nav = document.querySelector(navSelector);
+                if (nav) {
+                    const navItems = nav.querySelectorAll('.nav-item, .mobile-nav-item');
+                    navItems.forEach(item => {
+                        item.addEventListener('click', function() {
+                            activateNavItem(this, navSelector);
+                        });
+                    });
+                }
+            }
+
+            function activateNavItem(item, navSelector) {
+                const activeItem = document.querySelector(`${navSelector} .nav-item.active, ${navSelector} .mobile-nav-item.active`);
+                if (activeItem && activeItem !== item) {
+                    activeItem.classList.remove('active');
+                }
+                item.classList.add('active');
+                localStorage.setItem('activeNavLink', item.dataset.navlink);
+            }
+
+            function checkAndApplyActiveStateOnLoad() {
+                const storedActiveNavLink = localStorage.getItem('activeNavLink');
+                const desktopNavItems = document.querySelectorAll('.desktop-nav .nav-item');
+                const mobileNavItems = document.querySelectorAll('.mobile-nav .mobile-nav-item');
+                const currentPage = window.location.pathname;
+                const allNavItems = [...desktopNavItems, ...mobileNavItems];
+
+                if (storedActiveNavLink) {
+                    allNavItems.forEach(item => {
+                        if (item.dataset.navlink === storedActiveNavLink) {
+                            item.classList.add('active');
+                        }
+                    });
+                } else {
+                    if (currentPage === '/' || currentPage === '/dashboard') {
+                        allNavItems.forEach(item => {
+                            if (item.dataset.navlink === 'accueil') {
+                                item.classList.add('active');
+                                localStorage.setItem('activeNavLink', 'accueil');
+                            }
+                        });
+                    } else {
+                        allNavItems.forEach(item => {
+                            if (item.getAttribute('href') === currentPage) {
+                                item.classList.add('active');
+                                localStorage.setItem('activeNavLink', item.dataset.navlink);
+                            }
+                        });
+                    }
+                }
+            }
+        });
+    </script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
