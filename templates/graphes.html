@@ -16,22 +16,22 @@
    #btn{
 
             padding: 12px 25px;
-            background-color: #4D869C;
+            background-color: #e96036;
             color: white;
             text-decoration: none;
-            filter: drop-shadow(0,0,10px,#4D869C);
+            filter: drop-shadow(0,0,10px,#e96036);
             border-radius: 8px;
             font-weight: bold;
             transition: background-color 0.3s ease, color 0.3s ease;
-            border: #4F959D 1px solid;
+            border: #e96036 1px solid;
         }
         #btn:hover{
             background-color: white;
-            color: #4F959D;
+            color: #e96036;
             transition: 1s ease-in-out;
-            border: #4F959D 1px solid;}
+            border: #e96036 1px solid;}
             h1{
-              color: #4F959D;
+              color: #e96036;
          
             }
 </style>
@@ -164,7 +164,7 @@
           datasets: [{
             data: [{{ total_online | default(0) }}, {{ total_offline | default(0) }}],
             backgroundColor: ['rgba(102, 167, 102, 0.6)', 'rgba(216, 61,30, 0.6)'],
-            borderColor: ['rgba(137, 168, 178, 1)', 'rgba(54, 116, 181, 1)'],
+            borderColor: ['rgba(102, 167, 102, 1)', 'rgba(216, 61,30, 1)'],
             borderWidth: 1
           }]
         },

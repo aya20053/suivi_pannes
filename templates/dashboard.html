@@ -23,7 +23,7 @@
 
     h2  , i ,.pa{
       margin-bottom: 1rem;
-      color: #205781;
+      color: #e96036;
     }
 
     #pieChart {
@@ -41,7 +41,7 @@
         margin: 0;
         padding: 0;
         min-height: 100vh; 
-        background-color: #D5E5D5;
+        background-color: #fffaf8;
     }
     .statistic-box p {
       margin: 0;
@@ -51,7 +51,7 @@
       font-weight: bold;
       font-size: 18px;
     
-      color: #4F959D;
+      color: #e96036;
     }
     canvas[id^="hourlyChart"] {
   height: 120px !important;
@@ -222,8 +222,8 @@
           labels: ['En ligne', 'Hors ligne'],
           datasets: [{
             data: [{{ total_online | default(0) }}, {{ total_offline | default(0) }}],
-            backgroundColor: ['rgba(77, 134, 156, 0.6)', 'rgba(32, 87, 129, 0.6)'],
-            borderColor: ['rgba(137, 168, 178, 1)', 'rgba(54, 116, 181, 1)'],
+            backgroundColor: ['rgba(102, 167, 102, 0.6)', 'rgba(216, 61,30, 0.6)'],
+            borderColor: ['rgba(102, 167, 102, 1)', 'rgba(216, 61,30, 1)'],
             borderWidth: 1
           }]
         },
