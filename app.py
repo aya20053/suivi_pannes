@@ -1443,5 +1443,5 @@ if __name__ == '__main__':
         thread.daemon = True
         thread.start()
 
-    #start_monitoring()
+    start_monitoring()
     app.run(debug=True)

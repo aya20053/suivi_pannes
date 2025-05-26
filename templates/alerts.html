@@ -68,24 +68,37 @@
                 grid-template-columns: 1fr;
             }
         }
+         .header {
+      color: var(--primary-color);
+      border-bottom: 2px solid var(--primary-color);
+      padding-bottom: 0.5rem;
+    }
     </style>
 </head>
 <body class="p-4 sm:p-6">
     <div id="menu"></div>
 
     <div class="max-w-7xl mx-auto">
-        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
-            <div class="flex items-center gap-3">
-                <h1 class="text-2xl sm:text-3xl font-bold text-gray-800 flex items-center gap-2">
-                    <i data-lucide="alert-triangle" class="text-primary"></i>
-                    Alertes Système
-                </h1>
-            </div>
-            <button onclick="deleteAllAlerts()" class="btn-danger flex items-center gap-2">
-                <i data-lucide="trash-2"></i>
-                <span>Supprimer toutes les alertes</span>
-            </button>
-        </div>
+        <div class="flex flex-col mb-6 gap-4">
+    <!-- Titre centré avec icône -->
+    <div class="flex justify-center">
+        <h1 class="text-3xl font-bold text-center mb-2 header flex items-center gap-3">
+            <i data-lucide="alert-triangle" class="text-primary"></i>
+            Alertes Système
+        </h1>
+    </div>
+
+    <!-- Bouton aligné à droite -->
+    <div class="flex justify-end">
+    <button 
+        onclick="deleteAllAlerts()" 
+        class="btn-danger flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-all mr-0 sm:mr-10"
+    >
+        <i data-lucide="trash-2" class="w-5 h-5"></i>
+        <span>Supprimer toutes les alertes</span>
+    </button>
+</div>
+</div>
 
         <div id="alerts-container" class="alerts-grid">
             <p class="text-gray-500">Chargement des alertes...</p>

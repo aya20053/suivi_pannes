@@ -8,10 +8,12 @@
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
     <link href="https://cdn.jsdelivr.net/npm/lucide-icons@0.1.0/dist/lucide.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
     <style>
         :root {
-            --primary-color: #3b82f6;
-            --primary-hover: #2563eb;
+            --primary-color: #e96036;
+            --primary-hover: #d04a22;
             --secondary-color: #f8fafc;
             --text-color: #1e293b;
             --light-text: #64748b;
@@ -42,15 +44,7 @@
             overflow: hidden;
         }
 
-        .profil-container::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 8px;
-            background: linear-gradient(90deg, var(--primary-color), #8b5cf6);
-        }
+       
 
         .profil-header {
             margin-bottom: 2rem;
@@ -60,23 +54,13 @@
         .profil-header h2 {
             font-size: 1.75rem;
             font-weight: 700;
-            color: var(--text-color);
+            
             margin-bottom: 1.5rem;
             position: relative;
             display: inline-block;
         }
 
-        .profil-header h2::after {
-            content: '';
-            position: absolute;
-            bottom: -8px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 50px;
-            height: 3px;
-            background: var(--primary-color);
-            border-radius: 3px;
-        }
+        
 
         .profil-info {
             display: grid;
@@ -153,7 +137,7 @@
         .btn-primary:hover {
             background-color: var(--primary-hover);
             transform: translateY(-2px);
-            box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.3);
+            box-shadow: 0 4px 6px -1px rgba(233, 96, 54, 0.3);
         }
 
         .btn-secondary {
@@ -169,6 +153,7 @@
 
         .btn i {
             margin-right: 0.5rem;
+            color: white;
         }
 
         /* Edit Form Styles */
@@ -221,7 +206,7 @@
         .form-input:focus {
             outline: none;
             border-color: var(--primary-color);
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+            box-shadow: 0 0 0 3px rgba(233, 96, 54, 0.2);
         }
 
         .form-input:disabled {
@@ -274,14 +259,27 @@
         .hidden {
             display: none;
         }
+        .header {
+      color: var(--primary-color);
+      border-bottom: 2px solid var(--primary-color);
+      padding-bottom: 0.5rem;
+     
+    }
+    h2 ,i{
+         color: #e96036;
+    }
+
     </style>
 </head>
 
 <body>
     <div class="profil-container animate-fade">
-        <div class="profil-header">
-            <h2>Mon Profil</h2>
-        </div>
+       <div class="profil-header">
+    <h2 class="text-3xl font-bold text-center mb-2 header">
+        <i class="fas fa-user-circle mr-2"></i>Mon Profil
+    </h2>
+</div>
+
 
         <div class="profil-info" id="profile-info">
             <div class="info-item">
