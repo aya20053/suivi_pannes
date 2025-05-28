@@ -18,8 +18,6 @@
             --card-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
         
-      
-        
         .btn-primary {
             background-color: var(--primary-color);
             color: white;
@@ -115,7 +113,6 @@
 </head>
 <body class="p-4 sm:p-6 bg-gray-50">
     <div class="max-w-7xl mx-auto">
-       <!-- Header -->
 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
     <div class="w-full flex flex-col items-center mb-8">
         <h1 class="text-3xl font-bold text-center mb-2 header">
@@ -128,14 +125,12 @@
     </div>
 </div>
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6 mb-8 w-full px-4 sm:max-w-xl md:max-w-2xl lg:max-w-4xl mx-auto">
-    <!-- Barre de recherche (à gauche) -->
     <div class="relative max-w-md w-full sm:w-auto">
         <i data-lucide="search" class="absolute search-icon top-1/2 left-3 transform -translate-y-1/2"></i>
         <input type="text" id="search" placeholder="Rechercher un utilisateur..." 
                class="search-input w-full pl-10 pr-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-color">
     </div>
 
-    <!-- Bouton (à droite) -->
     <div class="w-full sm:w-auto flex justify-end">
         <button id="toggle-form-btn" class="btn-primary flex items-center gap-2">
             <i data-lucide="user-plus"></i>
@@ -145,7 +140,6 @@
 </div>
         </div>
 
-        <!-- Add Form -->
         <form id="add-form" class="form-container p-6 mb-8 hidden">
             <h2 class="text-xl font-semibold text-gray-800 mb-4 flex items-center gap-2">
                 <i data-lucide="user-plus" class="text-primary-color" style="color: var(--primary-color);"></i>
@@ -192,14 +186,9 @@
             </div>
         </form>
 
-      
-
-        <!-- Users Grid -->
         <div id="users-container" class="users-grid">
-            <!-- Users will be loaded here -->
         </div>
 
-        <!-- Edit Form -->
         <form id="edit-form" class="form-container p-6 mb-8 hidden fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50 w-full max-w-2xl">
             <h2 class="text-xl font-semibold text-gray-800 mb-4 flex items-center gap-2">
                 <i data-lucide="user-cog" class="text-primary-color" style="color: var(--primary-color);"></i>
@@ -252,11 +241,9 @@
         </form>
     </div>
 
-    <!-- Overlay for edit form -->
     <div id="overlay" class="fixed inset-0 bg-black bg-opacity-50 z-40 hidden"></div>
 
     <script>
-        // Same JavaScript as before, with adjustments for the grid layout
         async function editUser(id) {
             document.getElementById('overlay').classList.remove('hidden');
             document.body.style.overflow = 'hidden';
@@ -290,7 +277,6 @@
 
         const API_URL = "http://localhost:5000/api/users";
 
-        // Toggle formulaire ajout
         document.getElementById("toggle-form-btn").addEventListener("click", () => {
             const form = document.getElementById("add-form");
             form.classList.toggle("hidden");
@@ -477,12 +463,10 @@
             fetchUsers(e.target.value);
         });
 
-        // Initialize icons and fetch users
         lucide.createIcons();
         fetchUsers();
     </script>
 
-    <!-- Menu script -->
     <div id="menu"></div>
     <script src="https://cdn.jsdelivr.net/npm/lucide@0.0.0/dist/lucide.min.js"></script>
     <script>

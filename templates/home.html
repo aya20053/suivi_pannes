@@ -47,7 +47,18 @@
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
             width: 250px;
         }
+.features a {
+    text-decoration: none;
+    color: inherit;
+    outline: none;
+}
 
+.features a:focus, 
+.features a:hover, 
+.features a:visited {
+    text-decoration: none;
+    color: inherit;
+}
         .feature i {
             font-size: 40px;
             color: #e96036;
@@ -63,7 +74,6 @@
             font-size: 14px;
             color: #718093;
         }
- /* Animation */
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
@@ -99,12 +109,10 @@
         }
 
         .btn:hover {
-            
     background-color: #c74a24;  
     color: white; 
     transition: 1s ease-in-out;
     border: #c74a24 1px solid;
-    
 }
 
     </style>
@@ -115,26 +123,39 @@
         <p class="welcome">Bienvenue dans l’application de <strong>surveillance et de diagnostic des pannes réseau</strong>.</p>
 
         <div class="features">
-            <div class="feature">
-                <i class='bx bx-network-chart'></i>
-                <h3>Surveillance</h3>
-                <p>Suivez en temps réel l’état de vos sites web et réseaux surveillés.</p>
-            </div>
-            <div class="feature">
-                <i class='bx bx-bell'></i>
-                <h3>Alertes</h3>
-                <p>Recevez des notifications en cas d’anomalie détectée dans le réseau.</p>
-            </div>
-            <div class="feature">
-                <i class='bx bx-stats'></i>
-                <h3>Statistiques</h3>
-                <p>Analysez les données de surveillance à travers des statistiques détaillées.</p>
-            </div>
-            <div class="feature">
-                <i class='bx bx-user-circle'></i>
-                <h3>Profil Utilisateur</h3>
-                <p>Gérez vos informations personnelles .</p>
-            </div>
+
+                <a href="/manage-networks" class="feature-link">
+                    <div class="feature">
+                            <i class='bx bx-network-chart'></i>
+                            <h3>Surveillance</h3>
+                            <p>Suivez en temps réel l’état de vos sites web et réseaux surveillés.</p>
+                        </div> 
+                </a>
+
+                <a href="/alerts" class="feature-link">
+                    <div class="feature">
+                        <i class='bx bx-bell'></i>
+                        <h3>Alertes</h3>
+                        <p>Recevez des notifications en cas d’anomalie détectée dans le réseau.</p>
+                    </div>
+                </a>
+
+                <a href="/dashboard" class="feature-link">
+                    <div class="feature">
+                        <i class='bx bx-stats'></i>
+                        <h3>Statistiques</h3>
+                        <p>Analysez les données de surveillance à travers des statistiques détaillées.</p>
+                    </div>
+                </a>
+
+                <a href="/manage_users" class="feature-link">
+                    <div class="feature">
+                        <i class='bx bx-user-circle'></i>
+                        <h3>Gestion des Comptes</h3>
+                        <p>Administration complète des utilisateurs</p>
+                    </div>
+                </a>
+
         </div>
         <a href="/dashboard" class="btn">Accéder au tableau de bord</a>
 

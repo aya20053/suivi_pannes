@@ -1,314 +1,314 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Surveillance réseau</title>
-    <link rel="icon" type="image/png" href="/static/image/logo.jpeg">
-    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
-    <script src="https://cdn.jsdelivr.net/npm/vue@2.7.14"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Surveillance réseau</title>
+  <link rel="icon" type="image/png" href="/static/image/logo.jpeg">
+  <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+  <script src="https://cdn.jsdelivr.net/npm/vue@2.7.14"></script>
 
 
-    <style>
-    :root {
-        --primary-color: rgb(233, 96, 54); 
-        --active-text-color: #e96036;
-        --bg-color: #ffffff;
-    }
-    
-    ::selection {
-        color: white;
-        background-color: #e96036;
-    }
-    
-    * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-    }
-
-    body {
-        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-        margin: 0;
-        padding: 0;
-        min-height: 100vh; 
-       
-    }
-
-    .desktop-nav {
-        position: fixed;
-        top: 50%;
-        right: 20px;
-        transform: translateY(-50%);
-        background: var(--bg-color);
-        display: flex;
-        flex-direction: column;
-        align-items: flex-end;
-        padding: 20px 0;
-        border-left: 1px solid #e0e0e0;
-        z-index: 101;
-        width: 100px;
-        box-shadow: -2px 0 10px rgba(0, 0, 0, 0.1);
-        border-radius: 10px 0 0 10px;
-    }
-
-    .nav-item {
-        width: 100%;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        padding: 12px 0;
-        margin-bottom: 4px;
-        cursor: pointer;
-        text-decoration: none;
-        color: var(--text-color);
-        position: relative;
-        transition: all 0.3s ease;
-    }
-
-    .nav-item:hover {
-      background-color: #F0F0F0;
-   
-    }
-
-    .nav-item .nav-icon {
-        font-size: 26px;
-        margin-bottom: 4px;
-        transition: color 0.3s ease;
-    }
-
-    .nav-item .nav-label {
-        font-size: 12px;
-        font-weight: 500;
-    }
-
-    .nav-item.active {
-        color: var(--active-text-color);
-    }
-
-    .nav-item.active .nav-icon {
-        color: var(--primary-color);
-    }
-
-    .nav-item.active::before {
-        content: '';
-        position: absolute;
-        left: 0;
-        top: 0;
-        bottom: 0;
-        width: 3px;
-        background-color: var(--primary-color);
-        border-radius: 0 3px 3px 0;
-    }
-
-    .mobile-nav {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    background: var(--bg-color);
-    display: none; /* Set to none by default */
-    justify-content: space-around;
-    padding: 8px 0;
-    border-top: 1px solid #e0e0e0;
-    z-index: 100;
-    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
-    
+  <style>
+  :root {
+    --primary-color: rgb(233, 96, 54); 
+    --active-text-color: #e96036;
+    --bg-color: #ffffff;
+  }
+  
+  ::selection {
+    color: white;
+    background-color: #e96036;
+  }
+  
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
   }
 
-    .mobile-nav-item {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        padding: 6px 12px;
-        text-decoration: none;
-        color: var(--text-color);
-        flex: 1;
-        max-width: 80px;
-        transition: all 0.3s ease;
-    }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    margin: 0;
+    padding: 0;
+    min-height: 100vh; 
+     
+  }
 
-    .mobile-nav-item:hover {
-        background-color: rgba(38, 80, 115, 0.4);
-        color: lch(100% 0.01 296.81);
-    }
+  .desktop-nav {
+    position: fixed;
+    top: 50%;
+    right: 20px;
+    transform: translateY(-50%);
+    background: var(--bg-color);
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    padding: 20px 0;
+    border-left: 1px solid #e0e0e0;
+    z-index: 101;
+    width: 100px;
+    box-shadow: -2px 0 10px rgba(0, 0, 0, 0.1);
+    border-radius: 10px 0 0 10px;
+  }
 
-    .mobile-nav-icon {
-        font-size: 24px;
-        transition: color 0.3s ease;
-    }
+  .nav-item {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 12px 0;
+    margin-bottom: 4px;
+    cursor: pointer;
+    text-decoration: none;
+    color:rgba(233, 96, 54,7);
+    position: relative;
+    transition: all 0.3s ease;
+  }
 
-    .mobile-nav-label {
-      display: none;
-        position: absolute;
-        background-color: rgba(205, 232, 229, 0.4);
-        color: black;
-        font-weight: bold;
-        padding: 5px 10px;
-        border-radius: 5px;
-        font-size: 12px;
-        top: 50%;
-        right: 110%;
-        transform: translateY(-50%);
-        white-space: nowrap;
-        pointer-events: none;
-    }
+  .nav-item:hover {
+    background-color: #F0F0F0;
+   
+  }
 
-    .mobile-nav-item.active {
-      color: var(--active-text-color);}
+  .nav-item .nav-icon {
+    font-size: 26px;
+    margin-bottom: 4px;
+    transition: color 0.3s ease;
+  }
 
-    .mobile-nav-item.active .mobile-nav-icon {
-      color: var(--primary-color);    }
+  .nav-item .nav-label {
+    font-size: 12px;
+    font-weight: 500;
+  }
 
-    .mobile-nav-item.active .mobile-nav-label {
-        color: var(--active-text-color);
-    }
+  .nav-item.active {
+    color: var(--active-text-color);
+  }
 
-    .mobile-nav-item.active::before {
-        content: '';
-        position: absolute;
-        left: 0;
-        top: 0;
-        bottom: 0;
-        width: 3px;
-        background-color: var(--primary-color);
-        border-radius: 0 3px 3px 0;
-    }
-    .main-content {
-        margin-right: 120px; 
-        padding: 20px;
-        min-height: calc(100vh - 80px);
-    }
+  .nav-item.active .nav-icon {
+    color: var(--primary-color);
+  }
 
-    /* Tooltip styles */
-    .nav__tooltip {
-        display: none;
-        position: absolute;
-        background-color: rgb(233, 96, 54);
-        color: black;
-        font-weight: bold;
-        padding: 5px 10px;
-        border-radius: 5px;
-        font-size: 12px;
-        top: 50%;
-        right: 110%;
-        transform: translateY(-50%);
-        white-space: nowrap;
-        pointer-events: none;
-    }
+  .nav-item.active::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background-color: var(--primary-color);
+    border-radius: 0 3px 3px 0;
+  }
 
-    .nav-item:hover .nav__tooltip {
-        display: block;
-    }
+  .mobile-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: var(--bg-color);
+  display: none;
+  justify-content: space-around;
+  padding: 8px 0;
+  border-top: 1px solid #e0e0e0;
+  z-index: 100;
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+  
+  }
 
-    @media (max-width: 768px) {
-    .desktop-nav {
-      display: none;
-    }
+  .mobile-nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 6px 12px;
+    text-decoration: none;
+    color:rgba(233, 96, 54,7);
+    flex: 1;
+    max-width: 80px;
+    transition: all 0.3s ease;
+  }
 
-    .mobile-nav {
-      display: flex; /* Now it will be displayed on smaller screens */
-    }
+  .mobile-nav-item:hover {
+    background-color: rgba(38, 80, 115, 0.4);
+    color: lch(100% 0.01 296.81);
+  }
 
-    .main-content {
-      margin-right: 0;
-      padding-bottom: 80px;
-    }
+  .mobile-nav-icon {
+    font-size: 24px;
+    transition: color 0.3s ease;
+  }
+
+  .mobile-nav-label {
+    display: none;
+    position: absolute;
+    background-color: rgba(205, 232, 229, 0.4);
+    color: black;
+    font-weight: bold;
+    padding: 5px 10px;
+    border-radius: 5px;
+    font-size: 12px;
+    top: 50%;
+    right: 110%;
+    transform: translateY(-50%);
+    white-space: nowrap;
+    pointer-events: none;
+  }
+
+  .mobile-nav-item.active {
+    color: var(--active-text-color);}
+
+  .mobile-nav-item.active .mobile-nav-icon {
+    color: var(--primary-color);    }
+
+  .mobile-nav-item.active .mobile-nav-label {
+    color: var(--active-text-color);
+  }
+
+  .mobile-nav-item.active::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background-color: var(--primary-color);
+    border-radius: 0 3px 3px 0;
+  }
+  .main-content {
+    margin-right: 120px; 
+    padding: 20px;
+    min-height: calc(100vh - 80px);
+  }
+
+  .nav__tooltip {
+    display: none;
+    position: absolute;
+    background-color: white;
+    color: #e96036;
+    font-weight: bold;
+    padding: 5px 10px;
+    border-radius: 5px;
+    font-size: 12px;
+    top: 50%;
+    right: 110%;
+    transform: translateY(-50%);
+    white-space: nowrap;
+    pointer-events: none;
+  }
+
+  .nav-item:hover .nav__tooltip {
+    display: block;
+  }
+
+  @media (max-width: 768px) {
+  .desktop-nav {
+    display: none;
+  }
+
+  .mobile-nav {
+    display: flex;
+  }
+
+  .main-content {
+    margin-right: 0;
+    padding-bottom: 80px;
+  }
   }
 
   @media (min-width: 769px) {
-    .mobile-nav {
-      display: none; /* Remains hidden on larger screens */
-    }
+  .mobile-nav {
+    display: none;
+  }
   }
 
-    /* Content sections */
-    #mainContent > section {
-        display: none;
-    }
+  #mainContent > section {
+    display: none;
+  }
 
-    #mainContent > section.active {
-        display: block;
-        animation: fadeIn 0.5s ease;
-    }
+  #mainContent > section.active {
+    display: block;
+    animation: fadeIn 0.5s ease;
+  }
 
-    @keyframes fadeIn {
-        from { opacity: 0; }
-        to { opacity: 1; }
-    }
-      a i {
-      margin-bottom: 1rem;
-      color: #FF8A08;
-    }
-    </style>
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+    a i {
+    margin-bottom: 1rem;
+    color:rgba(233, 96, 54,7);
+  }
+  .nav-icon {
+  color:rgba(233, 96, 54, 0.5);}
+  </style>
 </head>
 
 <body data-user-role="{{ user_role }}">
-    <div id="app">
-    <nav class="desktop-nav">
-      <a href="/dashboard" class="nav-item " data-navlink="accueil">
-        <i class='bx bx-home-alt-2 nav-icon'></i>
-        <span class="nav__tooltip">Tableau de bord</span>
-      </a>
-       <a href="/manage-networks" class="nav-item" data-navlink="reseau">
-        <i class='bx bx-network-chart nav-icon'></i>
-        <span class="nav__tooltip">Gestion du réseau</span>
-      </a> 
-      <a href="/manage_users" class="nav-item"  data-navlink="gestion-utilisateurs" >
-        <i class='bx bx-user-check nav-icon'></i>
-        <span class="nav__tooltip">Gestion des utilisateurs</span>
-      </a>
-     
-      <a href="/alerts" class="nav-item" data-navlink="Alertes">
-        <i class='bx bx-bell nav-icon'></i>
-        <span class="nav__tooltip">Alertes</span>
-      </a>
-      <a href="/settings" class="nav-item" data-navlink="parametres">
-        <i class='bx bx-cog nav-icon'></i>
-        <span class="nav__tooltip">Paramètres</span>
-      </a>
-      <a href="/profile" class="nav-item" data-navlink="profil">
-        <i class='bx bx-user nav-icon'></i>
-        <span class="nav__tooltip">Mon profil</span>
-      </a>
-      <a href="/logout" class="nav-item" data-navlink="deconnexion">
-        <i class='bx bx-log-out nav-icon'></i>
-        <span class="nav__tooltip">Se déconnecter</span>
-      </a>
-    </nav>
+  <div id="app">
+  <nav class="desktop-nav">
+    <a href="/dashboard" class="nav-item " data-navlink="accueil">
+    <i class='bx bx-home-alt-2 nav-icon'></i>
+    <span class="nav__tooltip">Tableau de bord</span>
+    </a>
+     <a href="/manage-networks" class="nav-item" data-navlink="reseau">
+    <i class='bx bx-network-chart nav-icon'></i>
+    <span class="nav__tooltip">Gestion du réseau</span>
+    </a> 
+    <a href="/manage_users" class="nav-item"  data-navlink="gestion-utilisateurs" >
+    <i class='bx bx-user-check nav-icon'></i>
+    <span class="nav__tooltip">Gestion des utilisateurs</span>
+    </a>
+   
+    <a href="/alerts" class="nav-item" data-navlink="Alertes">
+    <i class='bx bx-bell nav-icon'></i>
+    <span class="nav__tooltip">Alertes</span>
+    </a>
+    <a href="/settings" class="nav-item" data-navlink="parametres">
+    <i class='bx bx-cog nav-icon'></i>
+    <span class="nav__tooltip">Paramètres</span>
+    </a>
+    <a href="/profile" class="nav-item" data-navlink="profil">
+    <i class='bx bx-user nav-icon'></i>
+    <span class="nav__tooltip">Mon profil</span>
+    </a>
+    <a href="/logout" class="nav-item" data-navlink="deconnexion">
+    <i class='bx bx-log-out nav-icon'></i>
+    <span class="nav__tooltip">Se déconnecter</span>
+    </a>
+  </nav>
   
-    <nav class="mobile-nav">
-      <a href="/dashboard" class="mobile-nav-item " data-navlink="accueil">
-          <i class='bx bx-home-alt-2 mobile-nav-icon'></i>
-          <span class="mobile-nav-label">Tableau de bord</span>
-      </a>
+  <nav class="mobile-nav">
+    <a href="/dashboard" class="mobile-nav-item " data-navlink="accueil">
+      <i class='bx bx-home-alt-2 mobile-nav-icon'></i>
+      <span class="mobile-nav-label">Tableau de bord</span>
+    </a>
   
-      <a href="/manage_users" class="mobile-nav-item"  data-navlink="gestion-utilisateurs" >
-          <i class='bx bx-user-check mobile-nav-icon'></i>
-          <span class="mobile-nav-label">Gestion des utilisateurs</span>
-      </a>
-      <a href="/manage-networks" class="mobile-nav-item" data-navlink="reseau">
-          <i class='bx bx-network-chart mobile-nav-icon'></i>
-          <span class="mobile-nav-label">Gestion du réseau</span>
-      </a>
-      <a href="/alerts" class="mobile-nav-item" data-navlink="Alertes">
-          <i class='bx bx-bell mobile-nav-icon'></i>
-          <span class="mobile-nav-label">Alertes</span>
-      </a>
-     
-        <a href="/settings" class="mobile-nav-item" data-navlink="parametres">
-        <i class='bx bx-cog mobile-nav-icon'></i>
-        <span class="nav__tooltip">Paramètres</span>
-      </a>
-      <a href="/profile" class="mobile-nav-item" data-navlink="profil">
-          <i class='bx bx-user mobile-nav-icon'></i>
-          <span class="mobile-nav-label">Mon profil</span>
-      </a>
+    <a href="/manage_users" class="mobile-nav-item"  data-navlink="gestion-utilisateurs" >
+      <i class='bx bx-user-check mobile-nav-icon'></i>
+      <span class="mobile-nav-label">Gestion des utilisateurs</span>
+    </a>
+    <a href="/manage-networks" class="mobile-nav-item" data-navlink="reseau">
+      <i class='bx bx-network-chart mobile-nav-icon'></i>
+      <span class="mobile-nav-label">Gestion du réseau</span>
+    </a>
+    <a href="/alerts" class="mobile-nav-item" data-navlink="Alertes">
+      <i class='bx bx-bell mobile-nav-icon'></i>
+      <span class="mobile-nav-label">Alertes</span>
+    </a>
+   
+    <a href="/settings" class="mobile-nav-item" data-navlink="parametres">
+    <i class='bx bx-cog mobile-nav-icon'></i>
+    <span class="nav__tooltip">Paramètres</span>
+    </a>
+    <a href="/profile" class="mobile-nav-item" data-navlink="profil">
+      <i class='bx bx-user mobile-nav-icon'></i>
+      <span class="mobile-nav-label">Mon profil</span>
+    </a>
   
-      <a href="/logout" class="mobile-nav-item" data-navlink="deconnexion">
-          <i class='bx bx-log-out mobile-nav-icon'></i>
-          <span class="mobile-nav-label">Se déconnecter</span>
-      </a>
+    <a href="/logout" class="mobile-nav-item" data-navlink="deconnexion">
+      <i class='bx bx-log-out mobile-nav-icon'></i>
+      <span class="mobile-nav-label">Se déconnecter</span>
+    </a>
   </nav>
 
 
@@ -319,51 +319,43 @@
   const navItems = document.querySelectorAll('.desktop-nav .nav-item');
   const currentPage = window.location.pathname;
 
-  // Fonction pour activer un élément de navigation
   function activateNavItem(item) {
-    // Désactiver l'élément actif précédent s'il existe
-    const activeItem = document.querySelector('.desktop-nav .nav-item.active');
-    if (activeItem) {
-      activeItem.classList.remove('active');
-    }
-    // Activer l'élément cliqué
-    item.classList.add('active');
-    // Stocker l'état actif dans le localStorage pour les changements de page
-    localStorage.setItem('activeNavLink', item.dataset.navlink);
+  const activeItem = document.querySelector('.desktop-nav .nav-item.active');
+  if (activeItem) {
+    activeItem.classList.remove('active');
+  }
+  item.classList.add('active');
+  localStorage.setItem('activeNavLink', item.dataset.navlink);
   }
 
-  // Écouter les clics sur les éléments de navigation
   navItems.forEach(item => {
-    item.addEventListener('click', function(event) {
-      activateNavItem(this);
-      // La navigation vers la nouvelle page se fera normalement grâce au lien <a>
-    });
+  item.addEventListener('click', function(event) {
+    activateNavItem(this);
+  });
   });
 
-  // Vérifier au chargement de la page s'il y a un élément actif enregistré
   const storedActiveNavLink = localStorage.getItem('activeNavLink');
   if (storedActiveNavLink) {
-    navItems.forEach(item => {
-      if (item.dataset.navlink === storedActiveNavLink) {
-        item.classList.add('active');
-      }
-    });
-  } else {
-    // Si aucun état actif n'est enregistré, tu peux activer un élément par défaut (par exemple, le premier)
-    if (currentPage === '/' || currentPage === '/dashboard') {
-      const accueilItem = document.querySelector('.desktop-nav .nav-item[data-navlink="accueil"]');
-      if (accueilItem) {
-        accueilItem.classList.add('active');
-        localStorage.setItem('activeNavLink', 'accueil');
-      }
-    } else {
-      navItems.forEach(item => {
-        if (item.getAttribute('href') === currentPage) {
-          item.classList.add('active');
-          localStorage.setItem('activeNavLink', item.dataset.navlink);
-        }
-      });
+  navItems.forEach(item => {
+    if (item.dataset.navlink === storedActiveNavLink) {
+    item.classList.add('active');
     }
+  });
+  } else {
+  if (currentPage === '/' || currentPage === '/dashboard') {
+    const accueilItem = document.querySelector('.desktop-nav .nav-item[data-navlink="accueil"]');
+    if (accueilItem) {
+    accueilItem.classList.add('active');
+    localStorage.setItem('activeNavLink', 'accueil');
+    }
+  } else {
+    navItems.forEach(item => {
+    if (item.getAttribute('href') === currentPage) {
+      item.classList.add('active');
+      localStorage.setItem('activeNavLink', item.dataset.navlink);
+    }
+    });
+  }
   }
 });
 </script>

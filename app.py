@@ -291,12 +291,6 @@ def before_request():
     # The database query to fetch the role is no longer needed here
     pass
 
-# --- Other HTML Views ---
-@app.route('/network-stats')
-def network_stats():
-    if 'username' not in session:
-        return redirect(url_for('index'))
-    return render_template('network_stats.html')
 
 @app.route('/manage-networks')
 def manage_networks():

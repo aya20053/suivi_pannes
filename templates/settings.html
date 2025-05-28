@@ -74,7 +74,6 @@
 <body>
 <div class="container mt-5">
 
-    <!-- Affichage des messages -->
     {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
             {% for category, message in messages %}
@@ -86,14 +85,12 @@
         {% endif %}
     {% endwith %}
 
-    <!-- En-tête -->
     <div class="text-center mb-4">
         <h2 class="text-3xl font-bold header">
             <i class="bi bi-people-fill"></i> Gestion des Destinataires
         </h2>
         <div class="header-line"></div>
         
-        <!-- Bouton aligné à droite sous le titre -->
         <div class="d-flex justify-content-end mt-3 btn">
             <button class=" btn-primary btn-toggle flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-all" onclick="toggleForm()">
                 <i class="bi bi-plus-circle"></i> Ajouter un destinataire
@@ -101,13 +98,11 @@
         </div>
     </div>
 
-    <!-- Barre de recherche avec icône -->
     <div class="search-container position-relative">
         <i class="bi bi-search position-absolute top-50 start-0 translate-middle-y ms-3 text-muted"></i>
         <input type="text" id="searchInput" class="form-control ps-5" placeholder="Rechercher un destinataire par email...">
     </div>
 
-    <!-- Liste des destinataires -->
     <div class="row" id="destinatairesList">
         {% if destinataires %}
             {% for dest in destinataires %}
@@ -138,7 +133,6 @@
         {% endif %}
     </div>
 
-    <!-- Formulaire d'ajout -->
     <div id="formulaireAjout" class="form-container d-none mt-4">
         <h4 class="mb-3">Ajouter un destinataire</h4>
         <form method="POST" action="{{ url_for('save_emails') }}">

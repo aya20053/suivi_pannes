@@ -11,24 +11,18 @@
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/vis/4.21.0/vis.min.css" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/vis/4.21.0/vis.min.js"></script>
-<!-- Vis.js -->
 <link href="https://unpkg.com/vis-network/styles/vis-network.css" rel="stylesheet" />
 <script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
-
-<!-- Lucide -->
 <script src="https://unpkg.com/lucide@latest"></script>
   <script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
   <link href="https://unpkg.com/vis-network/styles/vis-network.css" rel="stylesheet" />
   <style>
-
     .node-status-badge {
   transition: left 0.1s ease, top 0.1s ease;
 }
-
 .architecture-card {
   position: relative;
 }
-
   #architectures-container {
       display: flex;
       flex-direction: column;
@@ -63,8 +57,6 @@
     background-color: #ef4444 !important;
     border-color: #b91c1c !important;
   }
-
-
     :root {
       --primary-color: #e96036;
       --secondary-color: #cf4d25;
@@ -75,8 +67,6 @@
       --light-bg: #f8fafc;
       --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
     }
-    
-  
     
     .header {
       color: var(--primary-color);
@@ -287,21 +277,15 @@ font-size: 0.75rem;
 </head>
 <body class="p-4 sm:p-8 bg-gray-50">
   <div class="max-w-6xl mx-auto">
-    <!-- Menu -->
     <div id="menu"></div>
-    
-    <!-- Header -->
     <div class="flex flex-col items-center mb-8">
       <h1 class="text-3xl font-bold text-center mb-2 header">
         <i class='bx bx-network-chart text-3xl align-middle mr-2'></i>
         Monitoring Réseau
       </h1>
-      
       <p class="text-gray-600 mb-6 text-center max-w-2xl">
         Visualisez et gérez l'ensemble de votre infrastructure réseau en temps réel
       </p>
-      
-      <!-- Navigation tabs -->
       <div class="flex nav-tabs mb-6 w-full justify-center">
   <button id="simple-view-btn" class="nav-tab active flex items-center mr-4">
     <i data-lucide="list" class="w-4 h-4 mr-2"></i>
@@ -312,8 +296,6 @@ font-size: 0.75rem;
     Vue Architecture
   </button>
 </div>
-
-<!-- Actions -->
  <div id="simple-view">
 <div class="flex gap-3 mb-6 w-full justify-between">
   <div class="relative flex-1 max-w-md">
@@ -330,15 +312,9 @@ font-size: 0.75rem;
     Ajouter Réseau
   </button>
 </div>
-
-<!-- Vue Simple -->
-
   <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="site-list">
-    <!-- Sites chargés dynamiquement -->
   </div>
 </div>
-
-<!-- Vue Architecture -->
 <section id="architecture-view" class="hidden">
   <div id="architecture-loader" class="hidden fixed inset-0 bg-black bg-opacity-10 flex items-center justify-center z-50">
     <div class="bg-white p-6 rounded-lg shadow-lg flex items-center">
@@ -346,7 +322,6 @@ font-size: 0.75rem;
       <span>Chargement des architectures...</span>
     </div>
   </div>
-
 <div class="flex gap-3 mb-6 w-full justify-between">
       <div class="relative flex-1 max-w-md">
     <i data-lucide="search" class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
@@ -364,24 +339,17 @@ font-size: 0.75rem;
   
   </div>
 <div id="architectures-list" class="mt-4">
-  <!-- La liste des architectures s'affichera ici -->
 </div>
   <div class="card p-4 mb-6">
     <div id="network-diagram" class="w-full h-[600px] rounded-lg"></div>
   </div>
-
- 
-
   <div id="architectures-container"></div>
-
-  <!-- Formulaire de création d'architecture -->
   <div id="archi-form-container" class="hidden">
     <div class="card p-6 mb-8">
       <h2 class="text-xl font-semibold text-gray-800 mb-4">
         <i data-lucide="network" class="text-blue-500 mr-2"></i>
         Étape <span id="current-step">1</span> - Création d'architecture
       </h2>
-
       <div id="step-1" class="step-content">
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
           <div>
@@ -394,7 +362,6 @@ font-size: 0.75rem;
               required
             />
           </div>
-
           <div>
             <label for="archi-description" class="block text-sm font-medium text-gray-700 mb-1">Description</label>
             <input
@@ -405,9 +372,7 @@ font-size: 0.75rem;
             />
           </div>
         </div>
-
         <h3 class="font-medium mb-3">Sélectionnez l'équipement de départ</h3>
-
         <div class="mb-4">
           <label class="block text-sm font-medium text-gray-700 mb-1">Filtrer par type :</label>
           <select id="equipment-filter" class="w-full p-2 form-input">
@@ -418,41 +383,30 @@ font-size: 0.75rem;
             <option value="réseau">Réseau</option>
           </select>
         </div>
-
-        <div id="equipment-options" class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
-          <!-- Liste des équipements de la base de données -->
+        <div id="equipment-options" class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6"></div>
         </div>
       </div>
-
       <div id="step-2" class="step-content hidden">
         <h3 class="font-medium mb-3">Lier à d'autres équipements</h3>
         <p class="text-sm text-gray-600 mb-4">Sélectionnez les équipements à connecter</p>
-
         <div class="mb-4">
           <label class="block text-sm font-medium text-gray-700 mb-1">Équipement sélectionné :</label>
           <div id="selected-equipment-display" class="card p-3 bg-gray-50">
-            <!-- Afficher l'équipement sélectionné -->
           </div>
         </div>
-
         <div id="equipment-list" class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
-          <!-- Liste des équipements disponibles pour connexion -->
         </div>
-
         <div id="connections-display" class="mb-4">
           <h4 class="font-medium mb-2">Connexions établies :</h4>
           <div id="connections-list" class="space-y-2">
-            <!-- Liste des connexions créées -->
           </div>
         </div>
       </div>
-
       <div class="flex justify-between">
         <button id="prev-step-btn" class="btn-secondary px-4 py-2 rounded-md flex items-center hidden">
           <i data-lucide="arrow-left" class="w-5 h-5 mr-2"></i>
           Précédent
         </button>
-
         <div class="flex gap-3 ml-auto">
           <button id="cancel-archi-btn" class="btn-secondary px-4 py-2 rounded-md flex items-center">
             <i data-lucide="x" class="w-5 h-5 mr-2"></i>
@@ -467,51 +421,51 @@ font-size: 0.75rem;
     </div>
   </div>
 </section>
-
-<!-- Formulaire d'ajout/modification site -->
 <form id="site-form" class="card p-6 mb-8 hidden">
   <h2 id="form-title" class="text-xl font-semibold text-gray-800 mb-4 flex items-center">
     <i data-lucide="plus-circle" class="text-blue-500 mr-2"></i>
     <span id="form-title-text">Ajouter un nouveau site</span>
   </h2>
-
   <input type="hidden" id="site-id" />
-
   <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
     <div>
       <label for="name" class="block text-sm font-medium text-gray-700 mb-1">Nom du réseau</label>
       <input
         type="text"
         id="name"
+        name="name"
         placeholder="Ex: Serveur Principal"
         required
         class="w-full p-3 form-input"
       />
     </div>
-
     <div>
       <label for="url_or_ip" class="block text-sm font-medium text-gray-700 mb-1">Adresse IP/URL</label>
       <input
         type="text"
         id="url_or_ip"
+        name="url_or_ip"
         placeholder="Ex: 192.168.1.1"
         required
         class="w-full p-3 form-input"
       />
     </div>
-
-    <div>
-      <label for="equipment_type" class="block text-sm font-medium text-gray-700 mb-1">Type d'équipement</label>
-      <select id="equipment_type" required class="w-full p-3 form-input">
-        <option value="">Sélectionnez un type</option>
-        <option value="serveur">Serveur</option>
-        <option value="réseau">Réseau</option>
-        <option value="switch">Switch</option>
-        <option value="routeur">Routeur</option>
-      </select>
-    </div>
+   <div>
+  <label for="equipment_type" class="block text-sm font-medium text-gray-700 mb-1">Type d'équipement</label>
+  <select id="equipment_type" name="equipment_type" required class="w-full p-3 form-input" onchange="toggleCustomType()">
+    <option value="">Sélectionnez un type</option>
+    <option value="serveur">Serveur</option>
+    <option value="réseau">Réseau</option>
+    <option value="switch">Switch</option>
+    <option value="routeur">Routeur</option>
+    <option value="other">Autre</option>
+  </select>
+  <div id="custom_type_container" class="mt-2 hidden">
+    <label for="custom_equipment_type" class="block text-sm font-medium text-gray-700 mb-1">Précisez le type</label>
+    <input type="text" id="custom_equipment_type" name="custom_equipment_type" class="w-full p-3 form-input">
   </div>
-
+</div>
+  </div>
   <div class="flex justify-end gap-3">
     <button type="button" id="cancel-btn" class="btn-secondary px-4 py-2 rounded-md flex items-center">
       <i data-lucide="x" class="w-5 h-5 mr-2"></i>
@@ -523,45 +477,31 @@ font-size: 0.75rem;
     </button>
   </div>
 </form>
-
-<!-- Détails du site -->
 <div id="site-details" class="card mb-6">
-  <!-- Contenu chargé dynamiquement -->
 </div>
-
 </div>     
-      
   <script>
-    // Configuration globale
     const API_BASE_URL = "http://localhost:5000/api";
     const SITES_URL = `${API_BASE_URL}/sites`;
     const ARCHITECTURES_URL = `${API_BASE_URL}/architectures`;
-    
-    // Variables d'état
     let sites = [];
     let architectures = [];
     let connections = [];
     let currentView = 'simple';
     let network = null;
     let isEditMode = false;
-    
-    // Variables pour la création d'architecture
     let currentStep = 1;
     let selectedEquipment = null;
     let tempConnections = [];
-
-    // Initialisation
     document.addEventListener('DOMContentLoaded', () => {
       initApp();
     });
-
     async function initApp() {
       await loadMenu();
       setupEventListeners();
       await fetchSites();
       
     }
-
     async function loadMenu() {
       try {
         const response = await fetch("/static/menu.html");
@@ -573,80 +513,49 @@ font-size: 0.75rem;
         showAlert("Impossible de charger le menu", "error");
       }
     }
-
     function setupEventListeners() {
-      // Boutons de vue
       document.getElementById('simple-view-btn').addEventListener('click', () => toggleView('simple'));
       document.getElementById('architecture-view-btn').addEventListener('click', () => toggleView('architecture'));
-      
-      // Bouton d'ajout
       document.getElementById('add-network-btn').addEventListener('click', () => {
         openSiteForm();
       });
-      
-      // Bouton d'annulation
       document.getElementById('cancel-btn').addEventListener('click', () => {
         closeSiteForm();
       });
-      
-      // Formulaire
       document.getElementById('site-form').addEventListener('submit', handleFormSubmit);
-      
-      // Recherche
       document.getElementById('search').addEventListener('input', (e) => {
         renderSiteList(e.target.value);
       });
-      
-      // Bouton pour créer une architecture
       document.getElementById('create-archi-btn').addEventListener('click', () => {
         document.getElementById('archi-form-container').classList.remove('hidden');
         resetArchitectureForm();
         loadEquipmentOptions();
       });
-      
-      // Bouton d'annulation architecture
       document.getElementById('cancel-archi-btn').addEventListener('click', () => {
         document.getElementById('archi-form-container').classList.add('hidden');
         resetArchitectureForm();
       });
-      
-      // Boutons suivant/précédent
       document.getElementById('next-step-btn').addEventListener('click', goToNextStep);
       document.getElementById('prev-step-btn').addEventListener('click', goToPrevStep);
-      
-      // Filtre des équipements
       document.getElementById('equipment-filter').addEventListener('change', function() {
         loadEquipmentOptions(this.value);
       });
     }
-
    function toggleView(view) {
   currentView = view;
-  
-  // Masquer/afficher les vues
   document.getElementById('simple-view').classList.toggle('hidden', view !== 'simple');
   document.getElementById('architecture-view').classList.toggle('hidden', view !== 'architecture');
-  
-  // Mettre à jour les boutons actifs
   document.getElementById('simple-view-btn').classList.toggle('active', view === 'simple');
   document.getElementById('architecture-view-btn').classList.toggle('active', view === 'architecture');
-  
-  // Charger les données appropriées
   if (view === 'simple') {
     fetchSites();
   } if (view === 'architecture') {
     loadAndDisplayArchitectures();
   }
 }
-
-// Dans la fonction setupEventListeners()
-
-
 document.getElementById('search-architecture').addEventListener('input', (e) => {
   filterArchitectures(e.target.value);
 });
-
-// Nouvelle fonction pour filtrer les architectures
 function filterArchitectures(filterText) {
   const filtered = architectures.filter(arch => 
     arch.name.toLowerCase().includes(filterText.toLowerCase()) || 
@@ -654,18 +563,12 @@ function filterArchitectures(filterText) {
   );
   displayArchitectures(filtered);
 }
-
-
 async function loadAndDisplayArchitectures() {
   const container = document.getElementById('architectures-container');
   if (!container) return;
-
   try {
-    // Afficher le loader
     toggleLoader(true);
-    
     const response = await fetch(`${API_BASE_URL}/architectures-with-details`);
-    
     if (!response.ok) {
       const errorData = await response.json().catch(() => null);
       throw new Error(
@@ -674,15 +577,11 @@ async function loadAndDisplayArchitectures() {
         `Erreur HTTP: ${response.status}`
       );
     }
-    
     const { status, data: architectures, message } = await response.json();
-    
     if (status !== 'success') {
       throw new Error(message || 'Réponse invalide du serveur');
     }
-
     displayArchitectures(architectures);
-    
   } catch (error) {
     console.error("Erreur complète:", error);
     container.innerHTML = createErrorState(error);
@@ -691,21 +590,17 @@ async function loadAndDisplayArchitectures() {
     lucide.createIcons();
   }
 }
-
 function toggleLoader(show) {
   const loader = document.getElementById('architecture-loader');
   if (loader) loader.style.display = show ? 'flex' : 'none';
 }
-
 function showTechnicalDetails(error) {
   const details = `
     Erreur complète : ${error}
     URL : ${API_BASE_URL}/architectures-with-details
     Heure : ${new Date().toLocaleString()}
   `;
-  
   alert(details);
-  // Ou affichez dans une modal plus élégante
 }
 function createEmptyState() {
   return `
@@ -720,7 +615,6 @@ function createEmptyState() {
     </div>
   `;
 }
-
 function createErrorState(error) {
   return `
     <div class="text-center p-8">
@@ -743,9 +637,7 @@ function createErrorState(error) {
     </div>
   `;
 }
-
 function createArchitectureCard(architecture) {  if (!architecture) return null;
-  
   const card = document.createElement('div');
   card.className = 'architecture-card';
   card.innerHTML =  `
@@ -773,12 +665,10 @@ function createArchitectureCard(architecture) {  if (!architecture) return null;
   `;
   return card;
 }
-
 function renderConnectionsList(connections) {
   if (connections.length === 0) {
     return `<p class="text-gray-400 text-sm">Aucune connexion définie</p>`;
   }
-
   return `
     <ul class="space-y-3">
       ${connections.map(conn => `
@@ -811,16 +701,12 @@ function renderConnectionsList(connections) {
         showAlert("Impossible de charger les sites", "error");
       }
     }
-
   fetchArchitectures()
-
-
     function renderSiteList(filter = '') {
       const filteredSites = filter ? sites.filter(site => 
         site.name.toLowerCase().includes(filter.toLowerCase()) || 
         site.url_or_ip.toLowerCase().includes(filter.toLowerCase())
       ) : sites;
-
       const list = document.getElementById('site-list');
       list.innerHTML = filteredSites.map(site => `
         <div class="card p-4 hover:border-blue-300 border border-gray-200">
@@ -865,13 +751,9 @@ function renderConnectionsList(connections) {
       `).join('');
       lucide.createIcons();
     }
-
-    
-
     async function fetchArchitectures() {
   try {
         const API_BASE_URL = "http://localhost:5000/api";
-
     const response = await fetch(`${API_BASE_URL}/architectures-with-details`);
     if (!response.ok) {
       throw new Error(`HTTP error: ${response.status}`);
@@ -886,9 +768,6 @@ function renderConnectionsList(connections) {
     throw new Error("Erreur réseau");
   }
 }
-
-    
-    // Fonctions pour la gestion des sites
     function getEquipmentClass(type) {
       const types = {
         'serveur': 'server',
@@ -898,14 +777,11 @@ function renderConnectionsList(connections) {
       };
       return types[type] || 'server';
     }
-
     function openSiteForm(site = null) {
       const form = document.getElementById('site-form');
       const title = document.getElementById('form-title-text');
       const submitBtn = document.getElementById('submit-btn-text');
-      
       if (site) {
-        // Mode édition
         isEditMode = true;
         title.textContent = "Modifier le site";
         submitBtn.textContent = "Mettre à jour";
@@ -914,68 +790,92 @@ function renderConnectionsList(connections) {
         document.getElementById('url_or_ip').value = site.url_or_ip;
         document.getElementById('equipment_type').value = site.equipment_type;
       } else {
-        // Mode ajout
         isEditMode = false;
         title.textContent = "Ajouter un nouveau site";
         submitBtn.textContent = "Enregistrer";
         document.getElementById('site-id').value = '';
       }
-      
       form.classList.remove('hidden');
     }
-
     function closeSiteForm() {
       document.getElementById('site-form').reset();
       document.getElementById('site-form').classList.add('hidden');
       isEditMode = false;
     }
-
-    async function handleFormSubmit(e) {
-      e.preventDefault();
-      
-      const formData = {
-        name: document.getElementById('name').value,
-        url_or_ip: document.getElementById('url_or_ip').value,
-        equipment_type: document.getElementById('equipment_type').value
-      };
-      
-      const siteId = document.getElementById('site-id').value;
-      const url = isEditMode ? `${SITES_URL}/${siteId}` : SITES_URL;
-      const method = isEditMode ? 'PUT' : 'POST';
-
-      try {
-        const response = await fetch(url, {
-          method,
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(formData)
-        });
-
-        if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.error || "Erreur lors de l'opération");
-        }
-
-        closeSiteForm();
-        await fetchSites();
-        showAlert(`Site ${isEditMode ? 'modifié' : 'ajouté'} avec succès`, "success");
-        
-      } catch (error) {
-        console.error("Erreur:", error);
-        showAlert(error.message, "error");
+   function toggleCustomType() {
+      const select = document.getElementById('equipment_type');
+      const container = document.getElementById('custom_type_container');
+      const customInput = document.getElementById('custom_equipment_type');
+      if (select.value === 'other') {
+        container.classList.remove('hidden');
+        customInput.required = true;
+      } else {
+        container.classList.add('hidden');
+        customInput.required = false;
       }
     }
-
+   async function handleFormSubmit(e) {
+  e.preventDefault();
+  const equipmentTypeSelect = document.getElementById('equipment_type');
+  const customTypeInput = document.getElementById('custom_equipment_type');
+  const equipmentType = equipmentTypeSelect.value === 'other' 
+    ? customTypeInput.value 
+    : equipmentTypeSelect.value;
+  const formData = {
+    name: document.getElementById('name').value,
+    url_or_ip: document.getElementById('url_or_ip').value,
+    equipment_type: equipmentType
+  };
+  if (equipmentTypeSelect.value === 'other' && !customTypeInput.value.trim()) {
+    showAlert("Veuillez préciser le type d'équipement", "error");
+    customTypeInput.focus();
+    return;
+  }
+  const siteId = document.getElementById('site-id').value;
+  const url = isEditMode ? `${SITES_URL}/${siteId}` : SITES_URL;
+  const method = isEditMode ? 'PUT' : 'POST';
+  try {
+    const response = await fetch(url, {
+      method,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(formData)
+    });
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || "Erreur lors de l'opération");
+    }
+    closeSiteForm();
+    await fetchSites();
+    showAlert(`Site ${isEditMode ? 'modifié' : 'ajouté'} avec succès`, "success");
+    
+  } catch (error) {
+    console.error("Erreur:", error);
+    showAlert(error.message, "error");
+  }
+}
+function fillSiteForm(site) {
+  document.getElementById('site-id').value = site.id;
+  document.getElementById('name').value = site.name;
+  document.getElementById('url_or_ip').value = site.url_or_ip;
+  const predefinedTypes = ['serveur', 'réseau', 'switch', 'routeur'];
+  if (predefinedTypes.includes(site.equipment_type)) {
+    document.getElementById('equipment_type').value = site.equipment_type;
+  } else {
+    document.getElementById('equipment_type').value = 'other';
+    document.getElementById('custom_equipment_type').value = site.equipment_type;
+    document.getElementById('custom_type_container').classList.remove('hidden');
+  }
+  
+}
     function editSite(id) {
       const site = sites.find(s => s.id == id);
       if (site) {
         openSiteForm(site);
       }
     }
-
     function showSiteDetails(id) {
       const site = sites.find(s => s.id == id);
       if (!site) return;
-
       const details = document.getElementById('site-details');
       details.innerHTML = `
         <div class="flex justify-between items-start mb-4">
@@ -984,7 +884,6 @@ function renderConnectionsList(connections) {
             ${site.equipment_type}
           </span>
         </div>
-        
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
           <div class="space-y-3">
             <div class="flex items-center">
@@ -994,7 +893,6 @@ function renderConnectionsList(connections) {
                 <p class="font-medium">${site.url_or_ip}</p>
               </div>
             </div>
-            
             <div class="flex items-center">
               <i data-lucide="${site.last_status === 'En ligne' ? 'check-circle' : 'x-circle'}" 
                  class="${site.last_status === 'En ligne' ? 'text-green-500' : 'text-red-500'} mr-3 w-5 h-5"></i>
@@ -1006,7 +904,6 @@ function renderConnectionsList(connections) {
               </div>
             </div>
           </div>
-          
           <div class="space-y-3">
             <div class="flex items-center">
               <i data-lucide="clock" class="text-gray-500 mr-3 w-5 h-5"></i>
@@ -1015,7 +912,6 @@ function renderConnectionsList(connections) {
                 <p class="font-medium">${site.last_checked || 'N/A'}</p>
               </div>
             </div>
-            
             <div class="flex items-center">
               <i data-lucide="alert-circle" class="text-gray-500 mr-3 w-5 h-5"></i>
               <div>
@@ -1025,7 +921,6 @@ function renderConnectionsList(connections) {
             </div>
           </div>
         </div>
-        
         <div class="flex justify-end gap-3">
           <button onclick="editSite(${site.id})" 
                   class="btn-primary px-4 py-2 rounded-md flex items-center">
@@ -1042,24 +937,19 @@ function renderConnectionsList(connections) {
       details.classList.add('show');
       lucide.createIcons();
     }
-
     function closeDetails() {
       document.getElementById('site-details').classList.remove('show');
     }
-
     async function deleteSite(id) {
       if (!confirm('Êtes-vous sûr de vouloir supprimer ce site ?')) return;
-      
       try {
         const response = await fetch(`${SITES_URL}/${id}`, { 
           method: 'DELETE' 
         });
-
         if (!response.ok) {
           const errorData = await response.json();
           throw new Error(errorData.error || "Erreur lors de la suppression");
         }
-
         await fetchSites();
         closeDetails();
         showAlert("Site supprimé avec succès", "success");
@@ -1068,11 +958,9 @@ function renderConnectionsList(connections) {
         showAlert(error.message, "error");
       }
     }
-
     function getNodeColor(site) {
       if (site.last_status === 'En ligne') return '#4CAF50';
       if (site.last_status === 'Hors ligne') return '#F44336';
-      
       switch(site.equipment_type) {
         case 'serveur': return '#2196F3';
         case 'switch': return '#FF9800';
@@ -1080,8 +968,6 @@ function renderConnectionsList(connections) {
         default: return '#607D8B';
       }
     }
-
-    // Fonctions pour la création d'architecture
     function resetArchitectureForm() {
       currentStep = 1;
       selectedEquipment = null;
@@ -1094,15 +980,12 @@ function renderConnectionsList(connections) {
       document.getElementById('archi-name').value = '';
       document.getElementById('archi-description').value = '';
     }
-
     function loadEquipmentOptions(filterType = '') {
       const container = document.getElementById('equipment-options');
       container.innerHTML = '';
-      
       const filteredEquipment = filterType 
         ? sites.filter(s => s.equipment_type === filterType)
         : sites;
-      
       if (filteredEquipment.length === 0) {
         container.innerHTML = `
           <div class="col-span-2 text-center py-4 text-gray-500">
@@ -1111,7 +994,6 @@ function renderConnectionsList(connections) {
         `;
         return;
       }
-      
       filteredEquipment.forEach(equipment => {
         container.innerHTML += `
           <div class="equipment-option" data-id="${equipment.id}">
@@ -1129,28 +1011,19 @@ function renderConnectionsList(connections) {
           </div>
         `;
       });
-      
-      // Ajouter les écouteurs d'événements
       document.querySelectorAll('.equipment-option').forEach(option => {
         option.addEventListener('click', function() {
           selectEquipment(parseInt(this.dataset.id));
         });
       });
-      
       lucide.createIcons();
     }
-
     function selectEquipment(siteId) {
       selectedEquipment = sites.find(s => s.id == siteId);
-      
-      // Mettre en surbrillance la sélection
       document.querySelectorAll('.equipment-option').forEach(option => {
         option.querySelector('.card').classList.remove('border-blue-500', 'border-2');
       });
-      
       event.currentTarget.querySelector('.card').classList.add('border-blue-500', 'border-2');
-      
-      // Mettre à jour l'affichage de l'équipement sélectionné
       const selectedDisplay = document.getElementById('selected-equipment-display');
       selectedDisplay.innerHTML = `
         <div class="flex items-center">
@@ -1164,17 +1037,13 @@ function renderConnectionsList(connections) {
       `;
       lucide.createIcons();
     }
-
     function goToNextStep() {
       if (currentStep === 1) {
-        // Valider l'étape 1
         const archiName = document.getElementById('archi-name').value;
         if (!archiName || !selectedEquipment) {
           showAlert("Veuillez remplir tous les champs et sélectionner un équipement", "error");
           return;
         }
-        
-        // Préparer l'étape 2
         prepareStep2();
         currentStep = 2;
         document.getElementById('current-step').textContent = currentStep;
@@ -1183,11 +1052,9 @@ function renderConnectionsList(connections) {
         document.getElementById('prev-step-btn').classList.remove('hidden');
         document.getElementById('next-step-btn').textContent = 'Terminer';
       } else {
-        // Terminer et sauvegarder
         saveArchitecture();
       }
     }
-
     function goToPrevStep() {
       if (currentStep === 2) {
         currentStep = 1;
@@ -1198,18 +1065,14 @@ function renderConnectionsList(connections) {
         document.getElementById('next-step-btn').textContent = 'Suivant';
       }
     }
-
     function prepareStep2() {
       const equipmentList = document.getElementById('equipment-list');
       equipmentList.innerHTML = '';
-      
-      // Filtrer les équipements disponibles (exclure celui sélectionné et ceux déjà connectés)
       const connectedIds = tempConnections.map(c => c.to.id);
       const availableEquipment = sites.filter(site => 
         site.id != selectedEquipment.id && 
         !connectedIds.includes(site.id)
       );
-
       if (availableEquipment.length === 0) {
         equipmentList.innerHTML = `
           <div class="col-span-2 text-center py-4 text-gray-500">
@@ -1218,7 +1081,6 @@ function renderConnectionsList(connections) {
         `;
         return;
       }
-
       availableEquipment.forEach(equipment => {
         equipmentList.innerHTML += `
           <div class="equipment-to-connect" data-id="${equipment.id}">
@@ -1238,8 +1100,6 @@ function renderConnectionsList(connections) {
           </div>
         `;
       });
-
-      // Ajouter les écouteurs d'événements
       document.querySelectorAll('.connect-btn').forEach(btn => {
         btn.addEventListener('click', function(e) {
           e.stopPropagation();
@@ -1248,34 +1108,27 @@ function renderConnectionsList(connections) {
           addConnection(selectedEquipment, equipment);
         });
       });
-
       lucide.createIcons();
     }
-
     function addConnection(fromEquipment, toEquipment) {
-      // Vérifier si la connexion existe déjà
       const exists = tempConnections.some(conn => 
         (conn.from.id === fromEquipment.id && conn.to.id === toEquipment.id) || 
         (conn.from.id === toEquipment.id && conn.to.id === fromEquipment.id)
       );
-      
       if (!exists) {
         tempConnections.push({
           from: fromEquipment,
           to: toEquipment,
           type: 'standard',
-          created_by: 'Utilisateur' // À remplacer par l'utilisateur réel
+          created_by: 'Utilisateur'
         });
-        
         updateConnectionsDisplay();
-        prepareStep2(); // Recharger la liste des équipements disponibles
+        prepareStep2();
       }
     }
-
     function updateConnectionsDisplay() {
       const connectionsList = document.getElementById('connections-list');
       connectionsList.innerHTML = '';
-      
       tempConnections.forEach(conn => {
         connectionsList.innerHTML += `
           <div class="flex items-center justify-between p-3 bg-gray-50 rounded">
@@ -1299,10 +1152,8 @@ function renderConnectionsList(connections) {
           </div>
         `;
       });
-      
       lucide.createIcons();
     }
-
     function removeConnection(fromId, toId) {
       tempConnections = tempConnections.filter(conn => 
         !(conn.from.id === fromId && conn.to.id === toId)
@@ -1310,13 +1161,10 @@ function renderConnectionsList(connections) {
       updateConnectionsDisplay();
       prepareStep2();
     }
-
- // Sauvegarder l'architecture
 async function saveArchitecture() {
   try {
     console.log("Tentative d'envoi des données...");
         const API_BASE_URL = "http://localhost:5000/api";
-
     const response = await fetch(`${API_BASE_URL}/architectures`, {
       method: 'POST',
       headers: {
@@ -1332,14 +1180,12 @@ async function saveArchitecture() {
           type: conn.type || 'standard'
         }))
       }),
-      credentials: 'same-origin' // Important pour les cookies/sessions
+      credentials: 'same-origin'
     });
-
     if (!response.ok) {
       const errorData = await response.json();
       throw new Error(errorData.message || "Erreur inconnue du serveur");
     }
-
     const result = await response.json();
     console.log("Réponse du serveur:", result);
     showAlert("Architecture enregistrée avec succès !", "success");
@@ -1347,16 +1193,12 @@ async function saveArchitecture() {
   } catch (error) {
     console.error("Erreur détaillée:", error);
     showAlert(`Échec de l'enregistrement: ${error.message}`, "error");
-    
-    // Envoyez l'erreur à votre système de suivi
     fetch('/api/log-error', {
       method: 'POST',
       body: JSON.stringify({ error: error.message })
     });
   }
 }
-
-// Fonction séparée pour le logging
 async function logError(error) {
   try {
     await fetch('/api/log-error', {
@@ -1369,20 +1211,15 @@ async function logError(error) {
   }
 }
     function editConnection(connectionId) {
-      // Implémentez la logique d'édition ici
       alert(`Modification de la connexion ${connectionId}`);
     }
-
     async function deleteConnection(connectionId) {
       if (!confirm("Supprimer cette connexion ?")) return;
-      
       try {
         const response = await fetch(`${ARCHITECTURES_URL}/connections/${connectionId}`, {
           method: 'DELETE'
         });
-        
         if (!response.ok) throw new Error("Erreur lors de la suppression");
-        
         showAlert("Connexion supprimée avec succès", "success");
         await fetchArchitectures();
       } catch (error) {
@@ -1390,13 +1227,10 @@ async function logError(error) {
         showAlert(error.message, "error");
       }
     }
-
 async function displayArchitectures(architectures) {
   const container = document.getElementById('architectures-container');
   if (!container) return;
-
   container.innerHTML = '';
-
   if (!architectures || architectures.length === 0) {
     container.innerHTML = `
       <div class="empty-state">
@@ -1413,11 +1247,9 @@ async function displayArchitectures(architectures) {
     lucide.createIcons();
     return;
   }
-
   for (const arch of architectures) {
     const archElement = document.createElement('div');
     archElement.className = 'architecture-card mb-6 p-4 border rounded-lg bg-white shadow-sm';
-
     archElement.innerHTML = `
       <div class="flex justify-between items-start mb-3">
         <h3 class="text-xl font-semibold">${arch.name}</h3>
@@ -1441,9 +1273,7 @@ async function displayArchitectures(architectures) {
         <div class="network-graph bg-gray-50 p-4 rounded" style="height: 500px" id="network-graph-${arch.id}"></div>
       </div>
     `;
-    
     container.appendChild(archElement);
-
     try {
       const monitoredSites = await fetchMonitoredSites(arch.id);
       renderNetworkDiagram(arch, monitoredSites, `network-graph-${arch.id}`);
@@ -1460,41 +1290,34 @@ function renderNetworkDiagram(architecture, monitoredSites, containerId) {
     console.warn(`Élément avec l'ID "${containerId}" introuvable dans le DOM.`);
     return;
   }
-
   container.innerHTML = '';
-  container.style.position = 'relative'; // Important pour le positionnement absolu des badges
-
+  container.style.position = 'relative';
   if (!architecture?.connections?.length) {
     container.innerHTML = "<p>Aucune connexion réseau à afficher</p>";
     return;
   }
-
   const nodes = new vis.DataSet();
   const edges = new vis.DataSet();
   const nodeMap = {};
-
   const findStatus = (nodeId) => {
     const site = monitoredSites.find(site => site.id === nodeId);
     return site ? site.last_status : null;
   };
-
   const getNodeIcon = (type) => {
     const t = (type || '').toLowerCase();
     if (t.includes("routeur")) return "static/image/cloud.svg";
     if (t.includes("switch")) return "static/image/workgroup-switch.svg";
     if (t.includes("serveur")) return "static/image/file-server.svg";
     if (t.includes("réseau")) return "static/image/pc.svg";
-    return "static/image/default.svg";
+    return "static/image/ring-network.svg";
   };
-
   const getNodeColorByStatus = (status) => {
-    if (!status) return '#f97316'; // orange
+    if (!status) return '#f97316';
     const s = status.toLowerCase();
-    if (s === 'en ligne') return '#22c55e'; // vert
-    if (s === 'hors ligne') return '#ef4444'; // rouge
-    return '#f97316'; // orange
+    if (s === 'en ligne') return '#22c55e';
+    if (s === 'hors ligne') return '#ef4444';
+    return '#f97316';
   };
-
   const getStatusLabel = (status) => {
     if (!status) return 'État inconnu';
     const s = status.toLowerCase();
@@ -1502,16 +1325,12 @@ function renderNetworkDiagram(architecture, monitoredSites, containerId) {
     if (s === 'hors ligne') return 'Hors ligne';
     return 'État inconnu';
   };
-
-  // Création des nœuds et connexions
   for (const conn of architecture.connections) {
     if (!conn.source || !conn.target) continue;
-
     for (const endpoint of [conn.source, conn.target]) {
       if (!nodeMap[endpoint.id]) {
         const status = findStatus(endpoint.id);
         const statusColor = getNodeColorByStatus(status);
-        
         nodes.add({
           id: endpoint.id,
           label: endpoint.name,
@@ -1540,14 +1359,12 @@ function renderNetworkDiagram(architecture, monitoredSites, containerId) {
             useBorderWithImage: false
           }
         });
-        
         nodeMap[endpoint.id] = { 
           statusColor: statusColor,
-          badge: null // Référence au badge DOM
+          badge: null
         };
       }
     }
-
     edges.add({
       from: conn.source.id,
       to: conn.target.id,
@@ -1557,7 +1374,6 @@ function renderNetworkDiagram(architecture, monitoredSites, containerId) {
       color: { color: '#1d4ed8', inherit: false }
     });
   }
-
   const options = {
     nodes: {
       font: { 
@@ -1586,30 +1402,20 @@ function renderNetworkDiagram(architecture, monitoredSites, containerId) {
       }
     }
   };
-
   try {
     const network = new vis.Network(container, { nodes, edges }, options);
-    
-    // Fonction pour créer/mettre à jour les badges de statut
     const updateStatusBadges = () => {
       const canvasBounds = container.getBoundingClientRect();
       const transform = network.getViewPosition();
       const scale = network.getScale();
-      
       nodes.getIds().forEach(nodeId => {
         const nodePos = network.getPositions([nodeId])[nodeId];
         const nodeData = nodeMap[nodeId];
-        
         if (nodePos) {
-          // Convertir les coordonnées du nœud en coordonnées DOM
           const x = (nodePos.x - transform.x) * scale + canvasBounds.width/2;
           const y = (nodePos.y - transform.y) * scale + canvasBounds.height/2;
-          
-          // Position du badge (devant le nœud, légèrement à gauche)
           const badgeX = x - 20;
           const badgeY = y;
-          
-          // Créer ou mettre à jour le badge
           let badge = nodeData.badge;
           if (!badge) {
             badge = document.createElement('div');
@@ -1629,88 +1435,67 @@ function renderNetworkDiagram(architecture, monitoredSites, containerId) {
             container.appendChild(badge);
             nodeData.badge = badge;
           }
-          
           badge.style.left = `${badgeX}px`;
           badge.style.top = `${badgeY}px`;
           badge.style.backgroundColor = nodeData.statusColor;
         }
       });
     };
-
-    // Initialisation des badges
     network.once("afterDrawing", () => {
       updateStatusBadges();
     });
-
-    // Mise à jour lors des interactions
     network.on("dragEnd", updateStatusBadges);
     network.on("zoom", updateStatusBadges);
-    
-    // Redimensionnement de la fenêtre
     window.addEventListener('resize', updateStatusBadges);
-
   } catch (e) {
     console.error("Erreur lors de la création du réseau :", e);
     container.innerHTML = `<p class="text-red-500">Erreur : ${e.message}</p>`;
   }
 }
-
 async function fetchMonitoredSites(architectureId) {
   try {
     const response = await fetch(`http://localhost:5000/api/monitored-sites?architectureId=${architectureId}`);
-
     if (!response.ok) {
       throw new Error('Erreur HTTP ' + response.status);
     }
-
     const data = await response.json();
     return data;
   } catch (error) {
     console.error("Erreur lors de la récupération des sites monitorés :", error);
-    return []; // retourne tableau vide si erreur
+    return [];
   }
 }
-
-
 function deleteArchitecture(id) {
   if (!confirm("Voulez-vous vraiment supprimer cette architecture ?")) {
-    return; // Annule si l'utilisateur clique sur "Annuler"
+    return;
   }
-
-  fetch(`/api/architectures/${id}`, { // URL à adapter selon ton backend
-    method: 'DELETE', // méthode HTTP pour supprimer
+  fetch(`/api/architectures/${id}`, {
+    method: 'DELETE',
     headers: {
       'Content-Type': 'application/json',
-      // Si tu as besoin d'un token d'authentification, ajoute-le ici :
-      // 'Authorization': 'Bearer ton_token_ici'
     }
   })
   .then(response => {
     if (!response.ok) {
       throw new Error("Erreur lors de la suppression");
     }
-    return response.json(); // ou response.text() si besoin
+    return response.json();
   })
   .then(data => {
     alert("Architecture supprimée avec succès !");
-    // Optionnel : retirer l'élément du DOM, recharger la page, etc.
-    location.reload(); // recharge la page pour voir les changements
+    location.reload();
   })
   .catch(error => {
     alert("Erreur: " + error.message);
   });
 }
-
-// Fonction utilitaire
-
 document.getElementById('search-architecture').addEventListener('input', function () {
   const search = this.value;
-
   fetch(`/api/architectures?search=${encodeURIComponent(search)}`)
     .then(res => res.json())
     .then(data => {
       if (data.status === 'success') {
-        displayArchitectures(data.data); // Réutilise ton affichage normal
+        displayArchitectures(data.data);
       } else {
         const container = document.getElementById('architectures-container');
         container.innerHTML = `<p class="text-red-500">Erreur: ${data.message}</p>`;
@@ -1721,19 +1506,15 @@ document.getElementById('search-architecture').addEventListener('input', functio
       container.innerHTML = `<p class="text-red-500">Erreur réseau: ${err.message}</p>`;
     });
 });
-
-
 function getNagiosStatusColor(status) {
-  if (status === 'En ligne') return '#4CAF50'; // vert
-  if (status === 'Hors ligne') return '#F44336'; // rouge
-  return '#FF9800'; // orange pour inconnu/avertissement
+  if (status === 'En ligne') return '#4CAF50';
+  if (status === 'Hors ligne') return '#F44336';
+  return '#FF9800';
 }
-// Fonction helper pour afficher les connexions
 function renderConnections(connections) {
   if (connections.length === 0) {
     return `<p class="text-gray-400 text-sm">Aucune connexion définie</p>`;
   }
-
   return `
     <ul class="space-y-3">
       ${connections.map(conn => `
@@ -1765,8 +1546,6 @@ function renderConnections(connections) {
     </ul>
   `;
 }
-
-// Fonctions utilitaires
 function getEquipmentIcon(type) {
   const icons = {
     'serveur': 'server',
@@ -1776,7 +1555,6 @@ function getEquipmentIcon(type) {
   };
   return icons[type.toLowerCase()] || 'server';
 }
-
 function getEquipmentColor(type) {
   const colors = {
     'serveur': 'text-blue-500',
@@ -1786,7 +1564,6 @@ function getEquipmentColor(type) {
   };
   return colors[type.toLowerCase()] || 'text-gray-500';
 }
-
 function getConnectionBadgeClass(type) {
   const classes = {
     'standard': 'bg-blue-100 text-blue-800',
@@ -1804,17 +1581,12 @@ function getConnectionBadgeClass(type) {
            class="w-5 h-5 mr-2"></i>
         ${message}
       `;
-      
       document.body.appendChild(alertDiv);
       lucide.createIcons();
-      
-      // Supprimer l'alerte après 5 secondes
       setTimeout(() => {
         alertDiv.remove();
       }, 5000);
     }
-
-   
   </script>
   <script>
   const nodes = new vis.DataSet([
@@ -1824,7 +1596,7 @@ function getConnectionBadgeClass(type) {
       image: "https://img.icons8.com/fluency/48/router.png",
       shape: "image",
       size: 40,
-      font: { size: 16, color: "#000", vadjust: 50 } // label en dessous
+      font: { size: 16, color: "#000", vadjust: 50 }
     },
     {
       id: 2,
@@ -1859,21 +1631,17 @@ function getConnectionBadgeClass(type) {
       font: { size: 16, color: "#000", vadjust: 50 }
     }
   ]);
-
   const edges = new vis.DataSet([
-    { from: 1, to: 2, arrows: '' }, // pas de flèches
+    { from: 1, to: 2, arrows: '' },
     { from: 2, to: 3, arrows: '' },
     { from: 2, to: 4, arrows: '' },
     { from: 1, to: 5, arrows: '' }
   ]);
-
   const container = document.getElementById("network");
-
   const data = {
     nodes: nodes,
     edges: edges
   };
-
   const options = {
     layout: {
       hierarchical: false
@@ -1898,15 +1666,12 @@ function getConnectionBadgeClass(type) {
       shape: "image"
     }
   };
-
   const demoNetwork = new vis.Network(container, data, options);
 </script>
-
 <script src="https://cdn.jsdelivr.net/npm/lucide@0.0.0/dist/lucide.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const menuDiv = document.getElementById("menu");
-            
             fetch("/static/menu.html")
                 .then(response => response.text())
                 .then(data => {
@@ -1920,7 +1685,6 @@ function getConnectionBadgeClass(type) {
                 .catch(error => {
                     console.error('Erreur lors du chargement du menu :', error);
                 });
-
             function attachEventListenersToNav(navSelector) {
                 const nav = document.querySelector(navSelector);
                 if (nav) {
@@ -1932,7 +1696,6 @@ function getConnectionBadgeClass(type) {
                     });
                 }
             }
-
             function activateNavItem(item, navSelector) {
                 const activeItem = document.querySelector(`${navSelector} .nav-item.active, ${navSelector} .mobile-nav-item.active`);
                 if (activeItem && activeItem !== item) {
@@ -1941,15 +1704,12 @@ function getConnectionBadgeClass(type) {
                 item.classList.add('active');
                 localStorage.setItem('activeNavLink', item.dataset.navlink);
             }
-
             function checkAndApplyActiveStateOnLoad() {
                 const storedActiveNavLink = localStorage.getItem('activeNavLink');
                 const desktopNavItems = document.querySelectorAll('.desktop-nav .nav-item');
                 const mobileNavItems = document.querySelectorAll('.mobile-nav .mobile-nav-item');
                 const currentPage = window.location.pathname;
-
                 const allNavItems = [...desktopNavItems, ...mobileNavItems]; 
-
                 if (storedActiveNavLink) {
                     allNavItems.forEach(item => {
                         if (item.dataset.navlink === storedActiveNavLink) {

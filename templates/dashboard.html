@@ -7,30 +7,22 @@
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
   <link rel="icon" type="image/png" href="/static/image/logo.jpeg">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
-
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@1.0.2"></script>
   <style>
-    
-
     .home-container {
-    
       margin: 30px auto;
       padding: 2rem;
       text-align: center;
     }
-
     h2  , i ,.pa{
       margin-bottom: 1rem;
       color: #e96036;
     }
-
     #pieChart {
-  margin: 20px auto;
+      margin: 20px auto;
     }
-
-
     .statistic-box {
       display: flex;
       justify-content: space-between;
@@ -41,43 +33,38 @@
         margin: 0;
         padding: 0;
         min-height: 100vh; 
-            background-color: #f8fafc;
-      
+        background-color: #f8fafc;
     }
     .statistic-box p {
       margin: 0;
     }
-   
     .statistic-box .stat-title  {
       font-weight: bold;
       font-size: 18px;
-    
       color: #e96036;
     }
     canvas[id^="hourlyChart"] {
-  height: 120px !important;
-  max-width: 100% !important;
-}
-.custom-hover-link:hover {
-    background-color: #EEF7FF;
-  }
-
-
-@keyframes fadeIn {
-    from {
-      opacity: 0;
-      transform: translateY(20px);
+      height: 120px !important;
+      max-width: 100% !important;
     }
-    to {
-      opacity: 1;
-      transform: translateY(0);
+    .custom-hover-link:hover {
+      background-color: #EEF7FF;
     }
-  }
-
-  .fade-in {
-    animation: fadeIn 1s ease-out;
-  }
-
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    .fade-in {
+      animation: fadeIn 1s ease-out;
+      color: rgb(244, 67, 54);
+      color: rgb(76, 175, 80);
+    }
   </style>
 </head>
 
@@ -87,16 +74,11 @@
       <i class="fas fa-chart-line mr-2"></i>
       Tableau de bord - Surveillance des Sites Web
     </h2>
-
-    
     <p class="text-center text-lg mb-4" id="pa">
       <i class="fas fa-clock  mr-2"></i>
       Dernière vérification : 
       <strong>{{ last_check or "Non disponible" }}</strong>
     </p>
-    
-
-    <!-- Statistiques globales -->
     <div class="flex flex-col md:flex-row justify-between bg-white p-4 rounded-lg shadow mb-6 gap-4">
       <div>
         <p class=" font-bold text-lg">
@@ -108,44 +90,31 @@
         <p class=" font-bold text-lg">
           <i class="fas fa-globe mr-2"></i> Nombre total de sites
         </p>
-                <p class="text-lg">{{ total_sites }}</p>
+        <p class="text-lg">{{ total_sites }}</p>
       </div>
     </div>
-
-    <!--  Diagramme circulaire -->
     <div class="flex justify-center mb-8">
       <canvas id="pieChart" width="400" height="200"></canvas>
     </div>
-
-    <!-- Liste des sites -->
     {% for site in sites_data %}
 <div class="bg-white rounded-lg p-4 mb-6">
   <div class="flex flex-col md:flex-row justify-between items-center mb-4">
-
-    <!-- Titre + IP dans une colonne -->
     <div class="flex flex-col text-center md:text-left">
       <h3 class="text-lg font-semibold">{{ site.name }}</h3>
       <h4 class="text-md text-black-600">{{ site.url_or_ip }}</h4>
     </div>
-
-    <!-- Statut -->
     <div class="flex gap-2 mt-2 md:mt-0">
       <span class="px-3 py-1 rounded-full text-white text-sm 
         {% if site.current_status == 'En ligne' %} bg-green-500 {% else %} bg-red-500 {% endif %}">
         {{ site.current_status }}
       </span>
     </div>
-
   </div>
-
   <a href="/manage-networks" class="block transition rounded-lg p-4 custom-hover-link">
     <div class="flex flex-col md:flex-row gap-4">
-      <!-- Graphique -->
       <div class="w-full md:w-2/3">
         <canvas id="hourlyChart{{ site.id }}" class="w-full h-32 mt-4"></canvas>
       </div>
-
-      <!-- Infos -->
       <div class="w-full md:w-1/3 flex flex-col justify-center gap-2 text-sm">
         <div class="flex justify-between">
           <span>En ligne :</span>
@@ -162,8 +131,6 @@
       </div>
     </div>
   </a>
-
-
     <script>
       new Chart(document.getElementById('hourlyChart{{ site.id }}'), {
         type: 'line',
@@ -182,8 +149,8 @@
        options: {
   responsive: true,
   animation: {
-    duration: 1000, // Durée de l’animation (en ms)
-    easing: 'easeInOutQuart' // Type d’animation fluide
+    duration: 1000,
+    easing: 'easeInOutQuart'
   },
   scales: {
     y: {
@@ -209,12 +176,9 @@
     }
   }
 }
-
       });
     </script>
     {% endfor %}
-
-    <!-- Script Pie Chart -->
     <script>
       const pieCtx = document.getElementById('pieChart').getContext('2d');
       new Chart(pieCtx, {
@@ -223,8 +187,8 @@
           labels: ['En ligne', 'Hors ligne'],
           datasets: [{
             data: [{{ total_online | default(0) }}, {{ total_offline | default(0) }}],
-            backgroundColor: ['rgba(102, 167, 102, 0.6)', 'rgba(216, 61,30, 0.6)'],
-            borderColor: ['rgba(102, 167, 102, 1)', 'rgba(216, 61,30, 1)'],
+            backgroundColor: ['rgb(76, 175, 80)', 'rgb(244, 67, 54)'],
+            borderColor: ['rgba(76, 175, 80, 1)', 'rgba(244, 67, 54, 1)'],
             borderWidth: 1
           }]
         },
@@ -235,17 +199,14 @@
     </script>
   </div>
   <div id="menu"></div>
-  
   <script>
      document.addEventListener('DOMContentLoaded', () => {
   const menuDiv = document.getElementById("menu");
-
   fetch("/static/menu.html")
     .then(response => response.text())
     .then(data => {
       if (menuDiv) {
         menuDiv.innerHTML = data;
-        // Maintenant que le menu est chargé, nous pouvons attacher les événements et vérifier l'état actif pour les deux menus.
         attachEventListenersToNav('.desktop-nav');
         attachEventListenersToNav('.mobile-nav');
         checkAndApplyActiveStateOnLoad();
@@ -254,7 +215,6 @@
     .catch(error => {
       console.error('Erreur lors du chargement du menu :', error);
     });
-
   function attachEventListenersToNav(navSelector) {
     const nav = document.querySelector(navSelector);
     if (nav) {
@@ -262,12 +222,10 @@
       navItems.forEach(item => {
         item.addEventListener('click', function(event) {
           activateNavItem(this, navSelector);
-          // La navigation vers la nouvelle page se fera normalement grâce au lien <a>
         });
       });
     }
   }
-
   function activateNavItem(item, navSelector) {
     const activeItem = document.querySelector(`${navSelector} .nav-item.active, ${navSelector} .mobile-nav-item.active`);
     if (activeItem && activeItem !== item) {
@@ -276,15 +234,12 @@
     item.classList.add('active');
     localStorage.setItem('activeNavLink', item.dataset.navlink);
   }
-
   function checkAndApplyActiveStateOnLoad() {
     const storedActiveNavLink = localStorage.getItem('activeNavLink');
     const desktopNavItems = document.querySelectorAll('.desktop-nav .nav-item');
     const mobileNavItems = document.querySelectorAll('.mobile-nav .mobile-nav-item');
     const currentPage = window.location.pathname;
-
-    const allNavItems = [...desktopNavItems, ...mobileNavItems]; // Combine les deux listes
-
+    const allNavItems = [...desktopNavItems, ...mobileNavItems];
     if (storedActiveNavLink) {
       allNavItems.forEach(item => {
         if (item.dataset.navlink === storedActiveNavLink) {
@@ -292,7 +247,6 @@
         }
       });
     } else {
-      // Logique pour activer un élément par défaut au chargement initial (si nécessaire)
       if (currentPage === '/' || currentPage === '/dashboard') {
         allNavItems.forEach(item => {
           if (item.dataset.navlink === 'accueil') {
@@ -312,8 +266,5 @@
   }
 });
   </script>
-  
-
- 
 </body>
 </html>
