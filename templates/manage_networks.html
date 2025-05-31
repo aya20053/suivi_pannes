@@ -1254,10 +1254,7 @@ async function displayArchitectures(architectures) {
       <div class="flex justify-between items-start mb-3">
         <h3 class="text-xl font-semibold">${arch.name}</h3>
         <div class="flex gap-2">
-          <button onclick="editArchitecture(${arch.id})" 
-                  class="p-1 text-blue-500 hover:bg-blue-50 rounded">
-            <i data-lucide="edit" class="w-4 h-4"></i>
-          </button>
+         
           <button onclick="deleteArchitecture(${arch.id})" 
                   class="p-1 text-red-500 hover:bg-red-50 rounded">
             <i data-lucide="trash-2" class="w-4 h-4"></i>
