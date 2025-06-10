@@ -14,7 +14,7 @@
             --primary-color: #205781;
             --secondary-color: #1c3d5a;
             --accent-color: #4f81bd;
-            --light-bg: #f0f7ff;
+            --light-bg: white;
             --card-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
         
@@ -139,52 +139,56 @@
     </div>
 </div>
         </div>
+<form id="add-form" class="form-container p-6 mb-8 hidden fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50 w-full max-w-2xl bg-white rounded-lg shadow-lg">
+    <h2 class="text-xl font-semibold text-gray-800 mb-4 flex items-center gap-2">
+        <i data-lucide="user-plus" class="text-primary-color" style="color: var(--primary-color);"></i>
+        Ajouter un nouveau utilisateur
+    </h2>
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+            <label for="username" class="block text-sm font-medium text-gray-700 mb-1">Nom</label>
+            <input type="text" id="username" placeholder="Nom" required class="input-field w-full">
+        </div>
+        <div>
+            <label for="prenom" class="block text-sm font-medium text-gray-700 mb-1">Prénom</label>
+            <input type="text" id="prenom" placeholder="Prénom" required class="input-field w-full">
+        </div>
+        <div>
+            <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+            <input type="email" id="email" placeholder="Email" required class="input-field w-full">
+        </div>
+        <div>
+            <label for="poste" class="block text-sm font-medium text-gray-700 mb-1">Poste</label>
+            <input type="text" id="poste" placeholder="Poste" required class="input-field w-full">
+        </div>
+        <div>
+            <label for="telephone" class="block text-sm font-medium text-gray-700 mb-1">Téléphone</label>
+            <input type="number" id="telephone" placeholder="Téléphone" required class="input-field w-full">
+        </div>
+        <div>
+            <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Mot de passe</label>
+            <input type="password" id="password" placeholder="Mot de passe" required class="input-field w-full">
+        </div>
+        <div>
+            <label for="role" class="block text-sm font-medium text-gray-700 mb-1">Rôle</label>
+            <select id="role" class="input-field w-full">
+                <option value="chef admin">Chef admin</option>
+                <option value="admin">Admin</option>
+            </select>
+        </div>
+    </div>
+    <div class="mt-6 flex justify-end gap-3">
+        <button type="button" onclick="cancelAdd()" class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 flex items-center gap-2">
+            <i data-lucide="x"></i>
+            <span>Annuler</span>
+        </button>
+        <button type="submit" class="btn-primary flex items-center gap-2">
+            <i data-lucide="save"></i>
+            <span>Ajouter</span>
+        </button>
+    </div>
+</form>
 
-        <form id="add-form" class="form-container p-6 mb-8 hidden">
-            <h2 class="text-xl font-semibold text-gray-800 mb-4 flex items-center gap-2">
-                <i data-lucide="user-plus" class="text-primary-color" style="color: var(--primary-color);"></i>
-                Ajouter un nouvel utilisateur
-            </h2>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                    <label for="username" class="block text-sm font-medium text-gray-700 mb-1">Nom</label>
-                    <input type="text" id="username" placeholder="Nom" required class="input-field w-full">
-                </div>
-                <div>
-                    <label for="prenom" class="block text-sm font-medium text-gray-700 mb-1">Prénom</label>
-                    <input type="text" id="prenom" placeholder="Prénom" required class="input-field w-full">
-                </div>
-                <div>
-                    <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                    <input type="email" id="email" placeholder="Email" required class="input-field w-full">
-                </div>
-                <div>
-                    <label for="poste" class="block text-sm font-medium text-gray-700 mb-1">Poste</label>
-                    <input type="text" id="poste" placeholder="Poste" required class="input-field w-full">
-                </div>
-                <div>
-                    <label for="telephone" class="block text-sm font-medium text-gray-700 mb-1">Téléphone</label>
-                    <input type="number" id="telephone" placeholder="Téléphone" required class="input-field w-full">
-                </div>
-                <div>
-                    <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Mot de passe</label>
-                    <input type="password" id="password" placeholder="Mot de passe" required class="input-field w-full">
-                </div>
-                <div>
-                    <label for="role" class="block text-sm font-medium text-gray-700 mb-1">Rôle</label>
-                    <select id="role" class="input-field w-full">
-                        <option value="chef admin">Chef admin</option>
-                        <option value="admin">Admin</option>
-                    </select>
-                </div>
-            </div>
-            <div class="mt-6 flex justify-end">
-                <button type="submit" class="btn-primary flex items-center gap-2">
-                    <i data-lucide="save"></i>
-                    <span>Ajouter</span>
-                </button>
-            </div>
-        </form>
 
         <div id="users-container" class="users-grid">
         </div>
@@ -274,6 +278,10 @@
             document.body.style.overflow = 'auto';
             document.getElementById("edit-form").classList.add("hidden");
         }
+        function cancelAdd() {
+    document.getElementById('add-form').classList.add('hidden');
+}
+
 
         const API_URL = "http://localhost:5000/api/users";
 

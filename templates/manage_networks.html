@@ -17,6 +17,7 @@
   <script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
   <link href="https://unpkg.com/vis-network/styles/vis-network.css" rel="stylesheet" />
   <style>
+
     .node-status-badge {
   transition: left 0.1s ease, top 0.1s ease;
 }
@@ -60,7 +61,7 @@
     :root {
       --primary-color: #e96036;
       --secondary-color: #cf4d25;
-      --accent-color: #3a9bd9;
+      --accent-color: #e96036;
       --success-color: #4CAF50;
       --danger-color: #F44336;
       --warning-color: #FF9800;
@@ -99,7 +100,7 @@
       background: white;
       border-radius: 0.5rem;
       box-shadow: var(--card-shadow);
-      transition: all 0.3s ease;
+      
     }
     
     .card:hover {
@@ -273,6 +274,12 @@ font-size: 0.75rem;
  #add-network-btn:hover ,#create-archi-btn:hover {
         background-color: #cf4d25;
     }
+body.modal-open {
+  overflow: hidden;
+  height: 100vh;
+}
+
+
   </style>
 </head>
 <body class="p-4 sm:p-8 bg-gray-50">
@@ -421,10 +428,10 @@ font-size: 0.75rem;
     </div>
   </div>
 </section>
-<form id="site-form" class="card p-6 mb-8 hidden">
+<form id="site-form" class="card p-6 mb-8 hidden fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50 w-full max-w-2xl bg-white rounded-lg shadow-lg overflow-auto max-h-[90vh]">
   <h2 id="form-title" class="text-xl font-semibold text-gray-800 mb-4 flex items-center">
     <i data-lucide="plus-circle" class="text-blue-500 mr-2"></i>
-    <span id="form-title-text">Ajouter un nouveau site</span>
+    <span id="form-title-text">Ajouter un nouveau réseau</span>
   </h2>
   <input type="hidden" id="site-id" />
   <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
@@ -479,7 +486,10 @@ font-size: 0.75rem;
 </form>
 <div id="site-details" class="card mb-6">
 </div>
-</div>     
+</div> 
+
+    <div id="overlay" class="fixed inset-0 bg-black bg-opacity-50 z-40 hidden"></div>
+
   <script>
     const API_BASE_URL = "http://localhost:5000/api";
     const SITES_URL = `${API_BASE_URL}/sites`;
@@ -502,6 +512,7 @@ font-size: 0.75rem;
       await fetchSites();
       
     }
+    document.body.classList.add('modal-open'); // ➕ Bloque le scroll
     async function loadMenu() {
       try {
         const response = await fetch("/static/menu.html");
@@ -777,31 +788,38 @@ function renderConnectionsList(connections) {
       };
       return types[type] || 'server';
     }
-    function openSiteForm(site = null) {
-      const form = document.getElementById('site-form');
-      const title = document.getElementById('form-title-text');
-      const submitBtn = document.getElementById('submit-btn-text');
-      if (site) {
-        isEditMode = true;
-        title.textContent = "Modifier le site";
-        submitBtn.textContent = "Mettre à jour";
-        document.getElementById('site-id').value = site.id;
-        document.getElementById('name').value = site.name;
-        document.getElementById('url_or_ip').value = site.url_or_ip;
-        document.getElementById('equipment_type').value = site.equipment_type;
-      } else {
-        isEditMode = false;
-        title.textContent = "Ajouter un nouveau site";
-        submitBtn.textContent = "Enregistrer";
-        document.getElementById('site-id').value = '';
-      }
-      form.classList.remove('hidden');
-    }
+   function openSiteForm(site = null) {
+  const form = document.getElementById('site-form');
+  const title = document.getElementById('form-title-text');
+  const submitBtn = document.getElementById('submit-btn-text');
+
+  if (site) {
+    isEditMode = true;
+    title.textContent = "Modifier le réseau";
+    submitBtn.textContent = "Mettre à jour";
+    document.getElementById('site-id').value = site.id;
+    document.getElementById('name').value = site.name;
+    document.getElementById('url_or_ip').value = site.url_or_ip;
+    document.getElementById('equipment_type').value = site.equipment_type;
+  } else {
+    isEditMode = false;
+    title.textContent = "Ajouter un nouveau réseau";
+    submitBtn.textContent = "Enregistrer";
+    document.getElementById('site-id').value = '';
+    document.getElementById('site-form').reset(); // pour vider les champs au cas où
+  }
+
+  form.classList.remove('hidden');
+  document.body.classList.add('modal-open'); // ➕ Bloque le scroll
+}
+
     function closeSiteForm() {
-      document.getElementById('site-form').reset();
-      document.getElementById('site-form').classList.add('hidden');
-      isEditMode = false;
-    }
+  document.getElementById('site-form').reset();
+  document.getElementById('site-form').classList.add('hidden');
+  document.body.classList.remove('modal-open'); // ➕ Débloque le scroll
+  isEditMode = false;
+}
+
    function toggleCustomType() {
       const select = document.getElementById('equipment_type');
       const container = document.getElementById('custom_type_container');
